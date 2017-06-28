@@ -3,7 +3,7 @@ function print_results_xi()
     
     %%%% Test voter data %%%%
     % load('data3.mat')
-    
+    % data = X;
     
     %%%% Test two moons data %%%%
     %d=100; N=1000; sigma=0.1;
@@ -26,6 +26,7 @@ function print_results_xi()
     %%%% Should automate in the future.
     set_pos     = 1:N/10:N/2;
     set_neg     = N/2+N/10:N/10:N;
+    
     label_data = init(num_data, set_neg, set_pos);
     
     p = 2;
@@ -82,7 +83,7 @@ function print_results_xi()
         end
         
         %%%%% CODE FOR AVG MOVIE %%%%
-        often = floor(num_iterations/50);
+        often = floor(num_iterations/100);
         if mod(i, often) == 1   
            clf
            subplotBar(u_avg(:, i))
@@ -172,7 +173,7 @@ function print_results_xi()
     fname = 'print_runs/final_scatter.png';
     print('-r144','-dpng',fname);
     
-    %plotVotes(Z, [371 280], 268:435)
+    % plotVotes(Z, [371 280], 268:435)
     
     final_tau = tau_avg(num_iterations);
     final_alpha = alpha_avg(num_iterations);
@@ -216,7 +217,6 @@ function subplot_scatter_twomoons_classify(data, final_avg, label_data)
 end
 
 function scatter_twomoons_classify(data, final_avg, label_data)
-    figure(2)
     colormap(redbluecmap(5))
     colors = -sign(final_avg); % to make blue = +, red = -
     scatter(data(:,1), data(:,2), 5 , colors)

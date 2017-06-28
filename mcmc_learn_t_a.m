@@ -2,7 +2,7 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
         mcmc_learn_t_a(Z, num_iterations, set_neg, set_pos, p, q, l, ...
         gamma, B, init_tau, init_alpha, min_tau, max_tau, min_alpha, ...
         max_alpha, alpha_epsilon, tau_epsilon)
-    [L, ~, ~] = computeLaplacian(Z, p, q, l);
+    [L, ~, ~] = compute_laplacian_standard(Z, p, q, l);
     lambda = eig(L);
     [phi, ~] = eig(L);
     
@@ -156,36 +156,4 @@ end
 
 function w = eigvalweight(lambda, tau, alpha)
     w = (lambda + tau^2)^(-alpha/2);
-end
-
-function [L, L_sym, L_rw] = computeLaplacian(X, p, q, l)
-    %compute Laplacian matrices
-    [n, ~] = size(X);
-    
-    W = zeros(n);
-    D = zeros(n);
-    for i=1:n
-        sum = 0;
-        for j=1:n
-            x = X(i,:);
-            y = X(j,:);
-            W(i, j) = weight(x, y, l, p, q);
-            sum = sum + W(i, j);
-        end
-        D(i, i) = sum;
-    end
-    L = D - W; 
-    L_sym = sqrtm(inv(D)) * L * sqrtm(inv(D));
-    L_rw = inv(D) * L;
-   %plotEigenvectors(L)
-end
-
-function d = dist(x, y, p, q)
-%Lp of x - y raised to the qth power
-    d = norm(x - y, p)^q;
-end
-
-function w = weight(x, y, l, p, q)
-%weight function with given metric and length-scale parameter
-    w = exp(-dist(x, y, p, q)/ 2 / l^2);
 end

@@ -6,14 +6,14 @@ function print_results()
     set_pos     = [280 281 282 283];
     [num_data, ~] = size(X);
     num_iterations = 1000;
-    burn_in = 500;
+    burn_in = 1;
     
     p = 2;
     q = 2;
     l = 1;
 
     gamma       = 0.0001;
-    B           = 0.9;
+    B           = 0.3;
     
     init_tau        = 20;
     init_alpha      = 1;
@@ -22,7 +22,7 @@ function print_results()
     max_tau         = 60;
     
     min_alpha       = 0;
-    max_alpha       = 10;
+    max_alpha       = 60;
     
     alpha_epsilon   = 0.1;  % Jump alpha
     tau_epsilon     = 1;    % Jump tau
@@ -81,13 +81,13 @@ function print_results()
     
     %%%%% PRINT TRACES OF TAU AND ALPHA %%%%%
     clf
-    plot(burn_in+1:num_iterations, tau_all(burn_in+1:end));
+    plot(1:num_iterations, tau_all(1:end));
     ylabel('\tau trace');
     fname = 'print_runs/trace_tau.png';
     print('-r144','-dpng',fname);
     
     clf
-    plot(burn_in+1:num_iterations, alpha_all(burn_in+1:end));
+    plot(1:num_iterations, alpha_all(1:end));
     ylabel('\alpha trace');
     fname = 'print_runs/trace_alpha.png';
     print('-r144','-dpng',fname);
