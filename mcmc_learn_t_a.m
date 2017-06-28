@@ -1,5 +1,5 @@
 function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
-        mcmc_learn_t_a(Z, num_iterations, set_neg, set_pos, p, q, l, ...
+        mcmc_learn_t_a(Z, num_iterations, label_data, p, q, l, ...
         gamma, B, init_tau, init_alpha, min_tau, max_tau, min_alpha, ...
         max_alpha, alpha_epsilon, tau_epsilon)
     [L, ~, ~] = compute_laplacian_standard(Z, p, q, l);
@@ -7,13 +7,11 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
     [phi, ~] = eig(L);
     
     [num_data, ~] = size(Z);
-    
-    label_data = init(num_data, set_neg, set_pos);
-    
+        
     U = zeros(num_data, num_iterations);
     
     %%%%% Indicates initialization from Fiedler Vector %%%%%
-    U(2, 1) = 1;
+    %U(2, 1) = 1;
             
     tau_all = zeros(1, num_iterations);
     tau_all(1) = init_tau;
@@ -93,18 +91,6 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
             alpha_accept(i+1) = 0;
         end
         
-    end
-end
-
-function u = init(num_senators, set_neg, set_pos)
-    u = zeros(num_senators, 1);
-    
-    % label some of the data
-    for i=1:length(set_pos)
-        u(set_pos(i))=1;
-    end
-    for i=1:length(set_neg)
-        u(set_neg(i))=-1;
     end
 end
 

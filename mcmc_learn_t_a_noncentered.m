@@ -13,7 +13,7 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
     
     %%%%% Initialization from Fiedler Vector?? %%%%%
     %xi_all(2, 1) = (lambda(2)+init_tau^2)^(init_alpha/2);
-    xi_all(2, 1) = 1;
+    %xi_all(2, 1) = 1;
     
     %%%%% Noisy initialization?? %%%%%
     %xi_all(:,1) = compute_rand_xi(num_data)/1000;

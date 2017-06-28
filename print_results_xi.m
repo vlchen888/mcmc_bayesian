@@ -1,19 +1,16 @@
 
 function print_results_xi()
+    % Voting data load
+    %load('data3.mat')
+    %data = X;
     
-    %%%% Test voter data %%%%
-    % load('data3.mat')
-    % data = X;
-    
-    %%%% Test two moons data %%%%
-    %d=100; N=1000; sigma=0.1;
-    %data = moondata(d,N,sigma);
+    % Two moons data load
     load('moondata.mat');
-    N = 1000;
     
     [num_data, ~] = size(data);
-    num_iterations = 10000;
-    burn_in = 1000;
+    
+    num_iterations = 1000;
+    burn_in = 1;
     
     %%%%  Voter data labeling %%%%
     % set_neg     = [25 26 27 28];
@@ -21,11 +18,12 @@ function print_results_xi()
     
     % set_neg     = 20:30;
     % set_pos     = 280:290;
+        
     
     %%%% Two moons labeling %%%% Currently need to set neg, pos manually.
     %%%% Should automate in the future.
-    set_pos     = 1:N/10:N/2;
-    set_neg     = N/2+N/10:N/10:N;
+    set_pos     = 50:20:450;
+    set_neg     = 550:20:950;
     
     label_data = init(num_data, set_neg, set_pos);
     
@@ -33,20 +31,20 @@ function print_results_xi()
     q = 2;
     l = 1;
 
-    gamma       = 0.0001;
-    B           = 0.02;
+    gamma       = 2;
+    B           = 0.0003;
     
-    init_tau        = 30;
+    init_tau        = 10;
     init_alpha      = 5;
     
     min_tau         = 0.1;
-    max_tau         = 60;
+    max_tau         = 30;
     
     min_alpha       = 0.1;
     max_alpha       = 60;
     
-    alpha_epsilon   = 1;    % Jump alpha
-    tau_epsilon     = 1;    % Jump tau
+    alpha_epsilon   = 2;    % Jump alpha
+    tau_epsilon     = 3;    % Jump tau
     
     start_time = cputime;
     [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
@@ -84,26 +82,46 @@ function print_results_xi()
         
         %%%%% CODE FOR AVG MOVIE %%%%
         often = floor(num_iterations/100);
-        if mod(i, often) == 1   
-           clf
-           subplotBar(u_avg(:, i))
+        if mod(i, often) == 1
+            %%% Plot trace of u? %%%
+            clf
+            subplotBar(std(:, i))
            
-           subplot(2,2,2)
-           subplot_scatter_twomoons_classify(data, u_avg(:,i), label_data);
+            subplot(2,2,2)
+            subplot_scatter_twomoons_classify(data, u_avg(:,i), label_data);
            
-           subplot(2,2,3)
-           plot(1:i, tau_all(1:i));
-           ylabel('\tau trace');
+            subplot(2,2,3)
+            plot(1:i, tau_all(1:i));
+            ylabel('\tau trace');
            
-           subplot(2,2,4)
-           plot(1:i, alpha_all(1:i));
-           ylabel('\alpha trace');
+            subplot(2,2,4)
+            plot(1:i, alpha_all(1:i));
+            ylabel('\alpha trace');
 
-           fname = sprintf('figs/step_%i.png',floor(i/often) + 1);
-           print('-r144','-dpng',fname);
+            fname = sprintf('figs/step_%i.png',floor(i/often) + 1);
+            print('-r144','-dpng',fname);
         end
     end
     
+    print_figures(num_iterations, tau_all, alpha_all, u_avg, tau_avg, alpha_avg, ...
+        xi_accept_avg, tau_accept_avg, alpha_accept_avg)
+    
+    final_tau = tau_avg(num_iterations);
+    final_alpha = alpha_avg(num_iterations);
+    
+    % correct_percent = count_correct(u_avg(:, num_iterations), set_neg, set_pos, [zeros(267,1) - 1; zeros(168,1) + 1]);
+    correct_percent = count_correct(u_avg(:, num_iterations), set_neg, set_pos, ...
+        [zeros(num_data/2,1) + 1; zeros(num_data/2, 1) - 1]);
+    
+    run_description = 'MCMC self-tuning Laplacian, xi tau alpha parameterization.\n';
+    
+    print_info_file(run_description, num_iterations, burn_in, p, q, l, B, ...
+        gamma, final_tau, final_alpha, set_neg, set_pos, correct_percent, tau_epsilon, ...
+        alpha_epsilon, elapsed_time, init_tau, init_alpha);
+end
+
+function print_figures(num_iterations, tau_all, alpha_all, u_avg, tau_avg, alpha_avg, ...
+    xi_accept_avg, tau_accept_avg, alpha_accept_avg)
     %plot_me = [(1:10)'; (268:277)'];
 
     %%%%% PRINT RUNNING AVERAGE OF U %%%%%
@@ -168,24 +186,23 @@ function print_results_xi()
     ylabel('\alpha acceptance probability');
     fname = 'print_runs/acceptance_alpha_probability.png';
     print('-r144','-dpng',fname);
-
+    
+    clf
     scatter_twomoons_classify(data, u_avg(:, num_iterations), label_data)
     fname = 'print_runs/final_scatter.png';
     print('-r144','-dpng',fname);
-    
-    % plotVotes(Z, [371 280], 268:435)
-    
-    final_tau = tau_avg(num_iterations);
-    final_alpha = alpha_avg(num_iterations);
-    
-    % correct_percent = count_votes_correct(u_avg(:, num_iterations), set_neg, set_pos, [zeros(267,1) - 1; zeros(168,1) + 1]);
-    correct_percent = -1;
-    
-    run_description = 'MCMC with unnormalized Laplacian prior, learning alpha and tau, and nonzero gamma.\n';
-    
-    print_info_file(run_description, num_iterations, burn_in, p, q, l, B, ...
-        gamma, final_tau, final_alpha, set_neg, set_pos, correct_percent, tau_epsilon, ...
-        alpha_epsilon, elapsed_time, init_tau, init_alpha);
+end
+
+function p = count_correct(final_avg, set_neg, set_pos, correct_labels)
+p = 0;
+remainder = length(correct_labels) - length(set_neg) - length(set_pos);
+
+for i=1:length(correct_labels)
+    if ~ismember(i, set_neg) && ~ismember(i, set_pos)
+        p = p + 1 - abs(sign(final_avg(i)) - correct_labels(i))/2;
+    end
+end
+p = p / remainder;
 
 end
 
@@ -242,25 +259,13 @@ fprintf(fileID, 'Parameters of weight function: p = %d, q = %d, l = %d\n', p, q,
 fprintf(fileID, 'Beta = %f, Gamma = %d\n', B, gamma);
 fprintf(fileID, 'Tau epsilon = %f, Alpha epsilon = %f\n', tau_epsilon, alpha_epsilon);
 fprintf(fileID, 'Initial tau = %f, Initial alpha = %f\n', init_tau, init_alpha);
-fprintf(fileID, 'Final tau = %f, Final alpha = %f\n', final_tau, final_alpha);
+fprintf(fileID, 'Average tau = %f, Average alpha = %f\n', final_tau, final_alpha);
 fprintf(fileID, 'Label Data:\n');
 fprintf(fileID, '+1: %d\n', set_pos);
 fprintf(fileID, '-1: %d\n', set_neg);
-fprintf(fileID, 'Percent of senators correctly classified: %f\n', correct_percent);
+fprintf(fileID, 'Percent correctly classified: %f\n', correct_percent);
 fprintf(fileID, 'Time elapsed: %.2f s\n', elapsed_time);
 
-end
-
-function p = count_votes_correct(final_avg, set_neg, set_pos, correct_labels)
-p = 0;
-remainder = length(correct_labels) - length(set_neg) - length(set_pos);
-
-for i=1:length(correct_labels)
-    if ~ismember(i, set_neg) && ~ismember(i, set_pos)
-        p = p + 1 - abs(sign(final_avg(i)) - correct_labels(i))/2;
-    end
-end
-p = p / remainder;
 end
 
 function plotAvg(f, num_iterations, plot_me, k)
