@@ -2,7 +2,8 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
         mcmc_learn_t_a(Z, num_iterations, label_data, p, q, l, ...
         gamma, B, init_tau, init_alpha, min_tau, max_tau, min_alpha, ...
         max_alpha, alpha_epsilon, tau_epsilon)
-    [L, ~, ~] = compute_laplacian_standard(Z, p, q, l);
+    L = compute_laplacian_selftuning(Z);
+    % [L, ~, ~] = compute_laplacian_standard(Z, p, q, l);
     lambda = eig(L);
     [phi, ~] = eig(L);
     
@@ -11,7 +12,7 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
     U = zeros(num_data, num_iterations);
     
     %%%%% Indicates initialization from Fiedler Vector %%%%%
-    %U(2, 1) = 1;
+    U(2, 1) = 1;
             
     tau_all = zeros(1, num_iterations);
     tau_all(1) = init_tau;
@@ -38,8 +39,9 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
         V = convert_std_basis(V_eigenbasis, phi);
         
         %%%%% Compute Transition Probability U -> V %%%%%
-        transition_uv = min(1, likelihood(gamma, label_data, V)...
-            /likelihood(gamma, label_data, std(:, i)));
+        log_uv = compute_log_likelihood(gamma, label_data, V) - ...
+            compute_log_likelihood(gamma, label_data, std(:, i));
+        transition_uv = exp(log_uv);
         
         %%%% Do transition %%%%
         if rand(1) < transition_uv 
@@ -114,7 +116,7 @@ function log_det_c = compute_log_det_c(lambda, tau, alpha)
     log_det_c = -alpha * sum;
 end
 
-function l = likelihood(gamma, label_data, u)
+function l = compute_log_likelihood(gamma, label_data, u)
     sum = 0;
     for i=1:length(label_data)
         %%%% Check if i \in Z' %%%%
@@ -122,7 +124,7 @@ function l = likelihood(gamma, label_data, u)
             sum = sum + abs(sign(u(i)) - label_data(i))^2;
         end
     end
-    l = exp(-sum/(2*gamma^2));
+    l = -sum/(2*gamma^2);
 end
 
 function x = compute_rand_in_eigenbasis(lambda, tau, alpha)

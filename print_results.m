@@ -1,25 +1,25 @@
 
 function print_results()
     % Voting data load
-    % load('data3.mat')
-    % data = X
+    load('data3.mat')
+    data = X;
     
     % Two moons data load
-    load('moondata.mat');
+    % load('moondata.mat');
     
     [num_data, ~] = size(data);
-    num_iterations = 10000;
-    burn_in = 1000;
+    num_iterations = 1000;
+    burn_in = 1;
     
     % Voting data labeling
     % set_neg     = [25 26 27 28];
     % set_pos     = [280 281 282 283];
-    % set_neg     = 20:30;
-    % set_pos     = 280:290;
+    set_neg     = 20:30;
+    set_pos     = 280:290;
     
     % Two moons labeling
-    set_neg     = 50:20:450;
-    set_pos     = 550:20:950;
+    % set_neg     = 50:20:450;
+    % set_pos     = 550:20:950;
     
 	label_data = init(num_data, set_neg, set_pos);
     
@@ -28,18 +28,18 @@ function print_results()
     l = 1;
 
     gamma       = 0.0001;
-    B           = 0.5;
+    B           = 0.1;
     
-    init_tau        = 40;
+    init_tau        = 20;
     init_alpha      = 30;
     
     min_tau         = 0.1;
-    max_tau         = 60;
+    max_tau         = 40;
     
     min_alpha       = 0.1;
     max_alpha       = 60;
     
-    alpha_epsilon   = 0.1;  % Jump alpha
+    alpha_epsilon   = 1;  % Jump alpha
     tau_epsilon     = 1;  % Jump tau
     
     start_time = cputime;
@@ -77,26 +77,26 @@ function print_results()
         end
         
         %%%%%% CODE FOR AVG MOVIE %%%%
-        often = floor(num_iterations/100);
-        if mod(i, often) == 1
-            %%% Plot trace of u? %%%
-            clf
-            subplotBar(std(:, i))
-            
-            subplot(2,2,2)
-            subplot_scatter_twomoons_classify(data, u_avg(:,i), label_data);
-            
-            subplot(2,2,3)
-            plot(1:i, tau_all(1:i));
-            ylabel('\tau trace');
-           
-            subplot(2,2,4)
-            plot(1:i, alpha_all(1:i));
-            ylabel('\alpha trace');
-            
-            fname = sprintf('figs/step_%i.png',floor(i/often) + 1);
-            print('-r144','-dpng',fname);
-        end
+%         often = floor(num_iterations/100);
+%         if mod(i, often) == 1
+%             %%% Plot trace of u? %%%
+%             clf
+%             subplotBar(std(:, i))
+%             
+%             subplot(2,2,2)
+%             subplot_scatter_twomoons_classify(data, u_avg(:,i), label_data);
+%             
+%             subplot(2,2,3)
+%             plot(1:i, tau_all(1:i));
+%             ylabel('\tau trace');
+%            
+%             subplot(2,2,4)
+%             plot(1:i, alpha_all(1:i));
+%             ylabel('\alpha trace');
+%             
+%             fname = sprintf('figs/step_%i.png',floor(i/often) + 1);
+%             print('-r144','-dpng',fname);
+%         end
     end
     
     print_figures(num_iterations, burn_in, tau_all, alpha_all, u_avg, tau_avg, alpha_avg, ...
@@ -109,6 +109,9 @@ function print_results()
     %correct_percent = count_correct(u_avg(:, num_iterations), ...
     %    set_neg, set_pos, [zeros(267,1) - 1; zeros(168,1) + 1]);
 
+    correct_percent = count_correct(u_avg(:, num_iterations), set_neg, set_pos, ...
+        [zeros(num_data/2,1) + 1; zeros(num_data/2, 1) - 1]);
+    
     run_description = 'MCMC with unnormalized Laplacian prior, learning alpha and tau, and nonzero gamma.\n';
     
     print_info_file(run_description, num_iterations, burn_in, p, q, l, B, ...
@@ -216,43 +219,6 @@ function subplot_scatter_twomoons_classify(data, final_avg, label_data)
         end
     end
     hold off
-end
-
-function p = count_correct(final_avg, set_neg, set_pos, correct_labels)
-p = 0;
-remainder = length(correct_labels) - length(set_neg) - length(set_pos);
-
-for i=1:length(correct_labels)
-    if ~ismember(i, set_neg) && ~ismember(i, set_pos)
-        p = p + 1 - abs(sign(final_avg(i)) - correct_labels(i))/2;
-    end
-end
-p = p / remainder;
-end
-
-function plotAvg(f, num_iterations, plot_me, k)
-    figure(k)
-    num_plots = length(plot_me);
-    for i = 1:num_plots
-        subplot(2, num_plots/2, i);
-        plot(1:num_iterations, f(plot_me(i), :))
-        title(sprintf('Senator %d', plot_me(i)))
-    end
-    ha = axes('Position',[0 0 1 1],'Xlim',[0 1],'Ylim',[0 1],'Box','off','Visible','off','Units','normalized', 'clipping' , 'off');
-    text(0.5, 1,'\bf Running Averages','HorizontalAlignment','center','VerticalAlignment', 'top');
-end
-
-function plotVar(var, num_iterations, plot_me, k)
-    figure(k)
-    num_plots = length(plot_me);
-    for i = 1:num_plots
-        subplot(2, 4, i);
-        plot(1:num_iterations, var(plot_me(i), :))
-        title(sprintf('Senator %d', plot_me(i)))
-    end
-    ha = axes('Position',[0 0 1 1],'Xlim',[0 1],'Ylim',[0 1],'Box','off','Visible','off','Units','normalized', 'clipping' , 'off');
-    text(0.5, 1,'\bf Running Variances','HorizontalAlignment','center','VerticalAlignment', 'top');
-    
 end
 
 function subplotBar(avg)

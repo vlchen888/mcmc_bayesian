@@ -1,58 +1,69 @@
 
 function print_results_xi()
-    % Voting data load
-    %load('data3.mat')
-    %data = X;
     
-    % Two moons data load
-    load('moondata.mat');
+    params = containers.Map;
+    params('data_set') = string('voting');
     
-    [num_data, ~] = size(data);
+    if params('data_set') == string('voting')
+        load('data3.mat')
+        data = X;
+        params('data') = data;
+        % set_neg     = [25 26 27 28];
+        % set_pos     = [280 281 282 283];
+        set_neg     = 20:30;
+        set_pos     = 280:290;
+        params('set_neg') = set_neg;
+        params('set_pos') = set_pos;
+        
+    elseif params('data_set') == string('moons')
+        load('moondata.mat')
+        %%%% Currently need to set neg, pos manually.
+        %%%% Should automate in the future.
+        params('data') = data;
+        set_pos     = 50:20:450;
+        set_neg     = 550:20:950;
+        params('set_neg') = set_neg;
+        params('set_pos') = set_pos;
+    end
+    
+    
+    [num_data, ~] = size(params('data'));
     
     num_iterations = 1000;
     burn_in = 1;
+    movie = 0;
     
-    %%%%  Voter data labeling %%%%
-    % set_neg     = [25 26 27 28];
-    % set_pos     = [280 281 282 283];
-    
-    % set_neg     = 20:30;
-    % set_pos     = 280:290;
-        
-    
-    %%%% Two moons labeling %%%% Currently need to set neg, pos manually.
-    %%%% Should automate in the future.
-    set_pos     = 50:20:450;
-    set_neg     = 550:20:950;
+    params('num_iterations') = num_iterations;
+    params('burn_in') = burn_in;
     
     label_data = init(num_data, set_neg, set_pos);
+    params('label_data') = label_data;
     
-    p = 2;
-    q = 2;
-    l = 1;
+    params('p') = 2;
+    params('q') = 2;
+    params('l') = 1;
 
-    gamma       = 2;
-    B           = 0.0003;
+    params('gamma') = 0.0001;
+    params('B')     = 0.1;
     
-    init_tau        = 10;
-    init_alpha      = 5;
+    params('init_tau')      = 20;
+    params('init_alpha')    = 5;
     
-    min_tau         = 0.1;
-    max_tau         = 30;
+    params('min_tau')      = 0.1;
+    params('max_tau')    = 60;
     
-    min_alpha       = 0.1;
-    max_alpha       = 60;
+
+    params('min_alpha')      = 0.1;
+    params('max_alpha')    = 60;
     
-    alpha_epsilon   = 2;    % Jump alpha
-    tau_epsilon     = 3;    % Jump tau
+    params('alpha_epsilon')      = 1;
+    params('tau_epsilon')    = 1;
     
     start_time = cputime;
     [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
-        mcmc_learn_t_a_noncentered(data, num_iterations, label_data, p, q, l, ...
-        gamma, B, init_tau, init_alpha, min_tau, max_tau, min_alpha, ...
-        max_alpha, alpha_epsilon, tau_epsilon);
+        mcmc_learn_t_a_noncentered(params);
     elapsed_time = cputime - start_time;
-
+    params('elapsed_time') = elapsed_time;
     
     %%%%% Take averages of tau, alpha over time as well %%%%%
     u_avg = zeros(num_data, num_iterations);
@@ -81,53 +92,67 @@ function print_results_xi()
         end
         
         %%%%% CODE FOR AVG MOVIE %%%%
-        often = floor(num_iterations/100);
-        if mod(i, often) == 1
-            %%% Plot trace of u? %%%
-            clf
-            subplotBar(std(:, i))
-           
-            subplot(2,2,2)
-            subplot_scatter_twomoons_classify(data, u_avg(:,i), label_data);
-           
-            subplot(2,2,3)
-            plot(1:i, tau_all(1:i));
-            ylabel('\tau trace');
-           
-            subplot(2,2,4)
-            plot(1:i, alpha_all(1:i));
-            ylabel('\alpha trace');
+        if movie
+            often = floor(num_iterations/100);
+            if mod(i, often) == 1
+                %%% Plot trace of u? %%%
+                clf
+                subplotBar(std(:, i))
 
-            fname = sprintf('figs/step_%i.png',floor(i/often) + 1);
-            print('-r144','-dpng',fname);
+                subplot(2,2,2)
+                subplot_scatter_twomoons_classify(data, u_avg(:,i), label_data);
+
+                 subplot(2,2,3)
+                 plot(1:i, tau_all(1:i));
+                 ylabel('\tau trace');
+
+                 subplot(2,2,4)
+                 plot(1:i, alpha_all(1:i));
+                 ylabel('\alpha trace');
+
+                 fname = sprintf('figs/step_%i.png',floor(i/often) + 1);
+                 print('-r144','-dpng',fname);
+            end
         end
     end
+    params('tau_all') = tau_all;
+    params('alpha_all') = alpha_all;
+    params('u_avg') = u_avg;
+    params('tau_avg') = tau_avg;
+    params('alpha_avg') = alpha_avg;
+    params('xi_accept_avg') = xi_accept_avg;
+    params('tau_accept_avg') = tau_accept_avg;
+    params('alpha_accept_avg') = alpha_accept_avg;
+    print_figures(params)
     
-    print_figures(num_iterations, tau_all, alpha_all, u_avg, tau_avg, alpha_avg, ...
-        xi_accept_avg, tau_accept_avg, alpha_accept_avg)
+    params('tau_avg') = tau_avg(num_iterations);
+    params('alpha_avg') = alpha_avg(num_iterations);
     
-    final_tau = tau_avg(num_iterations);
-    final_alpha = alpha_avg(num_iterations);
-    
-    % correct_percent = count_correct(u_avg(:, num_iterations), set_neg, set_pos, [zeros(267,1) - 1; zeros(168,1) + 1]);
-    correct_percent = count_correct(u_avg(:, num_iterations), set_neg, set_pos, ...
+    if params('data_set') == string('voting')
+        params('correct_percent') = count_correct(u_avg(:, num_iterations), set_neg, set_pos, [zeros(267,1) - 1; zeros(168,1) + 1]);
+    elseif params('data_set') == string('moon')
+        params('correct_percent') = count_correct(u_avg(:, num_iterations), set_neg, set_pos, ...
         [zeros(num_data/2,1) + 1; zeros(num_data/2, 1) - 1]);
+    end
     
-    run_description = 'MCMC self-tuning Laplacian, xi tau alpha parameterization.\n';
+    params('run_description') = 'MCMC self-tuning Laplacian, xi tau alpha parameterization.\n';
     
-    print_info_file(run_description, num_iterations, burn_in, p, q, l, B, ...
-        gamma, final_tau, final_alpha, set_neg, set_pos, correct_percent, tau_epsilon, ...
-        alpha_epsilon, elapsed_time, init_tau, init_alpha);
+    print_info_file(params);
 end
 
-function print_figures(num_iterations, tau_all, alpha_all, u_avg, tau_avg, alpha_avg, ...
-    xi_accept_avg, tau_accept_avg, alpha_accept_avg)
-    %plot_me = [(1:10)'; (268:277)'];
-
-    %%%%% PRINT RUNNING AVERAGE OF U %%%%%
-    %plotAvg(f, num_iterations, plot_me, 1)
-    %fname = 'print_runs/running_avg.png';
-    %print('-r144','-dpng',fname);
+function print_figures(params)
+    num_iterations = params('num_iterations');
+    tau_all = params('tau_all');
+    alpha_all = params('alpha_all');
+    u_avg = params('u_avg');
+    tau_avg = params('tau_avg');
+    alpha_avg = params('alpha_avg');
+    xi_accept_avg = params('xi_accept_avg');
+    tau_accept_avg = params('tau_accept_avg');
+    alpha_accept_avg = params('alpha_accept_avg');
+    burn_in = params('burn_in');
+    data = params('data');
+    label_data = params('label_data');
     
     %%%%% PRINT TRACES OF TAU AND ALPHA %%%%%
     clf
@@ -162,12 +187,6 @@ function print_figures(num_iterations, tau_all, alpha_all, u_avg, tau_avg, alpha
     fname = 'print_runs/avg_alpha.png';
     print('-r144','-dpng',fname);
     
-    %%%%%%% Plot Tau? %%%%%%
-    %figure(3)
-    %histogram(tau_all)
-    
-    %figure(4)
-    %histogram(alpha_all)
     
     clf
     plot(burn_in+1:num_iterations, xi_accept_avg(burn_in+1:end))
@@ -187,23 +206,12 @@ function print_figures(num_iterations, tau_all, alpha_all, u_avg, tau_avg, alpha
     fname = 'print_runs/acceptance_alpha_probability.png';
     print('-r144','-dpng',fname);
     
-    clf
-    scatter_twomoons_classify(data, u_avg(:, num_iterations), label_data)
-    fname = 'print_runs/final_scatter.png';
-    print('-r144','-dpng',fname);
-end
-
-function p = count_correct(final_avg, set_neg, set_pos, correct_labels)
-p = 0;
-remainder = length(correct_labels) - length(set_neg) - length(set_pos);
-
-for i=1:length(correct_labels)
-    if ~ismember(i, set_neg) && ~ismember(i, set_pos)
-        p = p + 1 - abs(sign(final_avg(i)) - correct_labels(i))/2;
+    if params('data_set') == string('moons')
+        clf
+        scatter_twomoons_classify(data, u_avg(:, num_iterations), label_data)
+        fname = 'print_runs/final_scatter.png';
+        print('-r144','-dpng',fname);
     end
-end
-p = p / remainder;
-
 end
 
 function u = init(num_senators, set_neg, set_pos)
@@ -248,9 +256,26 @@ function scatter_twomoons_classify(data, final_avg, label_data)
     hold off
 end
 
-function print_info_file(run_description, num_iterations, burn_in, p, q, l, B, ...
-    gamma, final_tau, final_alpha, set_neg, set_pos, correct_percent, tau_epsilon,...
-    alpha_epsilon, elapsed_time, init_tau, init_alpha)
+function print_info_file(params)
+run_description = params('run_description');
+num_iterations = params('num_iterations');
+burn_in = params('burn_in');
+p = params('p');
+q = params('q');
+l = params('l');
+B = params('B');
+gamma = params('gamma');
+tau_avg = params('tau_avg');
+alpha_avg = params('alpha_avg');
+set_neg = params('set_neg');
+set_pos = params('set_pos');
+correct_percent = params('correct_percent');
+tau_epsilon = params('tau_epsilon');
+alpha_epsilon = params('alpha_epsilon');
+elapsed_time = params('elapsed_time');
+init_tau = params('init_tau');
+init_alpha = params('init_alpha');
+
 fileID = fopen('print_runs/run_info.txt','w');
 fprintf(fileID, 'This is an autogenerated text file with run info and summary!\n');
 fprintf(fileID, ['Description: ' run_description]);
@@ -259,38 +284,13 @@ fprintf(fileID, 'Parameters of weight function: p = %d, q = %d, l = %d\n', p, q,
 fprintf(fileID, 'Beta = %f, Gamma = %d\n', B, gamma);
 fprintf(fileID, 'Tau epsilon = %f, Alpha epsilon = %f\n', tau_epsilon, alpha_epsilon);
 fprintf(fileID, 'Initial tau = %f, Initial alpha = %f\n', init_tau, init_alpha);
-fprintf(fileID, 'Average tau = %f, Average alpha = %f\n', final_tau, final_alpha);
+fprintf(fileID, 'Average tau = %f, Average alpha = %f\n', tau_avg, alpha_avg);
 fprintf(fileID, 'Label Data:\n');
 fprintf(fileID, '+1: %d\n', set_pos);
 fprintf(fileID, '-1: %d\n', set_neg);
 fprintf(fileID, 'Percent correctly classified: %f\n', correct_percent);
 fprintf(fileID, 'Time elapsed: %.2f s\n', elapsed_time);
 
-end
-
-function plotAvg(f, num_iterations, plot_me, k)
-    figure(k)
-    num_plots = length(plot_me);
-    for i = 1:num_plots
-        subplot(2, num_plots/2, i);
-        plot(1:num_iterations, f(plot_me(i), :))
-        title(sprintf('Senator %d', plot_me(i)))
-    end
-    ha = axes('Position',[0 0 1 1],'Xlim',[0 1],'Ylim',[0 1],'Box','off','Visible','off','Units','normalized', 'clipping' , 'off');
-    text(0.5, 1,'\bf Running Averages','HorizontalAlignment','center','VerticalAlignment', 'top');
-end
-
-function plotVar(var, num_iterations, plot_me, k)
-    figure(k)
-    num_plots = length(plot_me);
-    for i = 1:num_plots
-        subplot(2, 4, i);
-        plot(1:num_iterations, var(plot_me(i), :))
-        title(sprintf('Senator %d', plot_me(i)))
-    end
-    ha = axes('Position',[0 0 1 1],'Xlim',[0 1],'Ylim',[0 1],'Box','off','Visible','off','Units','normalized', 'clipping' , 'off');
-    text(0.5, 1,'\bf Running Variances','HorizontalAlignment','center','VerticalAlignment', 'top');
-    
 end
 
 function subplotBar(avg)
