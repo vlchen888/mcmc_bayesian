@@ -20,7 +20,7 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
     if params('laplacian') == string('self tuning')
         L = compute_laplacian_selftuning(data);
     elseif params('laplacian') == string('un')
-        [L, ~, ~] = computeLaplacian(Z, p, q, l);
+        [L, ~, ~] = compute_laplacian_standard(data, p, q, l);
     end
     lambda = eig(L);
     [phi, ~] = eig(L);
@@ -129,13 +129,7 @@ function g = compute_log_g(lambda, phi, xi, tau, alpha, gamma, label_data)
 end
 
 function l = compute_phi(gamma, label_data, u)
-    sum = 0;
-    for i=1:length(label_data)
-        %%%% Check if i \in Z' %%%%
-        if label_data(i) ~= 0
-            sum = sum + abs(sign(u(i)) - label_data(i))^2;
-        end
-    end
+    sum = norm((sign(u)-label_data).*abs(label_data))^2;
     l = sum/(2*gamma^2);
 end
 
@@ -149,8 +143,5 @@ function x = compute_rand_xi(num_data)
 end
 
 function u = convert_std_basis(x, phi)
-    u = 0;
-    for j=1:length(phi)
-        u = u + x(j)* phi(:,j);
-    end
+    u = phi*x;
 end

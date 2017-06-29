@@ -7,15 +7,18 @@ function print_results()
     params('parameterization') = string('centered');
     params('laplacian') = string('un');
     
-    num_iterations = 1000;
+    num_iterations = 100000;
     burn_in = 1;
     params('num_iterations') = num_iterations;
     params('burn_in') = burn_in;
+    
+    movie = 0;
     
     params('p')             = 2;
     params('q')             = 2;
     params('l')             = 1;
 
+    %%%% CENTERED PARAMS %%%%
     params('gamma')         = 0.0001;
     params('B')             = 0.2;
     
@@ -30,8 +33,23 @@ function print_results()
     
     params('alpha_epsilon') = 1;
     params('tau_epsilon')   = 1;
-    
-    movie = 1;
+
+        
+    %%%% NONCENTEREED PARAMS %%%%
+%     params('gamma')         = 0.0001;
+%     params('B')             = 0.1;
+% 
+%     params('init_tau')      = 30;
+%     params('init_alpha')    = 5;
+% 
+%     params('min_tau')       = 0.1;
+%     params('max_tau')       = 60;
+% 
+%     params('min_alpha')     = 0.1;
+%     params('max_alpha')     = 60;
+% 
+%     params('alpha_epsilon') = 1;
+%     params('tau_epsilon')   = 1;
     
     if params('data_set') == string('voting')
         load('data3.mat')
@@ -200,7 +218,6 @@ function print_figures(params)
     ylabel('\alpha running average');
     fname = 'print_runs/avg_alpha.png';
     print('-r144','-dpng',fname);
-    
     
     clf
     if params('parameterization') == string('noncentered')
