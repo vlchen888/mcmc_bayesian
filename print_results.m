@@ -1,13 +1,13 @@
 
-function print_results()
+function [tau_all, alpha_all] = print_results()
     
     params = containers.Map;
-    params('data_set') = string('voting');
+    params('data_set') = string('moons');
     
-    params('parameterization') = string('centered');
-    params('laplacian') = string('un');
+    params('parameterization') = string('noncentered');
+    params('laplacian') = string('self tuning');
     
-    num_iterations = 100000;
+    num_iterations = 2000;
     burn_in = 1;
     params('num_iterations') = num_iterations;
     params('burn_in') = burn_in;
@@ -18,7 +18,8 @@ function print_results()
     params('q')             = 2;
     params('l')             = 1;
 
-    %%%% CENTERED PARAMS %%%%
+    %%%% CENTERED PARAMS for voting %%%%
+    %{
     params('gamma')         = 0.0001;
     params('B')             = 0.2;
     
@@ -33,23 +34,59 @@ function print_results()
     
     params('alpha_epsilon') = 1;
     params('tau_epsilon')   = 1;
-
+    %}
         
-    %%%% NONCENTEREED PARAMS %%%%
-%     params('gamma')         = 0.0001;
-%     params('B')             = 0.1;
-% 
-%     params('init_tau')      = 30;
-%     params('init_alpha')    = 5;
-% 
-%     params('min_tau')       = 0.1;
-%     params('max_tau')       = 60;
-% 
-%     params('min_alpha')     = 0.1;
-%     params('max_alpha')     = 60;
-% 
-%     params('alpha_epsilon') = 1;
-%     params('tau_epsilon')   = 1;
+    %%%% NONCENTEREED PARAMS for voting %%%%
+    %{
+    params('gamma')         = 0.0001;
+    params('B')             = 0.1;
+
+    params('init_tau')      = 30;
+    params('init_alpha')    = 5;
+
+    params('min_tau')       = 0.1;
+    params('max_tau')       = 60;
+
+    params('min_alpha')     = 0.1;
+    params('max_alpha')     = 60;
+
+    params('alpha_epsilon') = 1;
+    params('tau_epsilon')   = 1;
+    %}
+    
+    %%%% NONCENTERED PARAMS for moons %%%%
+    %{
+    params('gamma')         = 2;
+    params('B')             = 0.0003;
+    
+    params('init_tau')      = 40;
+    params('init_alpha')    = 20;
+    
+    params('min_tau')       = 0.1;
+    params('max_tau')       = 60;
+
+    params('min_alpha')     = 0.1;
+    params('max_alpha')     = 60;
+    
+    params('alpha_epsilon') = 2;
+    params('tau_epsilon')   = 3;
+    %}
+    
+    %%%% NONCENTERED PARAMS intertwined moons %%%%
+    params('gamma')         = 2;
+    params('B')             = 0.02;
+    
+    params('init_tau')      = 40;
+    params('init_alpha')    = 20;
+    
+    params('min_tau')       = 0.1;
+    params('max_tau')       = 60;
+
+    params('min_alpha')     = 0.1;
+    params('max_alpha')     = 60;
+    
+    params('alpha_epsilon') = 1;
+    params('tau_epsilon')   = 2;
     
     if params('data_set') == string('voting')
         load('data3.mat')
@@ -63,9 +100,10 @@ function print_results()
         params('set_pos') = set_pos;
         
     elseif params('data_set') == string('moons')
-        load('moondata.mat')
+        load('intertwine_moon.mat')
         %%%% Currently need to set neg, pos manually.
         %%%% Should automate in the future.
+        data = d;
         params('data') = data;
         set_pos     = 50:20:450;
         set_neg     = 550:20:950;
@@ -158,7 +196,7 @@ function print_results()
     
     if params('data_set') == string('voting')
         params('correct_percent') = count_correct(u_avg(:, num_iterations), set_neg, set_pos, [zeros(267,1) - 1; zeros(168,1) + 1]);
-    elseif params('data_set') == string('moon')
+    elseif params('data_set') == string('moons')
         params('correct_percent') = count_correct(u_avg(:, num_iterations), set_neg, set_pos, ...
         [zeros(num_data/2,1) + 1; zeros(num_data/2, 1) - 1]);
     end

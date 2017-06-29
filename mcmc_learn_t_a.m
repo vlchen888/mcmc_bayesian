@@ -110,7 +110,6 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
             alpha_all(i+1) = alpha_all(i);
             alpha_accept(i+1) = 0;
         end
-        
     end
 end
 

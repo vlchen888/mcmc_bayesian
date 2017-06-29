@@ -153,71 +153,7 @@ Time elapsed & 183.21 s \\ \hline
 \end{figure}
 
 \section{Revisiting the centered parameterization}
-Last week, forcing $\tau$ to be in $(0,1]$ proved to be too small of an interval so I allowed $\tau$ and $\alpha$ to be sampled from $(0, 60]$. $\beta$ was adjusted to obtain a reasonable acceptance probability for $u^{(k)}$. The parameters that I tried:
 
-\begin{center}
-\begin{tabular}{| c | c |}
-\hline
-Iterations & 10000 \\ \hline
-Burn in period & 500 \\ \hline
-Laplacian & unnormalized \\ \hline
-Weight function parameters $(p, q, l)$ & $(2,2,1)$ \\ \hline
-$\beta$             & $0.2$\\ \hline
-$\gamma$            & $0.0001$\\ \hline
-Labeled +1          & $280-290$ \\ \hline
-Labeled -1          & $20-30$ \\ \hline
-$\epsilon_\alpha$   & $1$\\ \hline
-$\epsilon_\tau$     & $1$\\ \hline
-Initial $\tau$      & $40$\\ \hline
-Initial $\alpha$    & $20$\\ \hline
-$\tau$ range        & $[0, 60]$\\ \hline
-$\alpha$ range      & $[0, 60]$\\ \hline
-Average $\tau$      & $1.31$\\ \hline
-Average $\alpha$    & $22.76$\\ \hline
-Percent of correct classification & $0.826698$ \\ \hline
-Time elapsed & 105.56 s \\ \hline
-\end{tabular}
-\end{center}
-The initial $\tau$ does not have a large effect on the final average $\tau$, subtracting the burn-in period. Initializing $\tau$ at $20$ resulted in an average $\tau$ of around $1.2$, while initializing at $0.1$ resulted in an average of $0.99$. I made a video with the traces of $(u^{(k)}, \tau^{(k)}, \alpha^{(k)})$. Diagrams: \cref{fig:xi_1}, \cref{fig:xi_2}, \cref{fig:xi_3}, \cref{fig:xi_4}, \cref{fig:xi_5}, \cref{fig:xi_6}.
-
-\begin{figure}[!htb]
-    \begin{minipage}{0.48\textwidth}
-        \centering
-        \caption{\label{fig:xi_1} $\alpha$ acceptance probability}
-        \includegraphics[width=\linewidth]{graphics/centered/acceptance_alpha_probability.png}
-    \end{minipage} \hfill
-    \begin{minipage}{0.48\textwidth}
-        \centering
-        \caption{\label{fig:xi_2} $\alpha$ trace}
-        \includegraphics[width=\linewidth]{graphics/centered/trace_alpha.png}
-    \end{minipage}
-\end{figure}
-
-\begin{figure}[!htb]
-    \begin{minipage}{0.48\textwidth}
-        \centering
-        \caption{\label{fig:xi_3} $\tau$ acceptance probability}
-        \includegraphics[width=\linewidth]{graphics/centered/acceptance_tau_probability.png}
-    \end{minipage} \hfill
-    \begin{minipage}{0.48\textwidth}
-        \centering
-        \caption{\label{fig:xi_4} $\tau$ trace}
-        \includegraphics[width=\linewidth]{graphics/centered/trace_tau.png}
-    \end{minipage}
-\end{figure}
-
-\begin{figure}[!htb]
-    \begin{minipage}{0.48\textwidth}
-        \centering
-        \caption{\label{fig:xi_5} $u$ acceptance probability}
-        \includegraphics[width=\linewidth]{graphics/centered/acceptance_u_probability.png}
-    \end{minipage} \hfill
-    \begin{minipage}{0.48\textwidth}
-        \centering
-        \caption{\label{fig:xi_6} $u$ final average}
-        \includegraphics[width=\linewidth]{graphics/centered/final_avg.png}
-    \end{minipage}
-\end{figure}
 \section{Two moons data}
 The non-centered parameterization with the unnormalized Laplacian does not perform well on the two moons data set. One possibility is that the first eigenvector in the unnormalized Laplacian is constant and is throwing off the classification. %insert figure?
 
