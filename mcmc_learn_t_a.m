@@ -1,13 +1,28 @@
 function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
-        mcmc_learn_t_a(Z, num_iterations, label_data, p, q, l, ...
-        gamma, B, init_tau, init_alpha, min_tau, max_tau, min_alpha, ...
-        max_alpha, alpha_epsilon, tau_epsilon)
-    L = compute_laplacian_selftuning(Z);
+        mcmc_learn_t_a(params)
+    data = params('data');
+    num_iterations = params('num_iterations');
+    label_data = params('label_data');
+    p = params('p');
+    q = params('q');
+    l = params('l');
+    gamma = params('gamma');
+    B = params('B');
+    init_tau = params('init_tau');
+    init_alpha = params('init_alpha');
+    min_tau = params('min_tau');
+    max_tau = params('max_tau');
+    min_alpha = params('min_alpha');
+    max_alpha = params('max_alpha');
+    alpha_epsilon = params('alpha_epsilon');
+    tau_epsilon = params('tau_epsilon');
+    
+    L = compute_laplacian_selftuning(data);
     % [L, ~, ~] = compute_laplacian_standard(Z, p, q, l);
     lambda = eig(L);
     [phi, ~] = eig(L);
     
-    [num_data, ~] = size(Z);
+    [num_data, ~] = size(data);
         
     U = zeros(num_data, num_iterations);
     

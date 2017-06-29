@@ -4,6 +4,42 @@ function print_results_xi()
     params = containers.Map;
     params('data_set') = string('voting');
     
+    params('parameterization') = string('centered');
+    num_iterations = 1000;
+    burn_in = 1;
+    params('num_iterations') = num_iterations;
+    params('burn_in') = burn_in;
+    
+    params('p') = 2;
+    params('q') = 2;
+    params('l') = 1;
+
+    params('gamma') = 0.0001;
+    params('B')     = 0.1;
+    
+    params('init_tau')      = 20;
+    params('init_alpha')    = 5;
+    
+    params('min_tau')      = 0.1;
+    params('max_tau')    = 60;
+
+    params('min_alpha')      = 0.1;
+    params('max_alpha')    = 60;
+    
+    params('alpha_epsilon')      = 1;
+    params('tau_epsilon')    = 1;
+    
+    movie = 0;
+    
+    
+    
+    
+    if params('parameterization') == string('noncentered')
+        params('run_description') = 'MCMC self-tuning Laplacian, noncentered parameterization.\n';
+    elseif params('parameterization') == string('centered')
+        params('run_description') = 'MCMC self-tuning Laplacian, centered parameterization.\n';
+    end
+    
     if params('data_set') == string('voting')
         load('data3.mat')
         data = X;
@@ -29,39 +65,19 @@ function print_results_xi()
     
     [num_data, ~] = size(params('data'));
     
-    num_iterations = 1000;
-    burn_in = 1;
-    movie = 0;
-    
-    params('num_iterations') = num_iterations;
-    params('burn_in') = burn_in;
-    
     label_data = init(num_data, set_neg, set_pos);
     params('label_data') = label_data;
     
-    params('p') = 2;
-    params('q') = 2;
-    params('l') = 1;
-
-    params('gamma') = 0.0001;
-    params('B')     = 0.1;
-    
-    params('init_tau')      = 20;
-    params('init_alpha')    = 5;
-    
-    params('min_tau')      = 0.1;
-    params('max_tau')    = 60;
-    
-
-    params('min_alpha')      = 0.1;
-    params('max_alpha')    = 60;
-    
-    params('alpha_epsilon')      = 1;
-    params('tau_epsilon')    = 1;
     
     start_time = cputime;
-    [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
-        mcmc_learn_t_a_noncentered(params);
+    if params('parameterization') == string('noncentered')
+        [tau_all, alpha_all, std, var_accept, tau_accept, alpha_accept] =...
+            mcmc_learn_t_a_noncentered(params);
+    elseif params('parameterization') == string('centered')
+        [tau_all, alpha_all, std, var_accept, tau_accept, alpha_accept] =...
+            mcmc_learn_t_a(params);
+    end
+    
     elapsed_time = cputime - start_time;
     params('elapsed_time') = elapsed_time;
     
@@ -70,7 +86,7 @@ function print_results_xi()
     tau_avg = zeros(1, num_iterations);
     alpha_avg = zeros(1, num_iterations);
     
-    xi_accept_avg = zeros(1, num_iterations);
+    var_accept_avg = zeros(1, num_iterations);
     tau_accept_avg = zeros(1, num_iterations);
     alpha_accept_avg = zeros(1, num_iterations);
     
@@ -86,7 +102,7 @@ function print_results_xi()
             tau_avg(i+1) = ((i-burn_in)*tau_avg(i) + tau_all(i+1))/(i-burn_in+1);
             alpha_avg(i+1) = ((i-burn_in)*alpha_avg(i) + alpha_all(i+1))/(i-burn_in+1);
             
-            xi_accept_avg(i+1) = ((i-burn_in)*xi_accept_avg(i) + xi_accept(i+1))/(i-burn_in+1);
+            var_accept_avg(i+1) = ((i-burn_in)*var_accept_avg(i) + var_accept(i+1))/(i-burn_in+1);
             tau_accept_avg(i+1) = ((i-burn_in)*tau_accept_avg(i) + tau_accept(i+1))/(i-burn_in+1);
             alpha_accept_avg(i+1) = ((i-burn_in)*alpha_accept_avg(i) + alpha_accept(i+1))/(i-burn_in+1);
         end
@@ -101,17 +117,17 @@ function print_results_xi()
 
                 subplot(2,2,2)
                 subplot_scatter_twomoons_classify(data, u_avg(:,i), label_data);
+                
+                subplot(2,2,3)
+                plot(1:i, tau_all(1:i));
+                ylabel('\tau trace');
 
-                 subplot(2,2,3)
-                 plot(1:i, tau_all(1:i));
-                 ylabel('\tau trace');
+                subplot(2,2,4)
+                plot(1:i, alpha_all(1:i));
+                ylabel('\alpha trace');
 
-                 subplot(2,2,4)
-                 plot(1:i, alpha_all(1:i));
-                 ylabel('\alpha trace');
-
-                 fname = sprintf('figs/step_%i.png',floor(i/often) + 1);
-                 print('-r144','-dpng',fname);
+                fname = sprintf('figs/step_%i.png',floor(i/often) + 1);
+                print('-r144','-dpng',fname);
             end
         end
     end
@@ -120,7 +136,7 @@ function print_results_xi()
     params('u_avg') = u_avg;
     params('tau_avg') = tau_avg;
     params('alpha_avg') = alpha_avg;
-    params('xi_accept_avg') = xi_accept_avg;
+    params('var_accept_avg') = var_accept_avg;
     params('tau_accept_avg') = tau_accept_avg;
     params('alpha_accept_avg') = alpha_accept_avg;
     print_figures(params)
@@ -134,9 +150,7 @@ function print_results_xi()
         params('correct_percent') = count_correct(u_avg(:, num_iterations), set_neg, set_pos, ...
         [zeros(num_data/2,1) + 1; zeros(num_data/2, 1) - 1]);
     end
-    
-    params('run_description') = 'MCMC self-tuning Laplacian, xi tau alpha parameterization.\n';
-    
+        
     print_info_file(params);
 end
 
@@ -147,7 +161,7 @@ function print_figures(params)
     u_avg = params('u_avg');
     tau_avg = params('tau_avg');
     alpha_avg = params('alpha_avg');
-    xi_accept_avg = params('xi_accept_avg');
+    var_accept_avg = params('var_accept_avg');
     tau_accept_avg = params('tau_accept_avg');
     alpha_accept_avg = params('alpha_accept_avg');
     burn_in = params('burn_in');
@@ -189,10 +203,17 @@ function print_figures(params)
     
     
     clf
-    plot(burn_in+1:num_iterations, xi_accept_avg(burn_in+1:end))
-    ylabel('\xi acceptance probability');
-    fname = 'print_runs/acceptance_xi_probability.png';
-    print('-r144','-dpng',fname);
+    if params('parameterization') == string('noncentered')
+        plot(burn_in+1:num_iterations, var_accept_avg(burn_in+1:end))
+        ylabel('\xi acceptance probability');
+        fname = 'print_runs/acceptance_xi_probability.png';
+        print('-r144','-dpng',fname);
+    elseif params('parameterization') == string('centered')
+        plot(burn_in+1:num_iterations, var_accept_avg(burn_in+1:end))
+        ylabel('u acceptance probability');
+        fname = 'print_runs/acceptance_u_probability.png';
+        print('-r144','-dpng',fname);
+    end
     
     clf
     plot(burn_in+1:num_iterations, tau_accept_avg(burn_in+1:end))
