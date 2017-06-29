@@ -17,8 +17,11 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
     alpha_epsilon = params('alpha_epsilon');
     tau_epsilon = params('tau_epsilon');
     
-    L = compute_laplacian_selftuning(data);
-    % [L, ~, ~] = compute_laplacian_standard(Z, p, q, l);
+    if params('laplacian') == string('self tuning')
+        L = compute_laplacian_selftuning(data);
+    elseif params('laplacian') == string('un')
+        [L, ~, ~] = compute_laplacian_standard(data, p, q, l);
+    end
     lambda = eig(L);
     [phi, ~] = eig(L);
     
@@ -27,6 +30,7 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
     U = zeros(num_data, num_iterations);
     
     %%%%% Indicates initialization from Fiedler Vector %%%%%
+    %U(2, 1) = (lambda(2) + init_tau^2)^(-init_alpha/2);
     U(2, 1) = 1;
             
     tau_all = zeros(1, num_iterations);
@@ -117,46 +121,26 @@ function log_prior = compute_log_prior(u, lambda, tau, alpha)
 end
 
 function innerProd = compute_inner_prod(u, lambda, tau, alpha)
-    innerProd = 0;
-    for j = 1:length(lambda)
-        innerProd = innerProd + u(j)^2 * (lambda(j) + tau^2)^alpha;
-    end
+    innerProd = (u.^2)' * (lambda + tau^2).^alpha;
 end
 
 function log_det_c = compute_log_det_c(lambda, tau, alpha)
-    sum = 0;
-    for j = 1:length(lambda)
-        sum = sum + log(lambda(j) + tau^2);
-    end
-    log_det_c = -alpha * sum;
+    log_det_c = -alpha * sum(log(lambda + tau^2));
 end
 
 function l = compute_log_likelihood(gamma, label_data, u)
-    sum = 0;
-    for i=1:length(label_data)
-        %%%% Check if i \in Z' %%%%
-        if label_data(i) ~= 0
-            sum = sum + abs(sign(u(i)) - label_data(i))^2;
-        end
-    end
+    sum = norm((sign(u)-label_data).*abs(label_data))^2;
     l = -sum/(2*gamma^2);
 end
 
 function x = compute_rand_in_eigenbasis(lambda, tau, alpha)
-    x = zeros(length(lambda), 1);
-    for j=1:length(lambda)
-       zeta = normrnd(0, 1);
-       x(j) = eigvalweight(lambda(j), tau, alpha) * zeta;
-    end
+    x = eigvalweight(lambda, tau, alpha) .* normrnd(0, 1, length(lambda), 1);
 end
 
 function u = convert_std_basis(x, phi)
-    u = 0;
-    for j=1:length(phi)
-        u = u + x(j)* phi(:,j);
-    end
+    u = phi*x;
 end
 
 function w = eigvalweight(lambda, tau, alpha)
-    w = (lambda + tau^2)^(-alpha/2);
+    w = (lambda + tau^2).^(-alpha/2);
 end

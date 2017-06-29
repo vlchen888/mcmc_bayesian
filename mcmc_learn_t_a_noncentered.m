@@ -17,8 +17,11 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
     alpha_epsilon = params('alpha_epsilon');
     tau_epsilon = params('tau_epsilon');
     
-    L = compute_laplacian_selftuning(data);
-    %[L, ~, ~] = computeLaplacian(Z, p, q, l);
+    if params('laplacian') == string('self tuning')
+        L = compute_laplacian_selftuning(data);
+    elseif params('laplacian') == string('un')
+        [L, ~, ~] = computeLaplacian(Z, p, q, l);
+    end
     lambda = eig(L);
     [phi, ~] = eig(L);
     
