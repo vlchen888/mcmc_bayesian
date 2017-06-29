@@ -83,21 +83,20 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
                 
         %%%%% Propose a new tau %%%%%
         new_tau = tau_all(i) + tau_epsilon * normrnd(0, 1);
-        if new_tau < min_tau
-            new_tau = min_tau;
-        elseif new_tau > max_tau
-            new_tau = max_tau;
-        end
-        
-        log_tau = compute_log_g(lambda, phi, curr_xi, new_tau, curr_alpha, gamma, label_data) ...
-            - compute_log_g(lambda, phi, curr_xi, curr_tau, curr_alpha, gamma, label_data);
-        transition_tau = exp(log_tau);
-        if rand(1) < transition_tau
-            tau_all(i+1) = new_tau;
-            tau_accept(i+1) = 1;
-        else
+        if new_tau < min_tau || new_tau > max_tau
             tau_all(i+1) = tau_all(i);
             tau_accept(i+1) = 0;
+        else
+            log_tau = compute_log_g(lambda, phi, curr_xi, new_tau, curr_alpha, gamma, label_data) ...
+            - compute_log_g(lambda, phi, curr_xi, curr_tau, curr_alpha, gamma, label_data);
+            transition_tau = exp(log_tau);
+            if rand(1) < transition_tau
+                tau_all(i+1) = new_tau;
+                tau_accept(i+1) = 1;
+            else
+                tau_all(i+1) = tau_all(i);
+                tau_accept(i+1) = 0;
+            end
         end
         
         curr_tau = tau_all(i+1);
@@ -105,22 +104,21 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
         %%%%% Propose a new alpha %%%%%
         new_alpha = alpha_all(i) + alpha_epsilon * normrnd(0, 1);
         
-        if new_alpha < min_alpha
-            new_alpha = min_alpha;
-        elseif new_alpha > max_alpha
-            new_alpha = max_alpha;
-        end
-                
-        log_alpha = compute_log_g(lambda, phi, curr_xi, curr_tau, new_alpha, gamma, label_data) ...
-            - compute_log_g(lambda, phi, curr_xi, curr_tau, curr_alpha, gamma, label_data);
-        transition_alpha = exp(log_alpha);
-        if rand(1) < transition_alpha
-            alpha_all(i+1) = new_alpha;
-            alpha_accept(i+1) = 1;
-        else
+        if new_alpha < min_alpha || new_alpha > max_alpha
             alpha_all(i+1) = alpha_all(i);
             alpha_accept(i+1) = 0;
-        end
+        else
+            log_alpha = compute_log_g(lambda, phi, curr_xi, curr_tau, new_alpha, gamma, label_data) ...
+            - compute_log_g(lambda, phi, curr_xi, curr_tau, curr_alpha, gamma, label_data);
+            transition_alpha = exp(log_alpha);
+            if rand(1) < transition_alpha
+                alpha_all(i+1) = new_alpha;
+                alpha_accept(i+1) = 1;
+            else
+                alpha_all(i+1) = alpha_all(i);
+                alpha_accept(i+1) = 0;
+            end
+        end      
     end
 end
 
