@@ -1,6 +1,8 @@
 function p = compute_fiedler_clustering_accuracy()
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%Compute Fiedler Classification Accuracy
+%   p = compute_fiedler_clustering_accuracy() computes the accuracy
+%   Uses kmeans to identity 2 clusters from the Fiedler vector of the
+%   Laplacian (currently unnormalized).
 
 load('intertwine_moon.mat');
 data = d;

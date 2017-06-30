@@ -1,22 +1,23 @@
 
 function [tau_all, alpha_all] = print_results()
-    
+%For printing traces, acceptance probabilities, run statistics, etc.
+%   Set run parameters here.
     params = containers.Map;
     params('data_set') = string('moons');
     
     params('parameterization') = string('noncentered');
     params('laplacian') = string('self tuning');
     
-    num_iterations = 10000;
+    num_iterations = 1000;
     burn_in = 1;
     params('num_iterations') = num_iterations;
     params('burn_in') = burn_in;
     
     movie = 0;
     
-    params('p')             = 2;
-    params('q')             = 2;
-    params('l')             = 1;
+    params('p') = 2;
+    params('q') = 2;
+    params('l') = 1;
 
     %%%% CENTERED PARAMS for voting %%%%
     %{
@@ -236,9 +237,9 @@ function [tau_all, alpha_all] = print_results()
     params('alpha_avg') = alpha_avg(num_iterations);
     
     if params('data_set') == string('voting')
-        params('correct_percent') = count_correct(u_avg(:, num_iterations), set_neg, set_pos, [zeros(267,1) - 1; zeros(168,1) + 1]);
+        params('correct_percent') = count_correct(u_avg(:, num_iterations), label_data, [zeros(267,1) - 1; zeros(168,1) + 1]);
     elseif params('data_set') == string('moons')
-        params('correct_percent') = count_correct(u_avg(:, num_iterations), set_neg, set_pos, ...
+        params('correct_percent') = count_correct(u_avg(:, num_iterations), label_data, ...
         [zeros(num_data/2,1) + 1; zeros(num_data/2, 1) - 1]);
     end
     

@@ -7,6 +7,5 @@ function plotVar(var, num_iterations, plot_me, k)
         title(sprintf('Senator %d', plot_me(i)))
     end
     ha = axes('Position',[0 0 1 1],'Xlim',[0 1],'Ylim',[0 1],'Box','off','Visible','off','Units','normalized', 'clipping' , 'off');
-    text(0.5, 1,'\bf Running Variances','HorizontalAlignment','center','VerticalAlignment', 'top');
-    
+    text(0.5, 1,'\bf Running Variances','HorizontalAlignment','center','VerticalAlignment', 'top'); 
 end

@@ -1,5 +1,5 @@
 function L = compute_laplacian_standard(X, p, q, l)
-    %compute Laplacian matrix
+    %Compute Laplacian matrix
     
     lap = 'un';
     
