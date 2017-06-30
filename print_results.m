@@ -201,7 +201,8 @@ function [tau_all, alpha_all] = print_results()
                 
                 clf
                 %%% Plot trace of u? %%%
-                subplotBar(std(:, i))
+                subplot(2,2,1)
+                plotBar(std(:, i))
                 
                 %subplotBar(u_avg(:, i))
                 
@@ -281,7 +282,7 @@ function print_figures(params)
     
     %%%%%%% FINAL AVG %%%%%%%
     clf
-    plotBar(u_avg(:, num_iterations), 1)
+    plotBar(u_avg(:, num_iterations))
     fname = 'print_runs/final_avg.png';
     print('-r144','-dpng',fname);
     
@@ -380,74 +381,4 @@ fprintf(fileID, '-1: %d\n', set_neg);
 fprintf(fileID, 'Percent correctly classified: %f\n', correct_percent);
 fprintf(fileID, 'Time elapsed: %.2f s\n', elapsed_time);
 
-end
-
-function subplotBar(avg)
-    num_pos = 0;
-    for i=1:length(avg)
-        if avg(i) > 0
-            num_pos = num_pos + 1;
-        end
-    end
-
-    posx = zeros(num_pos,1);
-    posy = zeros(num_pos,1);
-    ppos = 1;
-    negx = zeros(435-num_pos,1);
-    negy = zeros(435-num_pos,1);
-    pneg = 1;
-    for i=1:length(avg)
-        if avg(i) > 0
-            posx(ppos) = i;
-            posy(ppos) = avg(i);
-            ppos = ppos + 1;
-        else
-            negx(pneg) = i;
-            negy(pneg) = avg(i);
-            pneg = pneg + 1;
-        end
-    end
-    
-    
-    subplot(2,2,1)
-    hold on
-    bar(posx, posy, 'b')
-    bar(negx, negy, 'r')
-    hold off
-end
-
-function plotBar(avg, k)
-    
-    num_pos = 0;
-    for i=1:length(avg)
-        if avg(i) > 0
-            num_pos = num_pos + 1;
-        end
-    end
-
-    posx = zeros(num_pos,1);
-    posy = zeros(num_pos,1);
-    ppos = 1;
-    negx = zeros(435-num_pos,1);
-    negy = zeros(435-num_pos,1);
-    pneg = 1;
-    for i=1:length(avg)
-        if avg(i) > 0
-            posx(ppos) = i;
-            posy(ppos) = avg(i);
-            ppos = ppos + 1;
-        else
-            negx(pneg) = i;
-            negy(pneg) = avg(i);
-            pneg = pneg + 1;
-        end
-    end
-    
-    
-    figure(k)
-    clf
-    hold on
-    bar(posx, posy, 'b')
-    bar(negx, negy, 'r')
-    hold off
 end

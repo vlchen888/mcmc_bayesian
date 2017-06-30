@@ -19,7 +19,6 @@ params('laplacian') = string('un');
 clustering = fiedler_clustering(params);
 scatter_twomoons_classify(data, clustering, [])
 actual = [zeros(1, num_data/2)-1, zeros(1,num_data/2)+1]';
-wrong = min(norm(clustering - actual)^2/4, norm(clustering + actual)^2/4);
-p = (num_data-wrong)/num_data;
+p = count_correct(clustering, zeros(num_data,1), actual);
 end
 
