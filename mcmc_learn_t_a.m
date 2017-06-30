@@ -22,7 +22,7 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
     if params('laplacian') == string('self tuning')
         L = compute_laplacian_selftuning(data);
     elseif params('laplacian') == string('un')
-        [L, ~, ~] = compute_laplacian_standard(data, p, q, l);
+        L = compute_laplacian_standard(data, p, q, l);
     end
     lambda = eig(L);
     [phi, ~] = eig(L);

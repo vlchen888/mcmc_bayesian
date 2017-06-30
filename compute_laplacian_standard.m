@@ -1,23 +1,17 @@
-function [L, L_sym, L_rw] = compute_laplacian_standard(X, p, q, l)
-    %compute Laplacian matrices
-    [n, ~] = size(X);
+function L = compute_laplacian_standard(X, p, q, l)
+    %compute Laplacian matrix
     
-    W = zeros(n);
-    D = zeros(n);
-    for i=1:n
-        sum = 0;
-        for j=1:n
-            x = X(i,:);
-            y = X(j,:);
-            W(i, j) = weight(x, y, l, p, q);
-            sum = sum + W(i, j);
-        end
-        D(i, i) = sum;
+    lap = 'un';
+    
+    W = exp(-pdist2(X, X, 'minkowski', p).^q/(2*l^2));
+    D = diag(sum(W));
+    
+    L = D - W;
+    if strcmp(lap, 'sym')
+        L = sqrtm(inv(D)) * L * sqrtm(inv(D));
+    elseif strcmp(lap, 'rw')
+        L = inv(D) * L;
     end
-    L = D - W; 
-    L_sym = sqrtm(inv(D)) * L * sqrtm(inv(D));
-    L_rw = inv(D) * L;
-   %plotEigenvectors(L)
 end
 
 function d = dist(x, y, p, q)

@@ -5,10 +5,10 @@ function [tau_all, alpha_all] = print_results()
     params('data_set') = string('moons');
     
     params('parameterization') = string('noncentered');
-    params('laplacian') = string('un');
+    params('laplacian') = string('self tuning');
     
     num_iterations = 10000;
-    burn_in = 1000;
+    burn_in = 1;
     params('num_iterations') = num_iterations;
     params('burn_in') = burn_in;
     
@@ -92,7 +92,7 @@ function [tau_all, alpha_all] = print_results()
     
     %%%% NONCENTERED PARAMS intertwined moons, self tuning %%%%
     %%%% Gets convergence in ~400 iterations, ~98% accuracy on sigma = 0.1
-    %{
+    
     params('gamma')         = 0.1;
     params('B')             = 0.02;
     
@@ -107,10 +107,10 @@ function [tau_all, alpha_all] = print_results()
     
     params('alpha_epsilon') = 1;
     params('tau_epsilon')   = 3;
-    %}
+    
     
     %%%% NONCENTERED PARAMS for intertwined moons, unnormalized%%%%
-    
+    %{
     params('gamma')         = 0.0001;
     params('B')             = 0.002;
     
@@ -125,7 +125,7 @@ function [tau_all, alpha_all] = print_results()
     
     params('alpha_epsilon') = 0.1;
     params('tau_epsilon')   = 1;
-    
+    %}
     if params('data_set') == string('voting')
         load('data3.mat')
         data = X;
@@ -206,7 +206,7 @@ function [tau_all, alpha_all] = print_results()
                 
                 if params('data_set') == string('moons')
                     subplot(2,2,2)
-                    subplot_scatter_twomoons_classify(data, u_avg(:,i), label_data);
+                    scatter_twomoons_classify(data, u_avg(:,i), label_data);
                 end
                 
                 subplot(2,2,3)
@@ -341,36 +341,6 @@ function u = init(num_senators, set_neg, set_pos)
     for i=1:length(set_neg)
         u(set_neg(i))=-1;
     end
-end
-
-function subplot_scatter_twomoons_classify(data, final_avg, label_data)
-    colormap(redbluecmap(5))
-    colors = -sign(final_avg); % to make blue = +, red = -
-    scatter(data(:,1), data(:,2), 5 , colors)
-    hold on
-    for i = 1:length(label_data)
-        if label_data(i) == 1
-            scatter(data(i,1),data(i,2), 20, 'b', 'd', 'filled');
-        elseif label_data(i) == -1
-            scatter(data(i,1),data(i,2), 20, 'r', 'd', 'filled');
-        end
-    end
-    hold off
-end
-
-function scatter_twomoons_classify(data, final_avg, label_data)
-    colormap(redbluecmap(5))
-    colors = -sign(final_avg); % to make blue = +, red = -
-    scatter(data(:,1), data(:,2), 5 , colors)
-    hold on
-    for i = 1:length(label_data)
-        if label_data(i) == 1
-            scatter(data(i,1),data(i,2), 20, 'b', 'd', 'filled');
-        elseif label_data(i) == -1
-            scatter(data(i,1),data(i,2), 20, 'r', 'd', 'filled');
-        end
-    end
-    hold off
 end
 
 function print_info_file(params)
