@@ -153,9 +153,157 @@ Time elapsed & 183.21 s \\ \hline
 \end{figure}
 
 \section{Revisiting the centered parameterization}
+Matt took a look at my code and suggested that part of the reason why the parameters do not mix well is because of the accuracy of Matlab's eig solver for large eigenvalues, since the eigenvectors are very irregular. From Matt's suggestion, I truncated the sum after $M=50$ terms, a spectral projection. Applying this algorithm to the voting data set, the average $u$ was able to quickly converge to a function similar to the Fiedler vector, and the hyperparameters $\tau$ and $\alpha$ showed better mixing.
+\begin{center}
+\begin{tabular}{| c | c |}
+\hline
+Laplacian & self-tuning, unnormalized \\ \hline
+$\beta$ & $0.4$\\ \hline
+$\gamma$ & $0.0001$\\ \hline
+Labeled +1 & $280-290$ \\ \hline
+Labeled -1 & $20-30$ \\ \hline
+$\epsilon_\alpha$ & $0.1$\\ \hline
+$\epsilon_\tau$ & $1$\\ \hline
+Initial $\tau$ & $20$\\ \hline
+Initial $\alpha$ & $20$\\ \hline
+Percent of correct classification & $0.837772$ \\ \hline
+\end{tabular}
+\end{center}
+\begin{figure}[!htb]
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:centered_truncated_tau} $\tau$ trace}
+        \includegraphics[width=\linewidth]{graphics/centered/trace_tau.png}
+    \end{minipage} \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:centered_truncated_alpha} $\alpha$ trace}
+        \includegraphics[width=\linewidth]{graphics/centered/trace_alpha.png}
+    \end{minipage}
+\end{figure}
 
 \section{Two moons data}
-The non-centered parameterization with the unnormalized Laplacian does not perform well on the two moons data set. One possibility is that the first eigenvector in the unnormalized Laplacian is constant and is throwing off the classification. %insert figure?
+We began to test our algorithms on the two moons data. We used $1000$ nodes and noise in $100$ dimensions with standard deviation $\sigma = 0.1$. We labeled about $4\%$ of the nodes.
+\subsection{Centered parameterization}
+The centered parameterization with the unnormalized Laplacian and without truncation does not perform well on the two moons data set. This could again be due to higher order eigenvectors. See \cref{fig:moon_untruncated_tau}, \cref{fig:moon_untruncated_alpha}, \cref{fig:moon_untruncated_avg}, \cref{fig:moon_untruncated_scatter}.
 
-Initializing from $u=0$ was also a bad idea because $\tau, \alpha$ would blow up to their max limit.
+\begin{figure}[!htb]
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_untruncated_tau} Without truncation, $\tau$ trace}
+        \includegraphics[width=\linewidth]{graphics/moons/centered_untruncated/trace_tau.png}
+    \end{minipage} \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_untruncated_alpha} Without truncation, $\alpha$ trace}
+        \includegraphics[width=\linewidth]{graphics/moons/centered_untruncated/trace_alpha.png}
+    \end{minipage}
+\end{figure}
+\begin{figure}[!htb]
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_untruncated_avg} Without truncation, average eigenfunction $u$}
+        \includegraphics[width=\linewidth]{graphics/moons/centered_untruncated/final_avg.png}
+    \end{minipage} \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_untruncated_scatter} Without truncation, final clustering obtained. Colored diamonds indicate the labeled nodes.}
+        \includegraphics[width=\linewidth]{graphics/moons/centered_untruncated/final_scatter.png}
+    \end{minipage}
+\end{figure}
+
+Truncating to $M=50$ eigenvectors greatly improved classification and mixing of the hyperparameters. See \cref{fig:moon_truncated_tau}, \cref{fig:moon_truncated_alpha}, \cref{fig:moon_truncated_avg}, \cref{fig:moon_truncated_scatter}.
+
+\begin{figure}[!htb]
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_truncated_tau} Truncated, $\tau$ trace}
+        \includegraphics[width=\linewidth]{graphics/moons/centered_truncated/trace_tau.png}
+    \end{minipage} \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_truncated_alpha} Truncated, $\alpha$ trace}
+        \includegraphics[width=\linewidth]{graphics/moons/centered_truncated/trace_alpha.png}
+    \end{minipage}
+\end{figure}
+\begin{figure}[!htb]
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_truncated_avg} Truncated, average eigenfunction $u$}
+        \includegraphics[width=\linewidth]{graphics/moons/centered_truncated/final_avg.png}
+    \end{minipage} \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_truncated_scatter} Truncated, final clustering obtained}
+        \includegraphics[width=\linewidth]{graphics/moons/centered_truncated/final_scatter.png}
+    \end{minipage}
+\end{figure}
+\subsection{Non-centered parameterization}
+Working with the non-centered parameterization, we see that spectral projection/truncating has similar effects when using the unnormalized Laplacian: the algorithm has difficulty clustering the two moons without truncation, and is able to cluster when truncating to $M=50$ eigenvectors, with an accuracy of about $80\%$. See \cref{fig:moon_noncentered_truncated_tau}, \cref{fig:moon_noncentered_truncated_alpha}, \cref{fig:moon_noncentered_truncated_avg}, \cref{fig:moon_noncentered_truncated_scatter}.
+
+\begin{figure}[!htb]
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_noncentered_truncated_tau} Noncentered truncated, $\tau$ trace}
+        \includegraphics[width=\linewidth]{graphics/moons/noncentered_un_truncated/trace_tau.png}
+    \end{minipage} \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_noncentered_truncated_alpha} Noncentered truncated, $\alpha$ trace}
+        \includegraphics[width=\linewidth]{graphics/moons/noncentered_un_truncated/trace_alpha.png}
+    \end{minipage}
+\end{figure}
+\begin{figure}[!htb]
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_noncentered_truncated_avg} Noncentered truncated, average eigenfunction $u$}
+        \includegraphics[width=\linewidth]{graphics/moons/noncentered_un_truncated/final_avg.png}
+    \end{minipage} \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_noncentered_truncated_scatter} Noncentered truncated, final clustering obtained}
+        \includegraphics[width=\linewidth]{graphics/moons/noncentered_un_truncated/final_scatter.png}
+    \end{minipage}
+\end{figure}
+
+
+However, we get better results with the non-centered parameterization when using the self-tuning unnormalized Laplacian. It seems that the self-tuning Laplacian offers more clustering information in its higher order eigenvectors, while the eigenvectors beyond the Fiedler vector in the unnormalized Laplacian are less useful. Refer to \cref{fig:moon_laplacian_un}, \cref{fig:moon_laplacian_selftuning}. Clustering accuracy is around $98\%$. See \cref{fig:noncentered_selftuning_tau}, \cref{fig:noncentered_selftuning_alpha}, \cref{fig:noncentered_selftuning_avg}, \cref{fig:noncentered_selftuning_scatter}.
+
+\begin{figure}[!htb]
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_laplacian_un} First eigenvectors of unnormalized Laplacian for intertwined moons data}
+        \includegraphics[width=\linewidth]{graphics/moon_laplacian_un.png}
+    \end{minipage} \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_laplacian_selftuning} First eigenvectors of unnormalized self-tuning Laplacian for intertwined moons data}
+        \includegraphics[width=\linewidth]{graphics/moon_laplacian_selftuning.png}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[!htb]
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:noncentered_selftuning_tau} Self tuning, $\tau$ trace}
+        \includegraphics[width=\linewidth]{graphics/moons/noncentered_selftuning/trace_tau.png}
+    \end{minipage} \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:noncentered_selftuning_alpha} Self tuning, $\alpha$ trace}
+        \includegraphics[width=\linewidth]{graphics/moons/noncentered_selftuning/trace_alpha.png}
+    \end{minipage}
+\end{figure}
+\begin{figure}[!htb]
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:noncentered_selftuning_avg} Self tuning, average eigenfunction $u$}
+        \includegraphics[width=\linewidth]{graphics/moons/noncentered_selftuning/final_avg.png}
+    \end{minipage} \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:noncentered_selftuning_scatter} Self tuning, clustering obtained}
+        \includegraphics[width=\linewidth]{graphics/moons/noncentered_selftuning/final_scatter.png}
+    \end{minipage}
+\end{figure}
 \end{document}

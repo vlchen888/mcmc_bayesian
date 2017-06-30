@@ -17,6 +17,8 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
     alpha_epsilon = params('alpha_epsilon');
     tau_epsilon = params('tau_epsilon');
     
+    M = 50;
+    
     if params('laplacian') == string('self tuning')
         L = compute_laplacian_selftuning(data);
     elseif params('laplacian') == string('un')
@@ -24,13 +26,15 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
     end
     lambda = eig(L);
     [phi, ~] = eig(L);
+    phi = phi(:, 1:M);
+    lambda = lambda(1:M);
     
     [num_data, ~] = size(data);
-        
-    U = zeros(num_data, num_iterations);
+    
+    U = zeros(M, num_iterations);
     
     %%%%% Indicates initialization from Fiedler Vector %%%%%
-    U(2, 1) = (lambda(2) + init_tau^2)^(-init_alpha/2);
+    % U(2, 1) = (lambda(2) + init_tau^2)^(-init_alpha/2);
             
     tau_all = zeros(1, num_iterations);
     tau_all(1) = init_tau;

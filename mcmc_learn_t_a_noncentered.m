@@ -25,9 +25,13 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
     lambda = eig(L);
     [phi, ~] = eig(L);
     
-    [num_data, ~] = size(data);
     
-    xi_all = zeros(num_data, num_iterations);
+    [num_data, ~] = size(data);
+    M = 50;
+    phi = phi(:, 1:M);
+    lambda = lambda(1:M);
+    
+    xi_all = zeros(M, num_iterations);
     
     %%%%% Initialization from Fiedler Vector?? %%%%%
     %xi_all(2, 1) = (lambda(2)+init_tau^2)^(init_alpha/2);
@@ -63,7 +67,7 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
         
         std(:, i) = compute_T(curr_xi, curr_tau, curr_alpha, lambda, phi);
         
-        x = compute_rand_xi(num_data);
+        x = compute_rand_xi(M);
         new_xi = (1-B^2)^0.5*curr_xi+B*x;
         
         log_xi_trans = compute_log_g(lambda, phi, new_xi, curr_tau, curr_alpha, gamma, label_data) ...

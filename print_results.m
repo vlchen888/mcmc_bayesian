@@ -5,10 +5,10 @@ function [tau_all, alpha_all] = print_results()
     params('data_set') = string('moons');
     
     params('parameterization') = string('noncentered');
-    params('laplacian') = string('self tuning');
+    params('laplacian') = string('un');
     
-    num_iterations = 2000;
-    burn_in = 1;
+    num_iterations = 10000;
+    burn_in = 1000;
     params('num_iterations') = num_iterations;
     params('burn_in') = burn_in;
     
@@ -21,9 +21,9 @@ function [tau_all, alpha_all] = print_results()
     %%%% CENTERED PARAMS for voting %%%%
     %{
     params('gamma')         = 0.0001;
-    params('B')             = 0.2;
+    params('B')             = 0.4;
     
-    params('init_tau')      = 40;
+    params('init_tau')      = 20;
     params('init_alpha')    = 20;
     
     params('min_tau')       = 0.1;
@@ -32,8 +32,26 @@ function [tau_all, alpha_all] = print_results()
     params('min_alpha')     = 0.1;
     params('max_alpha')     = 60;
     
-    params('alpha_epsilon') = 1;
+    params('alpha_epsilon') = 0.1;
     params('tau_epsilon')   = 1;
+    %}
+    
+    %%%% CENTERED PARAMS for intertwined moons %%%%
+    %{
+    params('gamma')         = 0.0001;
+    params('B')             = 0.1;
+    
+    params('init_tau')      = 20;
+    params('init_alpha')    = 20;
+    
+    params('min_tau')       = 0.1;
+    params('max_tau')       = 60;
+
+    params('min_alpha')     = 0.1;
+    params('max_alpha')     = 60;
+    
+    params('alpha_epsilon') = 0.1;
+    params('tau_epsilon')   = 0.1;
     %}
         
     %%%% NONCENTEREED PARAMS for voting %%%%
@@ -42,7 +60,7 @@ function [tau_all, alpha_all] = print_results()
     params('B')             = 0.1;
 
     params('init_tau')      = 30;
-    params('init_alpha')    = 5;
+    params('init_alpha')    = 20;
 
     params('min_tau')       = 0.1;
     params('max_tau')       = 60;
@@ -72,11 +90,13 @@ function [tau_all, alpha_all] = print_results()
     params('tau_epsilon')   = 3;
     %}
     
-    %%%% NONCENTERED PARAMS intertwined moons %%%%
-    params('gamma')         = 2;
+    %%%% NONCENTERED PARAMS intertwined moons, self tuning %%%%
+    %%%% Gets convergence in ~400 iterations, ~98% accuracy on sigma = 0.1
+    %{
+    params('gamma')         = 0.1;
     params('B')             = 0.02;
     
-    params('init_tau')      = 40;
+    params('init_tau')      = 20;
     params('init_alpha')    = 20;
     
     params('min_tau')       = 0.1;
@@ -86,7 +106,25 @@ function [tau_all, alpha_all] = print_results()
     params('max_alpha')     = 60;
     
     params('alpha_epsilon') = 1;
-    params('tau_epsilon')   = 2;
+    params('tau_epsilon')   = 3;
+    %}
+    
+    %%%% NONCENTERED PARAMS for intertwined moons, unnormalized%%%%
+    
+    params('gamma')         = 0.0001;
+    params('B')             = 0.002;
+    
+    params('init_tau')      = 20;
+    params('init_alpha')    = 20;
+    
+    params('min_tau')       = 0.1;
+    params('max_tau')       = 60;
+
+    params('min_alpha')     = 0.1;
+    params('max_alpha')     = 60;
+    
+    params('alpha_epsilon') = 0.1;
+    params('tau_epsilon')   = 1;
     
     if params('data_set') == string('voting')
         load('data3.mat')
@@ -158,10 +196,13 @@ function [tau_all, alpha_all] = print_results()
         %%%%% CODE FOR AVG MOVIE %%%%
         if movie
             often = floor(num_iterations/100);
-            if mod(i, often) == 1
-                %%% Plot trace of u? %%%
+            if mod(i-1, often) == 0
+                
                 clf
+                %%% Plot trace of u? %%%
                 subplotBar(std(:, i))
+                
+                %subplotBar(u_avg(:, i))
                 
                 if params('data_set') == string('moons')
                     subplot(2,2,2)
