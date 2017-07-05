@@ -1,4 +1,4 @@
-function p = compute_mcmc_gamma_accuracy()
+function p = test_mcmc_hier_centered()
 params = containers.Map;
 
 load('data3.mat');
@@ -8,11 +8,22 @@ params('num_iterations') = 10000;
 burn_in = 1000;
 params('p') = 2;
 params('q') = 2;
-params('l') = 1;
-params('gamma') = 0.0001;
-params('B') = 0.4;
-params('init_tau') = 3;
-params('init_alpha') = 20;
+params('l') = 1.25;
+
+params('gamma')         = 0.0001;
+params('B')             = 0.6;
+params('init_tau')      = 20;
+params('init_alpha')    = 20;
+
+params('min_tau')       = 0.1;
+params('max_tau')       = 60;
+
+params('min_alpha')     = 0.1;
+params('max_alpha')     = 60;
+
+params('alpha_epsilon') = 0.1;
+params('tau_epsilon')   = 0.1;
+
 params('data_set') = string('voting');
 params('laplacian') = string('un');
 
@@ -40,13 +51,15 @@ end
 label_data = init(num_data, set_neg, set_pos);
 params('label_data') = label_data;
 
-[u, u_accept] = mcmc_gamma(params);
-u_avg = mean(sign(u(:, burn_in:end)), 2); %avg the rows
+[tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] = mcmc_learn_t_a(params);
+u_avg = mean(sign(std(:, burn_in:end)), 2); %avg the rows
 figure(1)
 clf
 plotBar(u_avg);
 p = count_correct(u_avg, label_data, [zeros(267,1) - 1; zeros(168,1) + 1]);
-
+u_avg_accept = mean(u_accept(burn_in:end))
+tau_avg_accept = mean(tau_accept(burn_in:end))
+alpha_avg_accept = mean(alpha_accept(burn_in:end))
 end
 
 function u = init(num_data, set_neg, set_pos)

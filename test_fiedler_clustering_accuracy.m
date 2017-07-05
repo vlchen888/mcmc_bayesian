@@ -1,4 +1,4 @@
-function p = compute_fiedler_clustering_accuracy()
+function p = test_fiedler_clustering_accuracy()
 %Compute Fiedler Classification Accuracy
 %   p = compute_fiedler_clustering_accuracy() computes the accuracy
 %   Uses kmeans to identity 2 clusters from the Fiedler vector of the

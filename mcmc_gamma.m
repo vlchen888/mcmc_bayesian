@@ -44,7 +44,6 @@ function [u, u_accept] = mcmc_gamma(params)
     end
 end
 
-
 function l = compute_log_likelihood(gamma, label_data, u)
     sum = norm((sign(u)-label_data).*abs(label_data))^2;
     l = -sum/(2*gamma^2);
