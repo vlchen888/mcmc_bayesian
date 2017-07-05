@@ -1,0 +1,25 @@
+\begin{thebibliography}{1}
+
+\bibitem{BeLuStZy17}
+{\sc A.~L. Bertozzi, X.~Luo, A.~M. Stuart, and K.~C. Zygalakis}, {\em
+  Uncertainty quantification in the classification of high dimensional data}.
+
+\bibitem{BeRoStVo08}
+{\sc A.~Beskos, G.~O. Roberts, A.~M. Stuart, and J.~Voss}, {\em
+  \uppercase{MCMC} methods for diffusion bridges}, Stochastics and Dynamics, 8
+  (2008), pp.~319--350.
+
+\bibitem{CoRoStWh13}
+{\sc S.~L. Cotter, G.~O. Roberts, A.~M. Stuart, and D.~White}, {\em
+  \uppercase{MCMC} methods for functions: modifying old algorithms to make them
+  faster}, Statistical Science, 28 (2013), pp.~424--446.
+
+\bibitem{Spectral}
+{\sc U.~von Luxburg}, {\em A tutorial on spectral clustering}, Statistics and
+  Computing, 17.
+
+\bibitem{SelfTuning}
+{\sc L.~Zelnik-Manor and P.~Perona}, {\em Self-tuning spectral clustering},
+  Neural Information Processing Systems.
+
+\end{thebibliography}

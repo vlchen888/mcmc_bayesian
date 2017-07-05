@@ -8,7 +8,7 @@ function [tau_all, alpha_all] = print_results()
     params('parameterization') = string('noncentered');
     params('laplacian') = string('self tuning');
     
-    num_iterations = 1000;
+    num_iterations = 10000;
     burn_in = 1;
     params('num_iterations') = num_iterations;
     params('burn_in') = burn_in;

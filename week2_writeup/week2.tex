@@ -64,7 +64,7 @@ Last week's experiments indicated that the original parameterization, treating $
 In the centered parameterization, the prior was $u|\tau,\alpha \sim N(0, C(\tau, \alpha))$, $\tau, \alpha$ distributed independently and uniformly over intervals. We would take the posterior by Bayes' theorem to be
 \[f(u,\tau,\alpha) \propto \exp\left(-\Phi(u) -\frac{1}{2}\langle u, C(\tau,\alpha)^{-1}u \rangle - \frac{1}{2}\log(\det(C(\tau,\alpha))) + \log(\pi_0(\tau,\alpha))\right) \]
 In the new parameterization, we sample $\xi \sim N(0, I)$ and $\tau, \alpha$ on uniform intervals as before. $\xi$ is related to $u$ by $T(\xi,\tau,\alpha) = u = \sum_{j=0}^{M}(\lambda_j+\tau^2)^{-\alpha/2}\xi_jq_j$. Recall that we are taking $M=N-1$. The new joint posterior becomes:
-\[ g(\xi,\tau,\alpha) \propto \exp\left( -\Phi(T(\xi,\tau,\alpha))-\frac{1}{2}\langle u,u \rangle + \log(\pi_0(\tau,\alpha)) \right)\]
+\[ g(\xi,\tau,\alpha) \propto \exp\left( -\Phi(T(\xi,\tau,\alpha))-\frac{1}{2}\langle \xi,\xi \rangle + \log(\pi_0(\tau,\alpha)) \right)\]
 This algorithm works as follows:
 \begin{algorithm}
 \caption{Non-centered parameterization: sampling $\xi, \tau, \alpha$}
