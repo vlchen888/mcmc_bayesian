@@ -1,62 +1,61 @@
 function p = test_mcmc_gamma_accuracy()
+rng(1)
 params = containers.Map;
+params('data_set') = string('moons');
+params('laplacian') = string('self tuning');
+params('percent_fidelity') = 0.005;
 
-load('data3.mat');
-data = X;
-params('data') = data;
-params('num_iterations') = 10000;
+    
+params('num_iterations') = 100000;
 burn_in = 1000;
-params('p') = 2;
-params('q') = 2;
-params('l') = 1.25;
-params('gamma') = 0.0001;
-params('B') = 0.6;
-params('init_tau') = 2.4;
-params('init_alpha') = 60;
-params('data_set') = string('voting');
-params('laplacian') = string('un');
 
 if params('data_set') == string('voting')
+    params('p') = 2;
+    params('q') = 2;
+    params('l') = 1.25;
+    params('gamma') = 0.0001;
+    params('B') = 0.6;
+    params('init_tau') = 2.4;
+    params('init_alpha') = 60;
+    
     load('data3.mat')
     data = X;
     params('data') = data;
-    set_neg     = 20:22;
-    set_pos     = 280:281;
-    params('set_neg') = set_neg;
-    params('set_pos') = set_pos;
+    params('label_data') = generate_voting_fidelity(params('percent_fidelity'));
 
 elseif params('data_set') == string('moons')
-    load('intertwine_moon.mat')
-    %%%% Currently need to set neg, pos manually.
-    %%%% Should automate in the future.
-    data = d;
-    params('data') = data;
-    set_pos     = 50:20:450;
-    set_neg     = 550:20:950;
-    params('set_neg') = set_neg;
-    params('set_pos') = set_pos;
-end
-[num_data, ~] = size(params('data'));    
-label_data = init(num_data, set_neg, set_pos);
-params('label_data') = label_data;
-
-[u, u_accept] = mcmc_gamma(params);
-u_avg = mean(sign(u(:, burn_in:end)), 2); %avg the rows
-figure(1)
-clf
-plotBar(u_avg);
-p = count_correct(u_avg, label_data, [zeros(267,1) - 1; zeros(168,1) + 1]);
-u_avg_accept = mean(u_accept(burn_in:end))
-end
-
-function u = init(num_data, set_neg, set_pos)
-    u = zeros(num_data, 1);
+    % not used
+    params('p') = 2;
+    params('q') = 2;
+    params('l') = 1.25;
     
-    % label some of the data
-    for i=1:length(set_pos)
-        u(set_pos(i))=1;
-    end
-    for i=1:length(set_neg)
-        u(set_neg(i))=-1;
-    end
+    params('gamma') = 0.1;
+    params('B') = 0.4;
+    params('init_tau') = 0.1;
+    params('init_alpha') = 1;
+
+    N = 2000;
+    sigma = 0.02;
+    data = moondata(1,100,N,sigma);
+    params('data') = data;
+    params('label_data') = generate_moons_fidelity(params('percent_fidelity'), N);
+end
+
+start_time = cputime;
+[u, u_accept] = mcmc_gamma(params);
+elapsed_time = cputime - start_time
+u_avg = mean(sign(u(:, burn_in:end)), 2); %avg the rows
+
+if params('data_set') == string('voting')
+    figure(1)
+    clf
+    plotBar(u_avg);
+    p = count_correct(u_avg, params('label_data'), [zeros(267,1) - 1; zeros(168,1) + 1]);
+elseif params('data_set') == string('moons')
+    figure(1)
+    clf
+    scatter_twomoons_classify(data, u_avg, params('label_data'))
+    p = count_correct(u_avg, params('label_data'), [zeros(floor(N/2)+1,1) - 1; zeros(N-(floor(N/2)+1),1) + 1]);
+end
+u_avg_accept = mean(u_accept(burn_in:end))
 end

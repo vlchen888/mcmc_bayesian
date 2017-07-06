@@ -1,18 +1,15 @@
-function p = test_mcmc_hier_centered()
+function p = test_mcmc_hier_noncentered()
 params = containers.Map;
 
-load('data3.mat');
-data = X;
-params('data') = data;
 params('num_iterations') = 10000;
-burn_in = 1000;
+burn_in = 1;
 params('p') = 2;
 params('q') = 2;
-params('l') = 1.25;
+params('l') = 1;
 
 params('gamma')         = 0.0001;
-params('B')             = 0.6;
-params('init_tau')      = 20;
+params('B')             = 0.1;
+params('init_tau')      = 30;
 params('init_alpha')    = 20;
 
 params('min_tau')       = 0.1;
@@ -21,8 +18,8 @@ params('max_tau')       = 60;
 params('min_alpha')     = 0.1;
 params('max_alpha')     = 60;
 
-params('alpha_epsilon') = 0.1;
-params('tau_epsilon')   = 0.1;
+params('alpha_epsilon') = 1;
+params('tau_epsilon')   = 1;
 
 params('data_set') = string('voting');
 params('laplacian') = string('un');
@@ -51,17 +48,18 @@ end
 label_data = init(num_data, set_neg, set_pos);
 params('label_data') = label_data;
 
-[tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] = mcmc_learn_t_a(params);
+[tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] = mcmc_learn_t_a_noncentered(params);
 u_avg = mean(sign(std(:, burn_in:end)), 2); %avg the rows
-figure(2)
-plot(1:length(tau_all), tau_all)
-xlabel('centered, \tau')
+figure(1)
+%plot(1:length(tau_all), tau_all)
+histogram(tau_all)
+xlabel('noncentered, \tau')
 
-% figure(4)
-% clf
-% plotBar(u_avg);
+figure(3)
+clf
+plotBar(u_avg);
 p = count_correct(u_avg, label_data, [zeros(267,1) - 1; zeros(168,1) + 1]);
-u_avg_accept = mean(u_accept(burn_in:end))
+xi_avg_accept = mean(xi_accept(burn_in:end))
 tau_avg_accept = mean(tau_accept(burn_in:end))
 alpha_avg_accept = mean(alpha_accept(burn_in:end))
 end

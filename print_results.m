@@ -5,7 +5,7 @@ function [tau_all, alpha_all] = print_results()
     params = containers.Map;
     params('data_set') = string('moons');
     
-    params('parameterization') = string('noncentered');
+    params('parameterization') = string('centered');
     params('laplacian') = string('self tuning');
     
     num_iterations = 10000;
@@ -38,7 +38,7 @@ function [tau_all, alpha_all] = print_results()
     %}
     
     %%%% CENTERED PARAMS for intertwined moons %%%%
-    %{
+    
     params('gamma')         = 0.0001;
     params('B')             = 0.1;
     
@@ -53,7 +53,7 @@ function [tau_all, alpha_all] = print_results()
     
     params('alpha_epsilon') = 0.1;
     params('tau_epsilon')   = 0.1;
-    %}
+    
         
     %%%% NONCENTEREED PARAMS for voting %%%%
     %{
@@ -93,7 +93,7 @@ function [tau_all, alpha_all] = print_results()
     
     %%%% NONCENTERED PARAMS intertwined moons, self tuning %%%%
     %%%% Gets convergence in ~400 iterations, ~98% accuracy on sigma = 0.1
-    
+    %{
     params('gamma')         = 0.1;
     params('B')             = 0.02;
     
@@ -108,7 +108,7 @@ function [tau_all, alpha_all] = print_results()
     
     params('alpha_epsilon') = 1;
     params('tau_epsilon')   = 3;
-    
+    %}
     
     %%%% NONCENTERED PARAMS for intertwined moons, unnormalized%%%%
     %{

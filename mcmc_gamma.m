@@ -19,6 +19,9 @@ function [u, u_accept] = mcmc_gamma(params)
     
     lambda = eig(L);
     [phi, ~] = eig(L);
+    M = 50;
+    lambda = lambda(2:M);
+    phi = phi(:,2:M);
     
     [num_data, ~] = size(data);
             
@@ -26,6 +29,7 @@ function [u, u_accept] = mcmc_gamma(params)
     u_accept = zeros(1, num_iterations);
 
     for i=1:num_iterations-1
+        
         %%%% Propose new state for U %%%%
         u_star = (1-B^2)^0.5*u(:,i)+B*compute_rand(lambda, phi, tau, alpha);
 
@@ -40,7 +44,7 @@ function [u, u_accept] = mcmc_gamma(params)
         else
             u(:, i+1) = u(:, i);
             u_accept(i+1) = 0;
-        end        
+        end
     end
 end
 

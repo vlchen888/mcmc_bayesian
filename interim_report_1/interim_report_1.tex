@@ -60,29 +60,28 @@
 %%%%% will eventually need more background -- definition of graph laplacian, weights, use in unsupervised learning, fiedler vector, etc
 In the context of semi-supervised learning, the \textit{clustering} problem refers to attempting to group a set of data or objects into clusters of similar objects. Applications of clustering include image segmentation, social network analysis, and voter classification. We approach the clustering problem from a graph-theoretical point of view, which assigns a node to each data value and edges between nodes to indicate how related the data points are.
 
-Let $Z$ be a set of unlabeled nodes $\{1, \ldots N\}$. The feature vectors are given by $x : Z \rightarrow \mathbb{R}^d$. $Z' \subset Z$ is a subset of labeled nodes, for which we have label data given by $y : Z' \rightarrow \{-1, 1\}$.
+Let $Z$ be a set of nodes $\{1, \ldots N\}$. The feature vectors are given by $x : Z \rightarrow \mathbb{R}^d$. $Z' \subset Z$ is a subset of labeled nodes, for which we have label data given by $y : Z' \to \{-1, 1\}$ for binary data, and $y : Z' \to \{1,2,\ldots k\}$ for {\bf $k$-ary} (multiclass) data.
 
 
-In the case of {\bf binary} data, $y_\ell \in \{\pm 1\}$, $v \in \mathbb{R}$, and
+The label model is given by $u$ where $y_l = S(u_l)$ for $l \in Z'$ (with possible corruption by noise). In the case of {\bf binary} data, $y_\ell \in \{\pm 1\}$, and for $v \in \mathbb{R}$,
 \[
 S(v) = \begin{cases}
-1 & u>0\\
-0 & u=0\\
--1 & u<0
+1 & v>0\\
+0 & v=0\\
+-1 & v<0
 \end{cases}
 \]
 
-In the case of {\bf $k$-ary} (multiclass) data, $y_\ell \in \{1, \ldots k\}$, $v \in \mathbb{R}^k$ and
+In the case of multiclass data, $y_\ell \in \{1, \ldots k\}$, $v \in \mathbb{R}^k$ and
 \[
 S(v) = \underset{r =1,\ldots,k}{\mathrm{argmax}}\;v_r
 \]
-where $\{e^r\}_{r=1}^k$ denotes the standard basis of $\mathbb{R}^k$.
 
 Given this problem, one goal is to come up with a classification that best fits the data. Our research group is currently looking at the effectiveness of incorporating Bayesian inference into semi-supervised learning. To view this problem from a Bayesian approach is to attempt to infer the unknown parameters that govern the probability distribution of this unknown. We can be hierarchical with these Bayesian models by having hyperparameters, parameters that govern the distributions of other parameters.
 
 Our focus is on \textit{spectral clustering}, using the clustering properties of the eigenvalues and eigenvectors of the graph Laplacian, a matrix defined on the similarity graph as follows:
 
-Let the similarity graph be $G$ with weights $w_{ij} \ge 0$. A smaller weight indicate a higher degree of similarity between the two nodes. Define $\delta_i = \sum_{k=1}^n w_{ij}$. Then, define matrices $W, D$ as:
+Let the similarity graph be $G$ with weights $w_{ij} \ge 0$. A larger weight indicate a higher degree of similarity between the two nodes. Define $\delta_i = \sum_{k=1}^n w_{ij}$. Then, define matrices $W, D$ as:
 
 \[W = w_{ij}, D = \begin{cases} 
 \delta_i    & i = j \\
