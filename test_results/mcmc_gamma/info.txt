@@ -1,0 +1,5 @@
+Laplacian: self tuning, sym
+N = 2000
+Gamma = 0.1
+Tau = 0
+Alpha = 1

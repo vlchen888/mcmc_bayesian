@@ -20,14 +20,15 @@ function [u, u_accept] = mcmc_gamma(params)
     lambda = eig(L);
     [phi, ~] = eig(L);
     M = 50;
-    lambda = lambda(2:M);
-    phi = phi(:,2:M);
+    lambda = lambda(1:M);
+    phi = phi(:,1:M);
     
     [num_data, ~] = size(data);
             
     u = zeros(num_data, num_iterations);
     u_accept = zeros(1, num_iterations);
-
+    
+    %u(:, 1) = (lambda(1)+tau^2)^(-alpha/2)*phi(:,1);
     for i=1:num_iterations-1
         
         %%%% Propose new state for U %%%%

@@ -1,0 +1,2 @@
+Laplacian: self tuning, sym
+N = 2000

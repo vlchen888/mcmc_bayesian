@@ -1,6 +1,6 @@
 function L = compute_laplacian_selftuning(data)
 
-lap = 'un';                 % Laplacian: 'un','sym' or 'rw'
+lap = 'sym';                 % Laplacian: 'un','sym' or 'rw'
 dist_type = 'euclidean';    % Distance for weights
 q = 2;                      % Power of distance for weights
 ell = 1;                    % Length-scale for weights

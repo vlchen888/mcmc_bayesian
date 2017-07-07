@@ -34,7 +34,8 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
     U = zeros(M, num_iterations);
     
     %%%%% Indicates initialization from Fiedler Vector %%%%%
-    % U(2, 1) = (lambda(2) + init_tau^2)^(-init_alpha/2);
+    U(1, 1) = (lambda(1) + init_tau^2)^(-init_alpha/2);
+    U(2, 1) = -(lambda(2) + init_tau^2)^(-init_alpha/2);
             
     tau_all = zeros(1, num_iterations);
     tau_all(1) = init_tau;

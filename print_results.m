@@ -8,7 +8,7 @@ function [tau_all, alpha_all] = print_results()
     params('parameterization') = string('centered');
     params('laplacian') = string('self tuning');
     
-    num_iterations = 10000;
+    num_iterations = 100000;
     burn_in = 1;
     params('num_iterations') = num_iterations;
     params('burn_in') = burn_in;
@@ -155,8 +155,7 @@ function [tau_all, alpha_all] = print_results()
     label_data = init(num_data, set_neg, set_pos);
     params('label_data') = label_data;
     
-    
-    start_time = cputime;
+    tic
     if params('parameterization') == string('noncentered')
         [tau_all, alpha_all, std, var_accept, tau_accept, alpha_accept] =...
             mcmc_learn_t_a_noncentered(params);
@@ -164,8 +163,7 @@ function [tau_all, alpha_all] = print_results()
         [tau_all, alpha_all, std, var_accept, tau_accept, alpha_accept] =...
             mcmc_learn_t_a(params);
     end
-    
-    elapsed_time = cputime - start_time;
+    toc
     params('elapsed_time') = elapsed_time;
     
     %%%%% Take averages of tau, alpha over time as well %%%%%
@@ -361,7 +359,6 @@ set_pos = params('set_pos');
 correct_percent = params('correct_percent');
 tau_epsilon = params('tau_epsilon');
 alpha_epsilon = params('alpha_epsilon');
-elapsed_time = params('elapsed_time');
 init_tau = params('init_tau');
 init_alpha = params('init_alpha');
 
@@ -379,6 +376,5 @@ fprintf(fileID, 'Label Data:\n');
 fprintf(fileID, '+1: %d\n', set_pos);
 fprintf(fileID, '-1: %d\n', set_neg);
 fprintf(fileID, 'Percent correctly classified: %f\n', correct_percent);
-fprintf(fileID, 'Time elapsed: %.2f s\n', elapsed_time);
 
 end

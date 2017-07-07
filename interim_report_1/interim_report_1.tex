@@ -63,7 +63,7 @@ In the context of semi-supervised learning, the \textit{clustering} problem refe
 Let $Z$ be a set of nodes $\{1, \ldots N\}$. The feature vectors are given by $x : Z \rightarrow \mathbb{R}^d$. $Z' \subset Z$ is a subset of labeled nodes, for which we have label data given by $y : Z' \to \{-1, 1\}$ for binary data, and $y : Z' \to \{1,2,\ldots k\}$ for {\bf $k$-ary} (multiclass) data.
 
 
-The label model is given by $u$ where $y_l = S(u_l)$ for $l \in Z'$ (with possible corruption by noise). In the case of {\bf binary} data, $y_\ell \in \{\pm 1\}$, and for $v \in \mathbb{R}$,
+The classifying function is given by the vector $u$, and the label model is given by $y(\ell) = S(u(\ell))$ for $l \in Z'$ (with possible corruption by noise). In the case of {\bf binary} data, $y(\ell) \in \{\pm 1\}$, and for $v \in \mathbb{R}$,
 \[
 S(v) = \begin{cases}
 1 & v>0\\
@@ -72,14 +72,14 @@ S(v) = \begin{cases}
 \end{cases}
 \]
 
-In the case of multiclass data, $y_\ell \in \{1, \ldots k\}$, $v \in \mathbb{R}^k$ and
+In the case of multiclass data, $y(\ell) \in \{1, \ldots k\}$, $v \in \mathbb{R}^k$ and
 \[
 S(v) = \underset{r =1,\ldots,k}{\mathrm{argmax}}\;v_r
 \]
 
-Given this problem, one goal is to come up with a classification that best fits the data. Our research group is currently looking at the effectiveness of incorporating Bayesian inference into semi-supervised learning. To view this problem from a Bayesian approach is to attempt to infer the unknown parameters that govern the probability distribution of this unknown. We can be hierarchical with these Bayesian models by having hyperparameters, parameters that govern the distributions of other parameters.
+Given this problem, one goal is to come up with a classification that best fits the data. Our research group is currently looking at the effectiveness of incorporating Bayesian inference into semi-supervised learning. In the Bayesian approach, the unknown classifying function $u$ is viewed as a random variable, whose distribution is determined by combining the labeling model $y$ with a probability distribution representing our prior beliefs about the classification. Hierarchical Bayesian methods provide additional flexibility by introducing hyperparameters governing the prior distribution, which are in turn treated as random variables to be inferred.
 
-Our focus is on \textit{spectral clustering}, using the clustering properties of the eigenvalues and eigenvectors of the graph Laplacian, a matrix defined on the similarity graph as follows:
+Our prior beliefs come from \textit{spectral clustering}, which uses the clustering properties of the eigenvalues and eigenvectors of the graph Laplacian, a matrix defined on the similarity graph as follows:
 
 Let the similarity graph be $G$ with weights $w_{ij} \ge 0$. A larger weight indicate a higher degree of similarity between the two nodes. Define $\delta_i = \sum_{k=1}^n w_{ij}$. Then, define matrices $W, D$ as:
 
@@ -94,7 +94,9 @@ Then, let $\mathcal{L} = D - W$ denote the unnormalized graph Laplacian on $\mat
 \mathcal{L}q_j = \lambda_j q_j,\quad j=0,\ldots,N-1.
 \end{equation}
 
-The graph Laplacian is important because the eigenvectors corresponding to the smaller eigenvalues are known to hold information about cluster data. In particular, if the graph has ``true'' clusters so that the edges between clusters all have weight 0, then the graph Laplacian would have as many eigenvalues 0 as there are clusters, and the corresponding eigenvectors would be indicators for the clusters \cite{Spectral}. Even if the data is not ideal, the small eigenvectors should hold clustering information. This includes the important Fiedler vector, the second-smallest eigenvector which is useful for bi-partitioning the graph. We assume that the prior distribution of the objective function follows from eigenvectors of the graph Laplacian.
+The graph Laplacian is important because the eigenvectors corresponding to the smaller eigenvalues are known to hold information about cluster data. In particular, if the graph has ``true'' clusters so that the edges between clusters all have weight 0, then the graph Laplacian would have as many eigenvalues 0 as there are clusters, and corresponding eigenvectors would be indicators for the clusters \cite{Spectral}. Even if the data is not ideal, the eigenvectors corresponding to small eigenvalues should hold clustering information. This includes the important Fiedler vector, the second-smallest eigenvector which is useful for bi-partitioning the graph. The eigenvalues and eigenvectors of the graph Laplacian are used to construct the prior probability distribution about $u$.
+
+% Derivation of prior, likelihood
 
 For the Bayesian approach, the prior, likelihood and posterior are defined as follows:
 \begin{itemize}
@@ -103,21 +105,28 @@ For the Bayesian approach, the prior, likelihood and posterior are defined as fo
 \label{eqn:prior}
 u = \sum_{j=0}^M (\lambda_j + \tau^2)^{-\alpha/2}\xi_j q_j,\quad \xi_j\sim N(0,1) \quad \text{i.i.d.}
 \end{equation}
+$\tau$ and $\alpha$ are hyperparameters that govern the prior. Note that samples from this prior are dominated by the lower eigenvalues, as when $\lambda$ increases, $(\lambda + \tau^2)^{-\alpha/2}$ decreases. This belief is consistent with our discussion about the graph Laplacian eigenvectors.
 
-\item[$\mathbb{P}(y|u)$:] Likelihood. For $\gamma > 0$, the likelihood is defined as
-\begin{equation}
-\label{eqn:likelihood}
-\exp(-\Phi(u)) = \displaystyle\exp\left(-\frac{1}{2\gamma^2}\sum_{\ell\in Z'}|y(\ell)-S(u(\ell))|^2\right)
-\end{equation}
-We choose this likelihood because we assume a normal distribution with mean given by the labeled values $y(l)$ and variance $\gamma^2$.
-We will also make use of the $\gamma\to 0$ limit of the likelihood, which is defined as
+\item[$\mathbb{P}(y|u)$:] Likelihood, given by $\exp(-\Phi(u))$. There are two definitions for $\Phi(u)$ that we will use.
+First, if we believe that the label data is certain, we use the $\gamma\to 0$ limit of the likelihood to enforce that $u$ must perfectly respect the labels. In this case, $\Phi(u)$ is defined as
 \begin{equation}
 \label{eqn:gammatozero}
-\exp(-\Phi(u)) = \begin{cases}
+\Phi(u) = \begin{cases}
 0 & S(u(l)) = y(l) \quad \forall l \in Z'\\
 \infty & \text{otherwise}
 \end{cases}
 \end{equation}
+Notice that $\exp(-\Phi(u)) = 1$ if and only if the classifying function $u$ respects the label data. Otherwise, $\exp(-\Phi(u)) = 0$.
+
+If we believe there is uncertainty in the labels, we could represent this uncertainty as additive Gaussian noise. For $\gamma > 0$, $\Phi(u)$ is chosen as
+\begin{equation}
+\label{eqn:likelihood}
+\Phi(u) = \displaystyle \frac{1}{2\gamma^2}\sum_{\ell\in Z'}|y(\ell)-S(u(\ell))|^2
+\end{equation}
+This definition can be derived from the Bayesian level-set model for label uncertainty, which assumes $y(j) = S(u(j)) + \eta_j, \eta_j \sim N(0,\gamma^2) \quad \text{i.i.d.}$ Then, the conditional distribution $y(j) | u \sim N(S(u(j)),\gamma^2)$. We can compute the likelihood as follows:
+\[ \mathbb{P}(y|u) = \prod_{j\in Z'} \mathbb{P}(y(j)|u) \propto \prod_{j\in Z'} e^{-\frac{(y(j)-S(u(j)))^2} {2\gamma^2}}\]
+So $\Phi(u) = -\log \mathbb{P}(y|u) = \frac{1}{2\gamma^2}\sum_{\ell\in Z'}|y(\ell)-S(u(\ell))|^2$ as desired.
+%We choose this likelihood because we assume a normal distribution with mean given by the labeled values $y(l)$ and variance $\gamma^2$.
 
 \item[$\mathbb{P}(u|y)$:] Posterior, which by Bayes' theorem is proportional to $\mathbb{P}(u) \mathbb{P}(y | u)$
 \end{itemize}
@@ -131,14 +140,21 @@ Applications to be considered include the following:
 
 My project looks at the effectiveness of different Bayesian hierarchical clustering algorithms. I am implementing these algorithms in Matlab and testing them on the data sets mentioned. The complexity of the models considered will evolve as follows:
 
-\begin{enumerate}[A)]
-\item Run fixed $\tau,\alpha, M=N-1$.
-\item Learn $\tau,\alpha$; fix $M=N-1$.
-\item Learn $\tau,\alpha,M$.
-\item $u = \sum_{j=0}^M u_j\xi_j q_j$. Learn $\{u_j\}_{j=0}^M$ with $M$ fixed.
-\item Learn $\{u_j\}_{j=0}^M$ and $M$.
-\item Multiclass, hierarchical on number of classes.
-\end{enumerate}
+For models (A), (B), and (C), the hyperparameters $\tau,\alpha,M$ refer to the prior in \cref{eqn:prior}
+
+(A) Run fixed $\tau,\alpha, M=N-1$.\\
+(B) Learn $\tau,\alpha$; fix $M=N-1$.\\
+(C) Learn $\tau,\alpha,M$.
+
+For models (D) and (E), samples from a new prior are given by $u = \sum_{j=0}^M u_j\xi_j q_j$.
+
+(D) Learn $\{u_j\}_{j=0}^M$ with $M$ fixed.\\
+(E) Learn $\{u_j\}_{j=0}^M$ and $M$.
+
+Model (F) can apply to all of the previous models.
+
+(F) Multiclass, hierarchical on number of classes.
+
 To learn $\tau, \alpha$, we will assume uniform priors on intervals $U(0, c)$ for constants $c$. For $M$, we will assume an exponentially or algebraically decaying prior with the reasoning that larger $M$ being less likely. We will refer to the hyperparameters as $\theta$.
 
 \section{Approach}
@@ -159,50 +175,58 @@ However, we cannot sample the conditional distributions directly, so we could us
 \label{alg:generalpCN}
 \begin{algorithmic}
 \State{Select $u^{(0)}$. Select $\tau, \alpha$. Select $\beta \in [0, 1]$}
-\For{$i = 0$ to $n$}
-\State{Sample $\xi$ from the prior distribution given in \cref{eqn:prior}}
-\State{Set $v^{(i)} = (1- \beta^2)^{1/2}u^{(i)} + \beta \xi$}
-\State{Set $\alpha(u^{(i)} \to v^{(i)}) = \min (1, \exp(\Phi(u^{(i)}) - \Phi(v^{(i)})) )$}
-\State{Set $u^{(i+1)} = v^{(i)}$ with probability $\alpha(u^{(i)} \to v^{(i)})$, and set $u^{(i+1)} = u^{(i)}$ otherwise}
+\For{$k = 0$ to $S$}
+\State{Sample $v$ from the prior distribution given in \cref{eqn:prior}}
+\State{Set $\hat u^{(k)} = (1- \beta^2)^{1/2}u^{(k)} + \beta v$}
+\State{Set $\alpha(u^{(k)} \to \hat u^{(k)}) = \min (1, \exp(\Phi(u^{(k)}) - \Phi(\hat u^{(k)})) )$}
+\State{Set $u^{(k+1)} = \hat u^{(k)}$ with probability $\alpha(u^{(k)} \to \hat u^{(k)})$, and set $u^{(k+1)} = u^{(k)}$ otherwise}
 \EndFor
-\State \Return $u^{(i)}$
+\State \Return $\{u^{(k)}\}$
 \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}
+Define $f(u,\tau,\alpha)$ as the joint posterior distribution. By Bayes' theorem, 
+\[f(u,\tau,\alpha) \propto \exp(-\Phi(u))\mathbb{P}(u,\tau,\alpha) = \exp(-\Phi(u))\mathbb{P}(u|\theta)\pi_0(\theta)\]
+Recall from \cref{eqn:prior} that the prior is distributed as $N(0, C)$ with the covariance matrix $C(\theta) = C(\tau, \alpha) = (\mathcal{L} + \tau^2I)^{-\alpha}$. We can finally write
+\[f(u,\tau,\alpha) \propto \exp(-\Phi(u))\times \frac{1}{\sqrt{(2\pi)^d \det C(\theta)}} \exp(-\frac{1}{2}\langle u, C(\theta)^{-1}u  \rangle) \times \pi_0(\theta)\]
+The normalization constant $\det(C(\theta))$ depends on $\tau, \alpha$ now and does not cancel out. Using this expression for the posterior, the algorithm is as follows:
+
 \caption{Hierarchical on $\tau, \alpha$}
 \label{alg:hierarchical_tau_alpha}
 \begin{algorithmic}
-\State Initialize $\mu^{(0)} = (0, 1, 0, 0, \ldots)$, which is the Fiedler vector written in the orthonormal basis of the eigenvectors
-\State Initialize $u^{(0)}$ as $\mu^{(0)}$ expressed in the standard basis.
+\State Initialize $u^{(0)} = q_1$, the Fiedler vector expressed in the standard basis.
 \State Initialize $\tau^{(0)}, \alpha^{(0)}$. Select $\beta \in [0, 1]$
-\State Initialize $\epsilon$
-\For{$i = 0$ to $n$}
-\State Sample $\xi$ from the prior distribution and expressed in the eigenbasis \Comment{$u|y, \tau, \alpha$}
-\State Set a proposal $\nu^{(i)} = (1- \beta^2)^{1/2}\mu^{(i)} + \beta \xi$
-\State Compute $v^{(i)}$ as $\nu^{(i)}$ in the standard basis
-\State Set $u^{(i+1)} = v^{(i)}$ and $\mu^{(i+1)} = \nu^{(i)}$ with probability $\min (1, \exp(\Phi(u^{(i)}) - \Phi(v^{(i)})) )$
+\State Pick $\epsilon_1, \epsilon_2$, the jump sizes for $\tau, \alpha$ respectively.
+\For{$k = 0$ to $S$}
+\State Sample $v$ from the prior distribution and expressed in the eigenbasis \Comment{$u|y, \tau, \alpha$}.
+\State Expressing $u$ in the eigenbasis, set a proposal $\hat u^{(k)} = (1- \beta^2)^{1/2}u^{(k)} + \beta v$
+\State Set $u^{(k+1)} = \hat u^{(k)}$ with probability $\min (1, \exp(\Phi(u^{(k)}) - \Phi(\hat u^{(k)})) )$
 
-\State Set a proposal $t^{(i)} = \tau^{(i)} + \epsilon \zeta^{(i)}$ for $\zeta^{(i)} \sim N(0, 1)$ \Comment{$\tau|y,u,\alpha$}
-\State Set $\tau^{(i+1)} = t^{(i)}$ with probability given by the ratio between the joint posterior functions on $u, \tau, \alpha$: $f(\mu^{(i+1)}, t^{(i)}, \alpha^{(i)})/f(\mu^{(i+1)}, \tau^{(i)}, \alpha^{(i)})$ (using the eigenbasis representation to simplify computation)
+\State Set a proposal $\hat \tau^{(k)} = \tau^{(k)} + \epsilon_1 t$ for $t \sim N(0, 1)$ \Comment{$\tau|y,u,\alpha$}
+\State Set $\tau^{(k+1)} = \hat \tau^{(k)}$ with probability given by the ratio between the joint posterior functions on $u, \tau, \alpha$: $f(u^{(k+1)}, \hat \tau^{(k)}, \alpha^{(k)})/f(u^{(k+1)}, \tau^{(k)}, \alpha^{(k)})$ (using the eigenbasis representation to simplify computation)
 
-\State Set a proposal $a^{(i)} = \alpha^{(i)} + \epsilon \zeta^{(i)}$ for $\zeta^{(i)} \sim N(0, 1)$ \Comment{$\alpha|y,u,\tau$}
-\State Set $\alpha^{(i+1)} = a^{(i)}$ with probability given by $f(\mu^{(i+1)}, \tau^{(i+1)}, a^{(i)})/f(\mu^{(i+1)}, \tau^{(i+1)}, \alpha^{(i)})$
+\State Set a proposal $\hat \alpha^{(k)} = \alpha^{(k)} + \epsilon_2 a$ for $a \sim N(0, 1)$ \Comment{$\alpha|y,u,\tau$}
+\State Set $\alpha^{(k+1)} = \hat \alpha^{(k)}$ with probability given by $f(u^{(k+1)}, \tau^{(k+1)}, \hat \alpha^{(k)})/f(u^{(k+1)}, \tau^{(k+1)}, \alpha^{(k)})$
 \EndFor\\
-\Return $u^{(i)}, \tau^{(i)}, \alpha^{(i)}$
+\Return $\{u^{(k)}, \tau^{(k)}, \alpha^{(k)}\}$
 \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}
+This model assumes the prior $\xi \sim N(0,I)$. Define $T(\xi,\tau,\alpha) = \sum_{i=1}^M \frac{1}{(\lambda_i+\tau^2)^{\alpha/2}}\xi_iq_i$, following \cref{eqn:prior}. Furthermore, define $g(\xi,\tau,\alpha)$ as the joint posterior distribution. By Bayes' theorem, 
+\[g(\xi,\tau,\alpha) \propto \exp(-\Phi(T(\xi,\tau,\alpha)))\mathbb{P}(\xi,\tau,\alpha) = \exp(-\Phi(T(\xi,\tau,\alpha)))\mathbb{P}(\xi)\pi_0(\tau, \alpha)\]
+Note that $\mathbb{P}(\xi) = \frac{1}{\sqrt{(2\pi)^d \det I}} \exp(-\frac{1}{2}\langle \xi, I\xi  \rangle) \propto \exp(-\frac{1}{2}\langle \xi,\xi \rangle)$ and the normalization constants dropped out. We obtain:
+\[ g(\xi,\tau,\alpha) \propto \exp\left( -\Phi(T(\xi,\tau,\alpha))-\frac{1}{2}\langle \xi,\xi \rangle + \log(\pi_0(\tau,\alpha)) \right)\]
+Using this posterior, the algorithm is:
 \caption{Non-centered parameterization: sampling $\xi, \tau, \alpha$}
 \label{alg:xi_tau_alpha}
 \begin{algorithmic}
 \State Choose $\xi^{(0)} \in \mathbb{R}^N, \alpha^{(0)}, \tau^{(0)} > 0, \beta \in (0, 1]$ and $\epsilon_1, \epsilon_2 > 0$.
-\State Define \[ g(\xi,\tau,\alpha) \propto \exp\left( -\Phi(T(\xi,\tau,\alpha))-\frac{1}{2}\langle \xi,\xi \rangle + \log(\pi_0(\tau,\alpha)) \right)\]
 \For{$k=0$ to $S$}
 \State Propose $\hat\xi^{(k)} = (1-\beta^2)\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim N(0, I)$
 \State Make transition $\xi^{(k+1)} \to \hat\xi^{(k)}$ with probability
-\[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\{1, \exp\left(\Phi(\xi^{(k)},\tau^{(k)},\alpha^{(k)}) - \Phi(\hat\xi^{(k)},\tau^{(k)},\alpha^{(k)})\right) \}\]
+\[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\{1, \exp\left(\Phi(T(\xi^{(k)},\tau^{(k)},\alpha^{(k)})) - \Phi(T(\hat\xi^{(k)},\tau^{(k)},\alpha^{(k)}))\right) \}\]
 
 \State Propose $\hat\tau^{(k)} = \tau^{(k)} + \epsilon_1 \rho^{(k)}, \rho^{(k)} \sim N(0,I)$
 \State Make transition $\tau^{(k+1)} \to \hat\tau^{(k)}$ with probability
