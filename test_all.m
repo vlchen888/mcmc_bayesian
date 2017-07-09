@@ -23,11 +23,11 @@ fclose(fileID);
                 percent_fidelity = fidelity_arr(b);
 
                 rng(i)
-                p = test_mcmc_gamma_accuracy(percent_fidelity, sigma);
+                [p, tau_mean, alpha_mean] = test_mcmc_hier_centered(percent_fidelity, sigma);
                 
                 fileID = fopen('tests/record.csv','a');
                 fmt = '%d,%f,%f,%f,%f,%f\n';
-                fprintf(fileID,fmt, i, sigma, percent_fidelity, p,1,1);
+                fprintf(fileID,fmt, i, sigma, percent_fidelity, p,tau_mean,alpha_mean);
                 fclose(fileID);
                 
                 %test_mcmc_hier_centered(percent_fidelity, sigma);

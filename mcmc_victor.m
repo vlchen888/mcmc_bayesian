@@ -39,7 +39,7 @@ lambda = lambda(1:M);
 
 % other parameters
 
-num_iterations = 10000;
+num_iterations = 100000;
 p = 2;
 q = 2;
 l = 1;

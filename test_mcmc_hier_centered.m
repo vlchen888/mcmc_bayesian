@@ -32,14 +32,14 @@ params('alpha_epsilon') = 0.5;
 params('tau_epsilon')   = 0.02;
 
 
-tic
-[tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] = mcmc_learn_t_a(params);
-toc
+
+[tau_all, alpha_all, std, ~, ~, ~] = mcmc_learn_t_a(params);
+
 u_avg = mean(sign(std(:, burn_in:end)), 2); %avg the rows
 
-figure(1)
-clf
-scatter_twomoons_classify(data, u_avg, params('label_data'))
+%figure(1)
+%clf
+%scatter_twomoons_classify(data, u_avg, params('label_data'))
 p = count_correct(u_avg, params('label_data'), [zeros(floor(N/2)+1,1) - 1; zeros(N-(floor(N/2)+1),1) + 1]);
 tau_mean = mean(tau_all(burn_in:end));
 alpha_mean = mean(alpha_all(burn_in:end));
