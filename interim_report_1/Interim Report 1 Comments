@@ -33,9 +33,9 @@ o p3/4, keep notation consistent throughout the algorithms. some notes:
  %- Algorithms 1,2, I'd use k=0,...,S for the sample index, as you have done in Algorithm 3
  %- Algorithm, \Phi(T(...)) not \Phi(...) in acceptance probability
 
-o p5, discussion of truncation, note that the next step in the hierarchical models is to be hierarchical about this truncation level
+% o p5, discussion of truncation, note that the next step in the hierarchical models is to be hierarchical about this truncation level
 
-o p5, discussion of alpha, 'prior distribution' not 'starting distribution'. Also we aren't expecting alpha to converge to a particular value -- it could just be the case that it isn't strongly informed by the data, and/or is highly correlated with tau. It's hard to tell from only 10k samples, but it does look a little like there has been some learning of alpha in Fig 13 -- there's seems to be a bias towards larger alpha, whereas the prior was uniform.
+% o p5, discussion of alpha, 'prior distribution' not 'starting distribution'. Also we aren't expecting alpha to converge to a particular value -- it could just be the case that it isn't strongly informed by the data, and/or is highly correlated with tau. It's hard to tell from only 10k samples, but it does look a little like there has been some learning of alpha in Fig 13 -- there's seems to be a bias towards larger alpha, whereas the prior was uniform.
 
 o Non-centering in general, refer to following paper: https://projecteuclid.org/euclid.ss/1185975637
 (Andrew and I should have also have a paper out soon regarding non-centering more focused Bayesian inverse problems, it may be ready for your second interim report)

@@ -19,7 +19,7 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
     params('l') = 1.25;
 
     params('gamma') = 0.1;
-    params('B') = 0.4;
+    params('B') = 0.1;
     params('init_tau') = 1;
     params('init_alpha') = 1;
 

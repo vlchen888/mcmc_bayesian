@@ -1,5 +1,7 @@
 Laplacian: self tuning, sym
 N = 2000
 Gamma = 0.1
-Tau = 0
+Beta = 0.1
+Tau = 1
 Alpha = 1
+Eigenvectors: 1-50

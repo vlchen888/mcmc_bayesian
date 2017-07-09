@@ -16,6 +16,7 @@ fprintf(fileID,fmt);
 fclose(fileID);
     for i = 1:num_trials
         fprintf('Trial %d started.\n', i)
+        tic;
         for a = 1:A
             for b = 1:B
                 sigma = sigma_arr(a);
@@ -26,13 +27,14 @@ fclose(fileID);
                 
                 fileID = fopen('tests/record.csv','a');
                 fmt = '%d,%f,%f,%f,%f,%f\n';
-                fprintf(fileID,fmt, i, sigma, percent_fidelity, p,0,1);
+                fprintf(fileID,fmt, i, sigma, percent_fidelity, p,1,1);
                 fclose(fileID);
                 
                 %test_mcmc_hier_centered(percent_fidelity, sigma);
                 %test_mcmc_hier_noncentered(percent_fidelity, sigma);
             end
         end
+        toc
     end
 end
 

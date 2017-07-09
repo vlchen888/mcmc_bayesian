@@ -60,10 +60,10 @@
 %%%%% will eventually need more background -- definition of graph laplacian, weights, use in unsupervised learning, fiedler vector, etc
 In the context of semi-supervised learning, the \textit{clustering} problem refers to attempting to group a set of data or objects into clusters of similar objects. Applications of clustering include image segmentation, social network analysis, and voter classification. We approach the clustering problem from a graph-theoretical point of view, which assigns a node to each data value and edges between nodes to indicate how related the data points are.
 
-Let $Z$ be a set of nodes $\{1, \ldots N\}$. The feature vectors are given by $x : Z \rightarrow \mathbb{R}^d$. $Z' \subset Z$ is a subset of labeled nodes, for which we have label data given by $y : Z' \to \{-1, 1\}$ for binary data, and $y : Z' \to \{1,2,\ldots k\}$ for {\bf $k$-ary} (multiclass) data.
+Let $Z$ be a set of nodes $\{1, \ldots N\}$. The feature vectors are given by $x : Z \rightarrow \mathbb{R}^d$. $Z' \subset Z$ is a subset of labeled nodes, for which we have label data given by $y : Z' \to \{-1, 1\}$ for {\bf binary} data, and $y : Z' \to \{1,2,\ldots k\}$ for {\bf $k$-ary} (multiclass) data.
 
 
-The classifying function is given by the vector $u$, and the label model is given by $y(\ell) = S(u(\ell))$ for $l \in Z'$ (with possible corruption by noise). In the case of {\bf binary} data, $y(\ell) \in \{\pm 1\}$, and for $v \in \mathbb{R}$,
+The classifying function is given by the vector $u$, and the label model is given by $y(\ell) = S(u(\ell))$ for $l \in Z'$ (with possible corruption by noise). In the case of binary data, $y(\ell) \in \{\pm 1\}$, and for $v \in \mathbb{R}$,
 \[
 S(v) = \begin{cases}
 1 & v>0\\
@@ -105,7 +105,7 @@ For the Bayesian approach, the prior, likelihood and posterior are defined as fo
 \label{eqn:prior}
 u = \sum_{j=0}^M (\lambda_j + \tau^2)^{-\alpha/2}\xi_j q_j,\quad \xi_j\sim N(0,1) \quad \text{i.i.d.}
 \end{equation}
-$\tau$ and $\alpha$ are hyperparameters that govern the prior. Note that samples from this prior are dominated by the lower eigenvalues, as when $\lambda$ increases, $(\lambda + \tau^2)^{-\alpha/2}$ decreases. This belief is consistent with our discussion about the graph Laplacian eigenvectors.
+$\tau$ and $\alpha$ are hyperparameters that govern the prior. Note that samples from this prior are dominated by the lower eigenvectors, as when $\lambda$ increases, $(\lambda + \tau^2)^{-\alpha/2}$ decreases. This belief is consistent with our discussion about the graph Laplacian eigenvectors.
 
 \item[$\mathbb{P}(y|u)$:] Likelihood, given by $\exp(-\Phi(u))$. There are two definitions for $\Phi(u)$ that we will use.
 First, if we believe that the label data is certain, we use the $\gamma\to 0$ limit of the likelihood to enforce that $u$ must perfectly respect the labels. In this case, $\Phi(u)$ is defined as
@@ -267,7 +267,7 @@ I ran experiments with this algorithm on the voting records data but plotting th
 \end{minipage}
 \end{figure}
 
-We also looked at a different parameterization for being hierarchical about $\tau$ and $\alpha$. \cref{alg:xi_tau_alpha} is non-centered compared to the previous algorithm.
+We also looked at a different parameterization for being hierarchical about $\tau$ and $\alpha$. \cref{alg:xi_tau_alpha} uses the variable $\xi$ that is related to the classifying function $u$ by $T(\xi,\tau,\alpha) = \sum_{i=1}^M \frac{1}{(\lambda_i+\tau^2)^{\alpha/2}}\xi_iq_i = u$ \cref{eqn:prior}. This algorithm is non-centered compared to the centered parameterization given in \cref{alg:hierarchical_tau_alpha}, meaning that the unknown classifying variable $\xi$ and the parameters $\theta$ are a priori independent \cite{Noncentered}.
 
 This non-centered algorithm seems to converge faster than the centered one, and truncation of the eigenvectors is not necessary. See \cref{fig:noncentered_voting_avg}, \cref{fig:noncentered_voting_tau}
 
@@ -342,9 +342,9 @@ Notice the convergence of $\tau$ and its low variance in the samples for the non
 \section{Challenges}
 Some common issues that I encountered are bugs in my Matlab code. Some of these bugs included overflow or underflow of ratios, when both numerator and denominator are very large or very small. To improve accuracy, I implemented these ratios as the difference between $\log$s, and took the $\exp$ of the result at the end. I became used to using Matlab's debugger to step through line-by-line and isolate the mistakes.
 
-Another challenge was trying to get \cref{alg:hierarchical_tau_alpha}, the centered hierarchical algorithm, to perform well. The first implementation of that algorithm gave traces of the hyperparameters with low mixing and poor clustering of the voting records. Allowing for large ranges for $\tau$ and $\alpha$ did not solve the problem as the MCMC seemed to find one value of $\tau$ and stay stuck at that value. To try to debug the code, I re-implemented the algorithm using more of the linear algebra functionality of Matlab and improved the readability. This did not solve the problem, and my co-mentor suggested that the problem might have to do with the eig solver of Matlab failing for larger eigenvalues. We tested this by truncating the list of eigenvectors from $435$ down to only $50$, and the results, as mentioned above, were better. Since this fix is specific to these data sets, moving forward I anticipate that there may be more challenges with this algorithm.
+Another challenge was trying to get \cref{alg:hierarchical_tau_alpha}, the centered hierarchical algorithm, to perform well. The first implementation of that algorithm gave traces of the hyperparameters with low mixing and poor clustering of the voting records. Allowing for large ranges for $\tau$ and $\alpha$ did not solve the problem as the MCMC seemed to find one value of $\tau$ and stay stuck at that value. To try to debug the code, I re-implemented the algorithm using more of the linear algebra functionality of Matlab and improved the readability. This did not solve the problem, and my co-mentor suggested that the problem might have to do with the eig solver of Matlab failing for larger eigenvalues. We tested this by truncating the list of eigenvectors from $435$ down to only $50$, and the results, as mentioned above, were better. Since this fix is specific to these data sets, moving forward I anticipate that there may be more challenges with this algorithm. Note that the next step in the hierarchical models is to be hierarchical about this truncation level, which would tackle this problem.
 
-We have also found that $\tau$ seems to have much lower variance than $\alpha$, and it is difficult to see if $\alpha$ has converged. I have tried looking at histograms for $\alpha$ and seeing if the distribution is different from the starting distribution, but the convergence of $\alpha$ could continue to be a problem.
+We have also found that $\tau$ seems to have much lower variance than $\alpha$, and it is difficult to see if $\alpha$ has converged. To understand this problem, I have tried looking at histograms for $\alpha$ and saw that the distribution appears different from the prior distribution, since there seems to be a bias towards larger $\alpha$ (an example of this is in \cref{fig:moon_noncentered_trace_alpha}). We do not necessarily expect $\alpha$ to converge to a particular value -- it could just be that $\alpha$ is not strongly informed by the data. We have also observed high levels of correlation between $\tau$ and $\alpha$.
 
 \section{Additional resources}
 My project is mostly done on my computer, my notebook, and a whiteboard. Most likely, I will not require additional resources other than references to papers and books to read to understand the algorithms.
