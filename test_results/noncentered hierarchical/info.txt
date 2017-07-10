@@ -1,0 +1,13 @@
+Laplacian: self tuning, sym
+N = 2000
+Eigenvectors: 1-50
+Burn in: 1000
+Iterations: 100,000
+Gamma = 0.1
+Beta = 0.4
+Initial tau = 1
+Initial alpha = 1
+Tau: 0.01-60
+Alpha: 0.1-60
+Tau jump: 0.1
+Alpha jump: 0.5

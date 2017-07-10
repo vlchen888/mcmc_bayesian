@@ -5,11 +5,11 @@ function [tau_all, alpha_all] = print_results()
     params = containers.Map;
     params('data_set') = string('moons');
     
-    params('parameterization') = string('centered');
+    params('parameterization') = string('noncentered');
     params('laplacian') = string('self tuning');
     
     num_iterations = 100000;
-    burn_in = 1;
+    burn_in = 1000;
     params('num_iterations') = num_iterations;
     params('burn_in') = burn_in;
     
@@ -38,7 +38,7 @@ function [tau_all, alpha_all] = print_results()
     %}
     
     %%%% CENTERED PARAMS for intertwined moons %%%%
-    
+    %{
     params('gamma')         = 0.0001;
     params('B')             = 0.1;
     
@@ -53,7 +53,7 @@ function [tau_all, alpha_all] = print_results()
     
     params('alpha_epsilon') = 0.1;
     params('tau_epsilon')   = 0.1;
-    
+    %}
         
     %%%% NONCENTEREED PARAMS for voting %%%%
     %{
@@ -93,22 +93,22 @@ function [tau_all, alpha_all] = print_results()
     
     %%%% NONCENTERED PARAMS intertwined moons, self tuning %%%%
     %%%% Gets convergence in ~400 iterations, ~98% accuracy on sigma = 0.1
-    %{
+    
     params('gamma')         = 0.1;
-    params('B')             = 0.02;
+    params('B')             = 0.4;
     
-    params('init_tau')      = 20;
-    params('init_alpha')    = 20;
+    params('init_tau')      = 1;
+    params('init_alpha')    = 1;
     
-    params('min_tau')       = 0.1;
+    params('min_tau')       = 0.01;
     params('max_tau')       = 60;
 
     params('min_alpha')     = 0.1;
     params('max_alpha')     = 60;
     
-    params('alpha_epsilon') = 1;
-    params('tau_epsilon')   = 3;
-    %}
+    params('alpha_epsilon') = .5;
+    params('tau_epsilon')   = .3;
+    
     
     %%%% NONCENTERED PARAMS for intertwined moons, unnormalized%%%%
     %{
@@ -155,7 +155,6 @@ function [tau_all, alpha_all] = print_results()
     label_data = init(num_data, set_neg, set_pos);
     params('label_data') = label_data;
     
-    tic
     if params('parameterization') == string('noncentered')
         [tau_all, alpha_all, std, var_accept, tau_accept, alpha_accept] =...
             mcmc_learn_t_a_noncentered(params);
@@ -163,8 +162,6 @@ function [tau_all, alpha_all] = print_results()
         [tau_all, alpha_all, std, var_accept, tau_accept, alpha_accept] =...
             mcmc_learn_t_a(params);
     end
-    toc
-    params('elapsed_time') = elapsed_time;
     
     %%%%% Take averages of tau, alpha over time as well %%%%%
     u_avg = zeros(num_data, num_iterations);
