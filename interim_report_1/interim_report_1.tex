@@ -60,7 +60,7 @@
 %%%%% will eventually need more background -- definition of graph laplacian, weights, use in unsupervised learning, fiedler vector, etc
 In the context of semi-supervised learning, the \textit{clustering} problem refers to attempting to group a set of data or objects into clusters of similar objects. Applications of clustering include image segmentation, social network analysis, and voter classification, but the reader will readily identify numerous other potential applications. We approach the clustering problem from a graph-theoretical point of view, which assigns a node to each data value and weights on edges between nodes to indicate how related the data points are.
 
-Let $Z$ be a set of nodes $\{1, \ldots N\}$. The feature vectors are given by $x : Z \rightarrow \mathbb{R}^d$. $Z' \subset Z$ is a subset of labeled nodes, for which we have label data given by $y : Z' \to \{-1, 1\}$ for {\bf binary} data, and $y : Z' \to \{1,2,\ldots k\}$ for {\bf $k$-ary} (multiclass) data.
+Let $Z$ be a set of nodes $\{1, \ldots N\}$. The feature vectors are given by $x : Z \rightarrow \mathbb{R}^d$. $Z' \subset Z$ is a subset of labeled nodes, for which we have label data given by $y : Z' \to \{-1, 1\}$ for {\bf binary} data, and $y : Z' \to \{e^1, \ldots e^k\}$ for {\bf $k$-ary} (multiclass) data.
 
 
 The classifying function is given by the vector $u$, and the label model is given by $y(\ell) = S(u(\ell))$ for $l \in Z'$ (with possible additional corruption by noise). In the case of binary data, $y(\ell) \in \{\pm 1\}$, and for $v \in \mathbb{R}$,
@@ -72,10 +72,11 @@ S(v) = \begin{cases}
 \end{cases}
 \]
 
-In the case of multiclass data, $y(\ell) \in \{1, \ldots k\}$, $v \in \mathbb{R}^k$ and
+In the case of multiclass data, $y(\ell) \in \{e^1, \ldots e^k\}$, $v \in \mathbb{R}^k$ and
 \[
-S(v) = \underset{r =1,\ldots,k}{\mathrm{argmax}}\;v_r
+S(v) = e^p, \quad p = \underset{r =1,\ldots,k}{\mathrm{argmax}}\;v_r
 \]
+where $\{e^l\}_{l=1}^k$ denotes the standard basis of $\mathbb{R}^k$.
 
 Given this problem, one goal is to come up with a classification that best fits the data. The research group in which I am working is currently looking at the effectiveness of incorporating Bayesian inference into semi-supervised learning. In the Bayesian approach, the unknown classifying function $u$ is viewed as a random variable, whose distribution is determined by combining the labeling model $y$ with a probability distribution representing our prior beliefs about the classification and derived from the feature vectors. Hierarchical Bayesian methods provide additional flexibility by introducing hyperparameters governing the prior distribution, which are in turn treated as random variables to be inferred.
 

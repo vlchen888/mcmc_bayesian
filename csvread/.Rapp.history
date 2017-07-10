@@ -1,0 +1,25 @@
+setwd
+setwd(/Users/victor/Documents/Caltech/surf/MCMC_semisupervised/matlab/test_results/fiedler)
+setwd(""/Users/victor/Documents/Caltech/surf/MCMC_semisupervised/matlab/test_results/fiedler")
+q
+setwd("/Users/victor/Documents/Caltech/surf/MCMC_semisupervised/matlab/test_results/fiedler")
+pwd
+MyData <- read.csv(file="fiedler.csv", header=TRUE, sep=",")
+MyData
+ls
+setwd(R\ work)
+setwd("R\ work")
+setwd("/Users/victor/Documents/Caltech/surf/MCMC_semisupervised/matlab/R\ work")
+source("make_figs.R")
+print('Hello world!')
+source("make_figs.R")
+MyData
+MyData[0]
+MyData[1]
+MyData[2]
+MyData[3]
+MyData[4]
+MyData[5]
+MyData[6]
+Mydata
+MyData
