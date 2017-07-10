@@ -14,6 +14,10 @@
   \uppercase{MCMC} methods for functions: modifying old algorithms to make them
   faster}, Statistical Science, 28 (2013), pp.~424--446.
 
+\bibitem{BLS}
+{\sc M.~A. Iglesias, Y.~Lu, and A.~M. Stuart}, {\em {A Bayesian Level Set
+  Method for Geometric Inverse Problems}}, ArXiv e-prints,  (2015).
+
 \bibitem{Noncentered}
 {\sc O.~Papaspiliopoulos, G.~O. Roberts, and M.~Skold}, {\em General framework
   for the parametrization of hierarchical models}.

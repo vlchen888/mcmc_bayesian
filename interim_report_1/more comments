@@ -1,0 +1,13 @@
+o p2, l1. Could it be useful to introduce a parameter in front of L and (later)
+treat this hierarchically? When we are non-hierarchical it does not matter as
+we re-scale the Gaussian to achieve E|u|^2=N. (Are you doing this?)
+But in hierarchical case it may matter. But maybe it does not matter if you
+only use conditioning on exact data, or Bayesian level set as these are
+invariant to the scale of the latent variable u; with Probit it might matter more.
+On the other hand even for conditioning on exact data, or Bayesian level set, adding
+a scale parameter in the prior may lead to a more efficient algorithm,
+potentially; we should certainly consider this.
+
+o p2 (F) or other; can you be more explicit about a class which includes
+non-parametetric learning of a function f(\lambda) used to scale $\xi_j q_j$
+in a generalization of (2)?

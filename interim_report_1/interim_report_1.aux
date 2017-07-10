@@ -20,6 +20,7 @@
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}}
 \newlabel{eqn:laplacian}{{1}{1}{Introduction}{equation.2}{}}
 \newlabel{eqn:laplacian@cref}{{[equation][1][]1}{1}}
+\citation{BLS}
 \newlabel{eqn:prior}{{2}{2}{Introduction}{equation.3}{}}
 \newlabel{eqn:prior@cref}{{[equation][2][]2}{2}}
 \newlabel{eqn:gammatozero}{{3}{2}{Introduction}{equation.4}{}}
@@ -27,69 +28,76 @@
 \newlabel{eqn:likelihood}{{4}{2}{Introduction}{equation.5}{}}
 \newlabel{eqn:likelihood@cref}{{[equation][4][]4}{2}}
 \citation{BeLuStZy17}
-\citation{CoRoStWh13}
 \citation{BeRoStVo08}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Approach}{3}{section.6}}
 \@writefile{toc}{\contentsline {section}{\numberline {3}Algorithms}{3}{section.7}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces General pCN adapted from \cite  {CoRoStWh13}}}{3}{algorithm.8}}
-\newlabel{alg:generalpCN}{{1}{3}{Algorithms}{algorithm.8}{}}
-\newlabel{alg:generalpCN@cref}{{[algorithm][1][]1}{3}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Work accomplished}{3}{section.11}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Hierarchical on $\tau , \alpha $}}{4}{algorithm.9}}
-\newlabel{alg:hierarchical_tau_alpha}{{2}{4}{Algorithms}{algorithm.9}{}}
-\newlabel{alg:hierarchical_tau_alpha@cref}{{[algorithm][2][]2}{4}}
-\newlabel{fig:mcmc_gamma_final}{{1}{4}{Work accomplished}{figure.12}{}}
-\newlabel{fig:mcmc_gamma_final@cref}{{[figure][1][]1}{4}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Average of signs of $u$ indicate the final clustering}}{4}{figure.12}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces  \cref  {alg:hierarchical_tau_alpha} final average after truncating eigenvectors}}{4}{figure.14}}
-\newlabel{fig:centered_voting_avg}{{2}{4}{\cref {alg:hierarchical_tau_alpha} final average after truncating eigenvectors}{figure.14}{}}
-\newlabel{fig:centered_voting_avg@cref}{{[figure][2][]2}{4}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces  Trace of $\tau $}}{4}{figure.17}}
-\newlabel{fig:centered_voting_tau}{{3}{4}{Trace of $\tau $}{figure.17}{}}
-\newlabel{fig:centered_voting_tau@cref}{{[figure][3][]3}{4}}
+\newlabel{eqn:centered_post}{{5}{3}{Algorithms}{equation.8}{}}
+\newlabel{eqn:centered_post@cref}{{[equation][5][]5}{3}}
 \citation{Noncentered}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces Non-centered parameterization: sampling $\xi , \tau , \alpha $}}{5}{algorithm.10}}
-\newlabel{alg:xi_tau_alpha}{{3}{5}{Algorithms}{algorithm.10}{}}
+\citation{CoRoStWh13}
+\newlabel{eqn:noncentered_T}{{6}{4}{Algorithms}{equation.9}{}}
+\newlabel{eqn:noncentered_T@cref}{{[equation][6][]6}{4}}
+\newlabel{eqn:noncentered_post}{{7}{4}{Algorithms}{equation.10}{}}
+\newlabel{eqn:noncentered_post@cref}{{[equation][7][]7}{4}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces General pCN adapted from \cite  {CoRoStWh13}}}{4}{algorithm.11}}
+\newlabel{alg:generalpCN}{{1}{4}{Algorithms}{algorithm.11}{}}
+\newlabel{alg:generalpCN@cref}{{[algorithm][1][]1}{4}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Work accomplished}{4}{section.14}}
+\newlabel{fig:mcmc_gamma_final}{{1}{4}{Work accomplished}{figure.15}{}}
+\newlabel{fig:mcmc_gamma_final@cref}{{[figure][1][]1}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Average of signs of $u$ indicate the final clustering}}{4}{figure.15}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Hierarchical on $\tau , \alpha $}}{5}{algorithm.12}}
+\newlabel{alg:hierarchical_tau_alpha}{{2}{5}{Algorithms}{algorithm.12}{}}
+\newlabel{alg:hierarchical_tau_alpha@cref}{{[algorithm][2][]2}{5}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces Non-centered parameterization: sampling $\xi , \tau , \alpha $}}{5}{algorithm.13}}
+\newlabel{alg:xi_tau_alpha}{{3}{5}{Algorithms}{algorithm.13}{}}
 \newlabel{alg:xi_tau_alpha@cref}{{[algorithm][3][]3}{5}}
 \citation{SelfTuning}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces \cref  {alg:xi_tau_alpha} final average}}{6}{figure.18}}
-\newlabel{fig:noncentered_voting_avg}{{4}{6}{\cref {alg:xi_tau_alpha} final average}{figure.18}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces  \cref  {alg:hierarchical_tau_alpha} final average after truncating eigenvectors}}{6}{figure.17}}
+\newlabel{fig:centered_voting_avg}{{2}{6}{\cref {alg:hierarchical_tau_alpha} final average after truncating eigenvectors}{figure.17}{}}
+\newlabel{fig:centered_voting_avg@cref}{{[figure][2][]2}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces  Trace of $\tau $}}{6}{figure.20}}
+\newlabel{fig:centered_voting_tau}{{3}{6}{Trace of $\tau $}{figure.20}{}}
+\newlabel{fig:centered_voting_tau@cref}{{[figure][3][]3}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces \cref  {alg:xi_tau_alpha} final average}}{6}{figure.21}}
+\newlabel{fig:noncentered_voting_avg}{{4}{6}{\cref {alg:xi_tau_alpha} final average}{figure.21}{}}
 \newlabel{fig:noncentered_voting_avg@cref}{{[figure][4][]4}{6}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces  Trace of $\tau $}}{6}{figure.21}}
-\newlabel{fig:noncentered_voting_tau}{{5}{6}{Trace of $\tau $}{figure.21}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces  Trace of $\tau $}}{6}{figure.24}}
+\newlabel{fig:noncentered_voting_tau}{{5}{6}{Trace of $\tau $}{figure.24}{}}
 \newlabel{fig:noncentered_voting_tau@cref}{{[figure][5][]5}{6}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces  First eigenvectors of unnormalized Laplacian for intertwined moons data}}{6}{figure.22}}
-\newlabel{fig:moon_laplacian_un}{{6}{6}{First eigenvectors of unnormalized Laplacian for intertwined moons data}{figure.22}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces  First eigenvectors of unnormalized Laplacian for intertwined moons data}}{6}{figure.25}}
+\newlabel{fig:moon_laplacian_un}{{6}{6}{First eigenvectors of unnormalized Laplacian for intertwined moons data}{figure.25}{}}
 \newlabel{fig:moon_laplacian_un@cref}{{[figure][6][]6}{6}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces  First eigenvectors of unnormalized self-tuning Laplacian for intertwined moons data}}{6}{figure.25}}
-\newlabel{fig:moon_laplacian_selftuning}{{7}{6}{First eigenvectors of unnormalized self-tuning Laplacian for intertwined moons data}{figure.25}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces  First eigenvectors of unnormalized self-tuning Laplacian for intertwined moons data}}{6}{figure.28}}
+\newlabel{fig:moon_laplacian_selftuning}{{7}{6}{First eigenvectors of unnormalized self-tuning Laplacian for intertwined moons data}{figure.28}{}}
 \newlabel{fig:moon_laplacian_selftuning@cref}{{[figure][7][]7}{6}}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces  Centered, truncated algorithm, final average}}{6}{figure.26}}
-\newlabel{fig:moon_centered_avg}{{8}{6}{Centered, truncated algorithm, final average}{figure.26}{}}
-\newlabel{fig:moon_centered_avg@cref}{{[figure][8][]8}{6}}
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces  Non-centered, self-tuning algorithm, final average}}{6}{figure.29}}
-\newlabel{fig:moon_noncentered_avg}{{9}{6}{Non-centered, self-tuning algorithm, final average}{figure.29}{}}
-\newlabel{fig:moon_noncentered_avg@cref}{{[figure][9][]9}{6}}
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces  Centered, truncated algorithm, trace $\tau $}}{7}{figure.30}}
-\newlabel{fig:moon_centered_trace_tau}{{10}{7}{Centered, truncated algorithm, trace $\tau $}{figure.30}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces  \cref  {alg:hierarchical_tau_alpha} with truncation, final average}}{7}{figure.29}}
+\newlabel{fig:moon_centered_avg}{{8}{7}{\cref {alg:hierarchical_tau_alpha} with truncation, final average}{figure.29}{}}
+\newlabel{fig:moon_centered_avg@cref}{{[figure][8][]8}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces  \cref  {alg:xi_tau_alpha}, final average}}{7}{figure.32}}
+\newlabel{fig:moon_noncentered_avg}{{9}{7}{\cref {alg:xi_tau_alpha}, final average}{figure.32}{}}
+\newlabel{fig:moon_noncentered_avg@cref}{{[figure][9][]9}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces  \cref  {alg:hierarchical_tau_alpha} with truncation, trace $\tau $}}{7}{figure.33}}
+\newlabel{fig:moon_centered_trace_tau}{{10}{7}{\cref {alg:hierarchical_tau_alpha} with truncation, trace $\tau $}{figure.33}{}}
 \newlabel{fig:moon_centered_trace_tau@cref}{{[figure][10][]10}{7}}
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces  Non-centered, self-tuning algorithm, trace $\tau $}}{7}{figure.33}}
-\newlabel{fig:moon_noncentered_trace_tau}{{11}{7}{Non-centered, self-tuning algorithm, trace $\tau $}{figure.33}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces  \cref  {alg:xi_tau_alpha}, trace $\tau $}}{7}{figure.36}}
+\newlabel{fig:moon_noncentered_trace_tau}{{11}{7}{\cref {alg:xi_tau_alpha}, trace $\tau $}{figure.36}{}}
 \newlabel{fig:moon_noncentered_trace_tau@cref}{{[figure][11][]11}{7}}
-\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces  Centered, truncated algorithm, trace $\alpha $}}{7}{figure.34}}
-\newlabel{fig:moon_centered_trace_alpha}{{12}{7}{Centered, truncated algorithm, trace $\alpha $}{figure.34}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces  \cref  {alg:hierarchical_tau_alpha} with truncation, trace $\alpha $}}{7}{figure.37}}
+\newlabel{fig:moon_centered_trace_alpha}{{12}{7}{\cref {alg:hierarchical_tau_alpha} with truncation, trace $\alpha $}{figure.37}{}}
 \newlabel{fig:moon_centered_trace_alpha@cref}{{[figure][12][]12}{7}}
-\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces  Non-centered, self-tuning, trace $\alpha $}}{7}{figure.37}}
-\newlabel{fig:moon_noncentered_trace_alpha}{{13}{7}{Non-centered, self-tuning, trace $\alpha $}{figure.37}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces  \cref  {alg:xi_tau_alpha}, trace $\alpha $}}{7}{figure.40}}
+\newlabel{fig:moon_noncentered_trace_alpha}{{13}{7}{\cref {alg:xi_tau_alpha}, trace $\alpha $}{figure.40}{}}
 \newlabel{fig:moon_noncentered_trace_alpha@cref}{{[figure][13][]13}{7}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Challenges}{7}{section.38}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Challenges}{7}{section.41}}
 \bibstyle{siamplain}
 \bibdata{references}
 \bibcite{BeLuStZy17}{1}
 \bibcite{BeRoStVo08}{2}
 \bibcite{CoRoStWh13}{3}
-\bibcite{Noncentered}{4}
-\bibcite{Spectral}{5}
-\bibcite{SelfTuning}{6}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Additional resources}{8}{section.39}}
-\@writefile{toc}{\contentsline {section}{References}{8}{section.39}}
+\bibcite{BLS}{4}
+\bibcite{Noncentered}{5}
+\bibcite{Spectral}{6}
+\bibcite{SelfTuning}{7}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Additional resources}{8}{section.42}}
+\@writefile{toc}{\contentsline {section}{References}{8}{section.42}}

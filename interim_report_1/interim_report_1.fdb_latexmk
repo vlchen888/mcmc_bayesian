@@ -1,13 +1,13 @@
 # Fdb version 3
-["bibtex interim_report_1"] 1499548286 "interim_report_1.aux" "interim_report_1.bbl" "interim_report_1" 1499559523
+["bibtex interim_report_1"] 1499717968 "interim_report_1.aux" "interim_report_1.bbl" "interim_report_1" 1499717968
   "./siamplain.bst" 1478312360 20348 27f9e90e97b6c2ef584cf260034fe8b9 ""
-  "interim_report_1.aux" 1499559522 6824 2e4ea44425c179cbf8196371d73fc26c ""
+  "interim_report_1.aux" 1499717967 7313 96a7b28ed4c94a6d1905993411c86fcf ""
   "interim_report_1.bcf" 0 -1 0 ""
-  "references.bib" 1499548070 1305 3e4ae15e6567917c2e1af23b5ebfefde ""
+  "references.bib" 1499708798 1509 18362321f3189f83fd783f28135ae760 ""
   (generated)
-  "interim_report_1.bbl"
   "interim_report_1.blg"
-["pdflatex"] 1499559521 "interim_report_1.tex" "interim_report_1.pdf" "interim_report_1" 1499559523
+  "interim_report_1.bbl"
+["pdflatex"] 1499717966 "interim_report_1.tex" "interim_report_1.pdf" "interim_report_1" 1499717966
   "./graphics/centered/final_avg.png" 1498845582 19638 adc6b2c15bb8bc30581103c4c0a40e15 ""
   "./graphics/centered/trace_tau.png" 1498845581 45390 1c2027e48464211360ba06223d12a600 ""
   "./graphics/mcmc_gamma/manycorrect_clustering.png" 1495425362 25058 5cb1b85a6e86c3ee0d7fe42c3971d01a ""
@@ -21,7 +21,7 @@
   "./graphics/moons/noncentered_selftuning/trace_tau.png" 1498847466 28588 50986e88e103efa444a3de69d181bfbd ""
   "./graphics/noncentered/final_avg.png" 1498606741 12244 9b06566008eacb5e7283634785f6086f ""
   "./graphics/noncentered/trace_tau.png" 1498688410 101571 a9e3e8aa7ca53bfa92e7fdd4fa396bb0 ""
-  "./interim_report_1.out" 1499559522 336 e0873f4ff6c9b9fdf33a9f576a556f7d ""
+  "./interim_report_1.out" 1499717946 336 bd7403a10c4cc782f0c51206fb60f08c ""
   "/usr/local/texlive/2015/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2015/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
   "/usr/local/texlive/2015/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm" 1246382020 988 bdf658c3bfc2d96d3c8b02cfc1c94c20 ""
@@ -121,14 +121,14 @@
   "graphics/moons/noncentered_selftuning/trace_tau.png" 1498847466 28588 50986e88e103efa444a3de69d181bfbd ""
   "graphics/noncentered/final_avg.png" 1498606741 12244 9b06566008eacb5e7283634785f6086f ""
   "graphics/noncentered/trace_tau.png" 1498688410 101571 a9e3e8aa7ca53bfa92e7fdd4fa396bb0 ""
-  "interim_report_1.aux" 1499559522 6824 2e4ea44425c179cbf8196371d73fc26c ""
-  "interim_report_1.bbl" 1499548286 1064 71276f2c7bcd1012b3ce4c34b8897d39 "bibtex interim_report_1"
-  "interim_report_1.out" 1499559522 336 e0873f4ff6c9b9fdf33a9f576a556f7d ""
-  "interim_report_1.tex" 1499559521 25519 893e04001906d68e6919bb7b5dcaf350 ""
+  "interim_report_1.aux" 1499717946 7333 3ad67b4123ab269f2918d35b64eaac9c ""
+  "interim_report_1.bbl" 1499717946 1221 ee889d3c52b123b5472b010013afad03 "bibtex interim_report_1"
+  "interim_report_1.out" 1499717946 336 bd7403a10c4cc782f0c51206fb60f08c ""
+  "interim_report_1.tex" 1499717965 26883 f60edd96c4faf4634ad192f2c192f8dd ""
   "siamart1116.cls" 1479503922 51936 d6cf1f77f37667b84945728b8bacc4f7 ""
   (generated)
-  "interim_report_1.log"
   "interim_report_1.aux"
+  "interim_report_1.out"
   "interim_report_1.thm"
   "interim_report_1.pdf"
-  "interim_report_1.out"
+  "interim_report_1.log"
