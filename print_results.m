@@ -5,10 +5,10 @@ function [tau_all, alpha_all] = print_results()
     params = containers.Map;
     params('data_set') = string('moons');
     
-    params('parameterization') = string('noncentered');
+    params('algorithm') = string('t a M');
     params('laplacian') = string('self tuning');
     
-    num_iterations = 100000;
+    num_iterations = 10000;
     burn_in = 1000;
     params('num_iterations') = num_iterations;
     params('burn_in') = burn_in;
@@ -93,7 +93,7 @@ function [tau_all, alpha_all] = print_results()
     
     %%%% NONCENTERED PARAMS intertwined moons, self tuning %%%%
     %%%% Gets convergence in ~400 iterations, ~98% accuracy on sigma = 0.1
-    
+    %{
     params('gamma')         = 0.1;
     params('B')             = 0.4;
     
@@ -108,7 +108,7 @@ function [tau_all, alpha_all] = print_results()
     
     params('alpha_epsilon') = .5;
     params('tau_epsilon')   = .3;
-    
+    %}
     
     %%%% NONCENTERED PARAMS for intertwined moons, unnormalized%%%%
     %{
@@ -127,6 +127,29 @@ function [tau_all, alpha_all] = print_results()
     params('alpha_epsilon') = 0.1;
     params('tau_epsilon')   = 1;
     %}
+    
+    %%%% t,a,M PARAMS for intertwined moons %%%%
+    
+    params('gamma')         = 0.0001;
+    params('B')             = 0.1;
+    
+    params('init_tau')      = 20;
+    params('init_alpha')    = 20;
+    params('init_M')        = 500;
+    
+    params('min_tau')       = 0.1;
+    params('max_tau')       = 60;
+
+    params('min_alpha')     = 0.1;
+    params('max_alpha')     = 60;
+    
+    params('min_M')       = 1;
+    params('max_M')       = 1000;
+    
+    params('alpha_epsilon') = 0.1;
+    params('tau_epsilon')   = 0.1;
+    
+    
     if params('data_set') == string('voting')
         load('data3.mat')
         data = X;
@@ -155,10 +178,10 @@ function [tau_all, alpha_all] = print_results()
     label_data = init(num_data, set_neg, set_pos);
     params('label_data') = label_data;
     
-    if params('parameterization') == string('noncentered')
+    if params('algorithm') == string('noncentered')
         [tau_all, alpha_all, std, var_accept, tau_accept, alpha_accept] =...
             mcmc_learn_t_a_noncentered(params);
-    elseif params('parameterization') == string('centered')
+    elseif params('algorithm') == string('centered')
         [tau_all, alpha_all, std, var_accept, tau_accept, alpha_accept] =...
             mcmc_learn_t_a(params);
     end
@@ -239,9 +262,9 @@ function [tau_all, alpha_all] = print_results()
         [zeros(num_data/2,1) + 1; zeros(num_data/2, 1) - 1]);
     end
     
-    if params('parameterization') == string('noncentered')
+    if params('algorithm') == string('noncentered')
         params('run_description') = 'MCMC self-tuning Laplacian, noncentered parameterization.\n';
-    elseif params('parameterization') == string('centered')
+    elseif params('algorithm') == string('centered')
         params('run_description') = 'MCMC self-tuning Laplacian, centered parameterization.\n';
     end
         
@@ -296,12 +319,12 @@ function print_figures(params)
     print('-r144','-dpng',fname);
     
     clf
-    if params('parameterization') == string('noncentered')
+    if params('algorithm') == string('noncentered')
         plot(burn_in+1:num_iterations, var_accept_avg(burn_in+1:end))
         ylabel('\xi acceptance probability');
         fname = 'print_runs/acceptance_xi_probability.png';
         print('-r144','-dpng',fname);
-    elseif params('parameterization') == string('centered')
+    elseif params('algorithm') == string('centered')
         plot(burn_in+1:num_iterations, var_accept_avg(burn_in+1:end))
         ylabel('u acceptance probability');
         fname = 'print_runs/acceptance_u_probability.png';

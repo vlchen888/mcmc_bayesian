@@ -179,7 +179,7 @@ Recall from \cref{eqn:prior} that the prior is distributed as $N(0, C)$ with the
 
 \begin{equation}
 \label{eqn:centered_post}
-f(u,\tau,\alpha) \propto \exp(-\Phi(u))\times \frac{1}{\sqrt{(2\pi)^d \det C(\theta)}} \exp(-\frac{1}{2}\langle u, C(\theta)^{-1}u  \rangle) \times \pi_0(\theta)
+f(u,\tau,\alpha) \propto \exp(-\Phi(u))\times \frac{1}{\sqrt{(2\pi)^d \det C(\theta)}} \exp\left(-\frac{1}{2}\langle u, C(\theta)^{-1}u  \rangle\right) \times \pi_0(\theta)
 \end{equation}
 The normalization constant $\det(C(\theta))$ depends on $\tau, \alpha$ now and does not cancel out. Using this expression for the posterior, I implemented the Metropolis-within-Gibbs method for model (B) in \cref{alg:hierarchical_tau_alpha}.
 
@@ -244,8 +244,8 @@ g(\xi,\tau,\alpha) \propto \exp\left( -\Phi(T(\xi,\tau,\alpha))-\frac{1}{2}\lang
  \]
 
 
-\EndFor\\
-\Return $\{u^{(k)}, \tau^{(k)}, \alpha^{(k)}\}$
+\EndFor
+\State \Return $\{u^{(k)}, \tau^{(k)}, \alpha^{(k)}\}$
 \end{algorithmic}
 \end{algorithm}
 
