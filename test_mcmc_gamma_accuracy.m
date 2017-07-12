@@ -10,7 +10,7 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
     params('data_set') = string('moons');
     params('laplacian') = string('self tuning');
 
-    params('num_iterations') = 100000;
+    params('num_iterations') = 10000;
     burn_in = 1000;
 
     % not used
@@ -21,7 +21,7 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
     params('gamma') = 0.1;
     params('B') = 0.1;
     params('init_tau') = 1;
-    params('init_alpha') = 1;
+    params('init_alpha') = 35;
 
     [u, ~] = mcmc_gamma(params);
     u_avg = mean(sign(u(:, burn_in:end)), 2); %avg the rows

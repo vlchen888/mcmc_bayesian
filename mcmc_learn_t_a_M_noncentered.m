@@ -173,10 +173,8 @@ function l = compute_phi(gamma, label_data, u)
 end
 
 function T = compute_T(xi, tau, alpha, M, lambda, phi)
-    mask = zeros(length(lambda), 1);
-    mask(1:M) = 1;
-    x = ((lambda + tau^2).^(-alpha/2) .* xi).*mask;
-    T = convert_std_basis(x, phi);
+    x = (lambda(1:M) + tau^2).^(-alpha/2) .* xi(1:M);
+    T = convert_std_basis(x, phi(:,1:M));
 end
 
 function x = compute_rand_xi(num_data)

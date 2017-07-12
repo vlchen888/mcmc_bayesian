@@ -55,39 +55,45 @@
 \maketitle
 \setlength{\unitlength}{1in}
 \setlength{\parindent}{0in}
-Joint posterior:
-\[f(u,\tau,\alpha,M) \propto \exp(-\Phi(u))\times\frac{1}{\sqrt{(2\pi)^d\det C(\tau,\alpha,M)}} \exp\left(-\frac{1}{2}\langle u,C(\tau,\alpha,M)^{-1} u \rangle\right) \times \pi_0(\tau,\alpha, M)\]
+\begin{equation}
+\label{eqn:noncentered_T}
+T(\xi,\tau,\alpha, M) = \sum_{i=1}^M \frac{1}{(\lambda_i+\tau^2)^{\alpha/2}}\xi_iq_i = u
+\end{equation}
+
+
+\begin{equation}
+\label{eqn:noncentered_post}
+g(\xi,\tau,\alpha, M) \propto \exp\left( -\Phi(T(\xi,\tau,\alpha,M))-\frac{1}{2}\langle \xi,\xi \rangle + \log(\pi_0(\tau,\alpha,M)) \right)
+\end{equation}
+
+
 \begin{algorithm}
-\caption{Hierarchical on $\tau, \alpha, M$}
-\label{alg:hierarchical_tau_alpha}
+
+\caption{Non-centered parameterization, hierarchical with $\tau, \alpha, M$}
+\label{alg:hier_t_a_M}
 \begin{algorithmic}
-\State Initialize $u^{(0)} = q_1$, the Fiedler vector expressed in the standard basis.
-\State Initialize $\tau^{(0)}, \alpha^{(0)}, M^{(0)}$.
-\State Pick $\beta \in [0, 1]$. Pick $\epsilon_1, \epsilon_2$, the jump sizes for $\tau, \alpha$ respectively. Pick $K$, the max absolute jump for $M$, with jumps $Q$ distributed as $\mathbb{P}(Q=j)=\frac{1}{1+|j|}$.
-\For{$k = 0$ to $S$}
-\State Sample $v$ from the prior distribution and expressed in the eigenbasis \Comment{$u|y, \tau, \alpha$}.
-\State Expressing $u$ in the eigenbasis, set a proposal $\hat u^{(k)} = (1- \beta^2)^{1/2}u^{(k)} + \beta v$
-\State Set $u^{(k+1)} = \hat u^{(k)}$ with probability 
-\[A(u^{(k)} \to \hat u^{(k)}) = \min \left\{1, \exp(\Phi(u^{(k)}) - \Phi(\hat u^{(k)})) \right\}\]
+\State Choose $\xi^{(0)} \in \mathbb{R}^N, \tau^{(0)}, \alpha^{(0)}, M^{(0)} > 0, \beta \in (0, 1]$ and $\epsilon_1, \epsilon_2 > 0$.
+\For{$k=0$ to $S$}
+\State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim N(0, I)$
+\State Make transition $\xi^{(k)} \to \hat\xi^{(k)}$ with probability
+\[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)})) - \Phi(T(\hat\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)}))\right) \right\}\] \Comment{$T$ defined in \cref{eqn:noncentered_T}}
 
-\State Set a proposal $\hat \tau^{(k)} = \tau^{(k)} + \epsilon_1 t$ for $t \sim N(0, 1)$ \Comment{$\tau|y,u,\alpha$}
-\State Set $\tau^{(k+1)} = \hat \tau^{(k)}$ with probability 
+\State Propose $\hat\tau^{(k)} = \tau^{(k)} + \epsilon_1 \rho^{(k)}, \rho^{(k)} \sim N(0,I)$
+\State Make transition $\tau^{(k)} \to \hat\tau^{(k)}$ with probability
+\[ A(\tau^{(k)} \to \hat\tau^{(k)}) 
+= \min\left\{1, \frac{g(\xi^{(k+1)},\hat\tau^{(k)},\alpha^{(k)},M^{(k)})}{g(\xi^{(k+1)},\tau^{(k)},\alpha^{(k)},M^{(k)})} \right\}\] \Comment{$g$ defined in \cref{eqn:noncentered_post}}
 
-\[A(\tau^{(k)} \to \hat \tau^{(k)}) = \min \left\{ 1, \frac{f(u^{(k+1)}, \hat \tau^{(k)}, \alpha^{(k)})}{f(u^{(k+1)}, \tau^{(k)}, \alpha^{(k)})}\right\}\]
-(Using the eigenbasis representation of $u$ for computation) \Comment{$f$ is the joint posterior}
-
-\State Set a proposal $\hat \alpha^{(k)} = \alpha^{(k)} + \epsilon_2 a$ for $a \sim N(0, 1)$ \Comment{$\alpha|y,u,\tau$}
-\State Set $\alpha^{(k+1)} = \hat \alpha^{(k)}$ with probability
-
- \[A(\alpha^{(k)}\to\hat\alpha^{(k)}) = 
- \min\left\{1, 
- \frac{f(u^{(k+1)}, \tau^{(k+1)}, \hat \alpha^{(k)})}
- {f(u^{(k+1)}, \tau^{(k+1)}, \alpha^{(k)})}\right\}
- \]
-
-
+\State Propose $\hat\alpha^{(k)} = \alpha^{(k)} + \epsilon_2 \sigma^{(k)}, \sigma^{(k)} \sim N(0,I)$
+\State Make transition $\alpha^{(k)} \to \hat\alpha^{(k)}$ with probability
+\[ A(\alpha^{(k)} \to \hat\alpha^{(k)}) 
+= \min\left\{1, \frac{g(\xi^{(k+1)},\tau^{(k+1)},\hat \alpha^{(k)},M^{(k)})}{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k)},M^{(k)})} \right\}\]
+\State Propose $\hat M^{(k)} = M^{(k)} + Q$, with jump $Q$ distributed as $\mathbb{P}(Q=k) \propto \frac{1}{1+|k|}$, $|Q|$ bounded.
+\State Make transition $M^{(k)} \to \hat M^{(k)}$ with probability
+\[ A(M^{(k)} \to \hat M^{(k)}) = 
+\min\left\{1, \frac{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k+1)},\hat M^{(k)})}{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k+1)},M^{(k)})} \right\}
+\]
 \EndFor
-\State \Return $\{u^{(k)}, \tau^{(k)}, \alpha^{(k)}\}$
+\State \Return $\{ T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}), \tau^{(k)}, \alpha^{k} \}$
 \end{algorithmic}
 \end{algorithm}
 

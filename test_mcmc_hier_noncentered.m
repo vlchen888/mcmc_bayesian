@@ -9,7 +9,7 @@ params('label_data') = generate_moons_fidelity(percent_fidelity, N);
 params('data_set') = string('moons');
 params('laplacian') = string('self tuning');
 
-params('num_iterations') = 100000;
+params('num_iterations') = 10000;
 burn_in = 1000;
 
 params('p') = 2;

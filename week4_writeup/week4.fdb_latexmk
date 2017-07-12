@@ -1,6 +1,6 @@
 # Fdb version 3
-["pdflatex"] 1499811220 "week4.tex" "week4.pdf" "week4" 1499811220
-  "./week4.out" 1499811220 0 d41d8cd98f00b204e9800998ecf8427e ""
+["pdflatex"] 1499883545 "week4.tex" "week4.pdf" "week4" 1499883546
+  "./week4.out" 1499883545 0 d41d8cd98f00b204e9800998ecf8427e ""
   "/usr/local/texlive/2015/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2015/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
   "/usr/local/texlive/2015/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm" 1246382020 916 f87d7c45f9c908e672703b83b72241a3 ""
@@ -16,6 +16,7 @@
   "/usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb" 1248133631 36299 5f9df58c2139e7edcf37c8fca4bd384d ""
   "/usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb" 1248133631 36281 c355509802a035cadc5f15869451dcee ""
   "/usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb" 1248133631 35752 024fb6c41858982481f6968b5fc26508 ""
+  "/usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb" 1248133631 31809 8670ca339bf94e56da1fc21c80635e2a ""
   "/usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb" 1248133631 32762 224316ccc9ad3ca0423a14971cfa7fc1 ""
   "/usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb" 1248133631 32726 0a1aea6fcd6468ee2cf64d891f5c43c8 ""
   "/usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb" 1248133631 32569 5e5ddc8df908dea60932f3c484a54c0d ""
@@ -73,12 +74,12 @@
   "/usr/local/texlive/2015/texmf.cnf" 1432479636 577 0d611272082f3cdb8e80e09a3c69cf07 ""
   "algpseudocode.sty" 1498183319 3457 d9077efe6b74c5a094199256af8d7d9a ""
   "siamart1116.cls" 1479503922 51936 d6cf1f77f37667b84945728b8bacc4f7 ""
-  "week4.aux" 1499811220 920 654441e63e36d455b4d66b9a988c1da0 ""
-  "week4.out" 1499811220 0 d41d8cd98f00b204e9800998ecf8427e ""
-  "week4.tex" 1499811219 3516 a58618a84cae13a4f715ec83c68f07ac ""
+  "week4.aux" 1499883546 1155 ec952c67d4f6fcbb1d4b2ac1c129986e ""
+  "week4.out" 1499883545 0 d41d8cd98f00b204e9800998ecf8427e ""
+  "week4.tex" 1499883542 3838 567c89cd71057b4f7cc3ecfd0bee1a65 ""
   (generated)
-  "week4.thm"
-  "week4.aux"
-  "week4.log"
   "week4.out"
+  "week4.thm"
   "week4.pdf"
+  "week4.log"
+  "week4.aux"

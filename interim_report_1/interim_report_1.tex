@@ -255,16 +255,16 @@ g(\xi,\tau,\alpha) \propto \exp\left( -\Phi(T(\xi,\tau,\alpha))-\frac{1}{2}\lang
 \begin{algorithmic}
 \State Choose $\xi^{(0)} \in \mathbb{R}^N, \alpha^{(0)}, \tau^{(0)} > 0, \beta \in (0, 1]$ and $\epsilon_1, \epsilon_2 > 0$.
 \For{$k=0$ to $S$}
-\State Propose $\hat\xi^{(k)} = (1-\beta^2)\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim N(0, I)$
-\State Make transition $\xi^{(k+1)} \to \hat\xi^{(k)}$ with probability
+\State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim N(0, I)$
+\State Make transition $\xi^{(k)} \to \hat\xi^{(k)}$ with probability
 \[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(\xi^{(k)},\tau^{(k)},\alpha^{(k)})) - \Phi(T(\hat\xi^{(k)},\tau^{(k)},\alpha^{(k)}))\right) \right\}\] \Comment{$T$ defined in \cref{eqn:noncentered_T}}
 
 \State Propose $\hat\tau^{(k)} = \tau^{(k)} + \epsilon_1 \rho^{(k)}, \rho^{(k)} \sim N(0,I)$
-\State Make transition $\tau^{(k+1)} \to \hat\tau^{(k)}$ with probability
+\State Make transition $\tau^{(k)} \to \hat\tau^{(k)}$ with probability
 \[ A(\tau^{(k)} \to \hat\tau^{(k)}) = \min\left\{1, \frac{g(\xi^{(k+1)},\hat\tau^{(k)},\alpha^{(k)})}{g(\xi^{(k+1)},\tau^{(k)},\alpha^{(k)})} \right\}\] \Comment{$g$ defined in \cref{eqn:noncentered_post}}
 
 \State Propose $\hat\alpha^{(k)} = \alpha^{(k)} + \epsilon_2 \sigma^{(k)}, \sigma^{(k)} \sim N(0,I)$
-\State Make transition $\alpha^{(k+1)} \to \hat\alpha^{(k)}$ with probability
+\State Make transition $\alpha^{(k)} \to \hat\alpha^{(k)}$ with probability
 \[ A(\alpha^{(k)} \to \hat\alpha^{(k)}) = \min\left\{1, \frac{g(\xi^{(k+1)},\tau^{(k+1)},\hat \alpha^{(k)})}{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k)})} \right\}\]
 \EndFor
 \State \Return $\{ T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}), \tau^{(k)}, \alpha^{k} \}$
