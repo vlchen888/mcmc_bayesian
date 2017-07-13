@@ -2,7 +2,8 @@
 
 \bibitem{BeLuStZy17}
 {\sc A.~L. Bertozzi, X.~Luo, A.~M. Stuart, and K.~C. Zygalakis}, {\em
-  Uncertainty quantification in the classification of high dimensional data}.
+  Uncertainty quantification in the classification of high dimensional data},
+  ArXiv e-prints,  (2017), \url{https://arxiv.org/abs/1703.08816}.
 
 \bibitem{BeRoStVo08}
 {\sc A.~Beskos, G.~O. Roberts, A.~M. Stuart, and J.~Voss}, {\em
@@ -15,19 +16,21 @@
   faster}, Statistical Science, 28 (2013), pp.~424--446.
 
 \bibitem{BLS}
-{\sc M.~A. Iglesias, Y.~Lu, and A.~M. Stuart}, {\em {A Bayesian Level Set
-  Method for Geometric Inverse Problems}}, ArXiv e-prints,  (2015).
+{\sc M.~Iglesias, Y.~Lu, and A.~M. Stuart}, {\em A {B}ayesian level set method
+  for geometric inverse problems}, Interfaces and Free Boundaries, 18 (2016),
+  pp.~181--217.
 
 \bibitem{Noncentered}
-{\sc O.~Papaspiliopoulos, G.~O. Roberts, and M.~Skold}, {\em General framework
-  for the parametrization of hierarchical models}.
+{\sc O.~Papaspiliopoulos, G.~O. Roberts, and M.~Sk{\"o}ld}, {\em A general
+  framework for the parametrization of hierarchical models}, Statistical
+  Science,  (2007), pp.~59--73.
 
 \bibitem{Spectral}
 {\sc U.~von Luxburg}, {\em A tutorial on spectral clustering}, Statistics and
   Computing, 17 (2007), pp.~395--416.
 
 \bibitem{SelfTuning}
-{\sc L.~Zelnik-Manor and P.~Perona}, {\em Self-tuning spectral clustering},
-  Neural Information Processing Systems.
+{\sc L.~Zelnik-Manor and P.~Perona}, {\em Self-tuning spectral clustering}, in
+  Advances in neural information processing systems, 2005, pp.~1601--1608.
 
 \end{thebibliography}

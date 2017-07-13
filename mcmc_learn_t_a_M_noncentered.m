@@ -31,9 +31,12 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
     end
     lambda = eig(L);
     [phi, ~] = eig(L);
+    lambda = lambda(1:params('max_M'));
+    phi = phi(:, 1:params('max_M'));
     
-    [num_data, ~] = size(data);    
-    xi_all = zeros(num_data, num_iterations);
+    [num_data, ~] = size(data);
+    
+    xi_all = zeros(length(lambda), num_iterations);
     
     %%%%% Initialization from Fiedler Vector?? %%%%%
     xi_all(2, 1) = (lambda(2)+init_tau^2)^(init_alpha/2);
@@ -63,7 +66,13 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
     
     %%%%% Store standard basis vectors %%%%%
     std = zeros(num_data, num_iterations);
-        
+    
+    if params('movie')
+        figure(3)
+        set(gcf, 'Position', [100, 300, 1200, 800])
+        step_num = 1;
+    end
+
     for i=1:num_iterations-1
         %%%%% Propose new state for xi %%%%%
         
@@ -74,7 +83,7 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
         
         std(:, i) = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
         
-        x = compute_rand_xi(num_data);
+        x = compute_rand_xi(length(lambda));
         new_xi = (1-B^2)^0.5*curr_xi+B*x;
         u_curr = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
         u_new = compute_T(new_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
@@ -158,6 +167,52 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
                 M_all(i+1) = M_all(i);
                 M_accept(i+1) = 0;
             end
+        end
+        
+        %%%% Movie things %%%%
+        if params('movie') && i >= params('burn_in') && mod(i,2500)==0
+            curr_avg = mean(sign(std(:,params('burn_in'):i)), 2);
+            
+            fprintf('Sample number: %d\n', i);
+            fprintf('\tClassification accuracy: %f\n', count_correct(curr_avg, params('label_data'), params('truth')));
+            fprintf('\tAcceptance rates: xi:%f, tau:%f, alpha:%f, M %f\n',...
+                sum(xi_accept)/i,sum(tau_accept)/i,sum(alpha_accept)/i,sum(M_accept)/i);
+
+            subplot(231)
+            plot(std(:,i))
+            xlabel('Current u')
+
+            subplot(232)
+            if params('data_set') == string('moons')
+                scatter_twomoons_classify(data, sign(std(:,i)), params('label_data'))
+            elseif params('data_set') == string('voting')
+                plotBar(std(:,i));
+            end
+            xlabel('Current u scatter')
+
+            subplot(233)
+            if params('data_set') == string('moons')
+                scatter_twomoons_classify(data, curr_avg, params('label_data'))
+            elseif params('data_set') == string('voting')
+                plotBar(curr_avg);
+            end
+            xlabel('Average u scatter')
+            
+            subplot(234)
+            plot(tau_all(1:i));
+            xlabel('\tau trace')
+            
+            subplot(235)
+            plot(alpha_all(1:i));
+            xlabel('\alpha trace')
+            
+            subplot(236)
+            plot(M_all(1:i));
+            xlabel('M trace')
+            
+            fname = sprintf('figs/step_%i.png',step_num);
+            print('-r144','-dpng',fname);
+            step_num = step_num + 1;
         end
         
     end

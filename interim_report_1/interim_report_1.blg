@@ -3,55 +3,44 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: interim_report_1.aux
 The style file: siamplain.bst
 Database file #1: references.bib
-I was expecting a `,' or a `}'---line 32 of file references.bib
- : 
- : volume =  17,
-(Error may have been on previous line)
-I'm skipping whatever remains of this entry
-Warning--empty journal in BeLuStZy17
-Warning--empty year in BeLuStZy17
-Warning--empty journal in Noncentered
-Warning--empty year in Noncentered
-Warning--empty year in SelfTuning
 You've used 7 entries,
             2234 wiz_defined-function locations,
-            584 strings with 5053 characters,
-and the built_in function-call counts, 2478 in all, are:
-= -- 206
+            595 strings with 5204 characters,
+and the built_in function-call counts, 3042 in all, are:
+= -- 284
 > -- 125
 < -- 0
-+ -- 50
++ -- 52
 - -- 42
-* -- 193
-:= -- 373
+* -- 229
+:= -- 428
 add.period$ -- 7
 call.type$ -- 7
 change.case$ -- 42
 chr.to.int$ -- 0
-cite$ -- 12
-duplicate$ -- 129
-empty$ -- 208
+cite$ -- 7
+duplicate$ -- 156
+empty$ -- 257
 format.name$ -- 42
-if$ -- 517
+if$ -- 671
 int.to.chr$ -- 0
 int.to.str$ -- 7
 missing$ -- 7
 newline$ -- 24
 num.names$ -- 14
-pop$ -- 72
+pop$ -- 62
 preamble$ -- 1
 purify$ -- 35
 quote$ -- 0
-skip$ -- 75
+skip$ -- 118
 stack$ -- 0
-substring$ -- 132
-swap$ -- 38
+substring$ -- 230
+swap$ -- 62
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 28
-warning$ -- 5
-while$ -- 23
+warning$ -- 0
+while$ -- 32
 width$ -- 8
-write$ -- 56
-(There was 1 error message)
+write$ -- 65

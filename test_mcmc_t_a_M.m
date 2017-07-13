@@ -2,16 +2,28 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
 
     params = containers.Map;
 
-    N = 2000;
-    data = moondata(1,100,N,sigma);
-    params('data') = data;
-    params('label_data') = generate_moons_fidelity(percent_fidelity, N);
+    params('data_set') = string('voting');
+    params('laplacian') = string('un');
+    
+    if params('data_set') == string('moons')
+        N = 2000;
+        data = moondata(1,100,N,sigma);
+        params('data') = data;
+        params('label_data') = generate_moons_fidelity(percent_fidelity, N);
+    elseif params('data_set') == string('voting')
+        load('data3.mat')
+        data = X;
+        params('data') = data;
+        params('label_data') = generate_voting_fidelity(percent_fidelity);
+    end
+    
+    figure(1)
+    plot(params('label_data'))
 
-    params('data_set') = string('moons');
-    params('laplacian') = string('self tuning');
-
-    params('num_iterations') = 10000;
-    burn_in = 1000;
+    params('num_iterations') = 100000;
+    burn_in = 5000;
+    params('burn_in') = burn_in;
+    params('movie') = true;
 
     % not used
     params('p') = 2;
@@ -20,10 +32,10 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     %
     
     params('gamma') = 0.1;
-    params('B') = 0.1;
+    params('B') = 0.05;
     params('init_tau') = 1;
     params('init_alpha') = 35;
-    params('init_M') = 70;
+    params('init_M') = 5;
     
     params('min_tau')       = 0.1;
     params('max_tau')       = 60;
@@ -32,45 +44,27 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     params('max_alpha')     = 60;
     
     params('min_M')       = 1;
-    params('max_M')       = 200;
+    params('max_M')       = 300;
     
     params('alpha_epsilon') = 0;
     params('tau_epsilon')   = 0;
     
-    params('max_M_jump') = 20;
-
-
-    [tau_all, alpha_all, M_all, std, u_accept, tau_accept, alpha_accept, M_accept] ...
+    params('max_M_jump') = 7;
+    
+    if params('data_set') == string('moons')
+        params('truth') = [-ones(floor(N/2)+1,1); ones(N-(floor(N/2)+1),1)];
+    elseif params('data_set') == string('voting')
+        params('truth') = [-ones(267,1); ones(168,1)];
+    end
+    
+    
+    [tau_all, alpha_all, M_all, std, ~, ~, ~, ~] ...
         = mcmc_learn_t_a_M_noncentered(params);
     u_avg = mean(sign(std(:, burn_in:end)), 2); %avg the rows
-
+        
+    p = count_correct(u_avg, params('label_data'), params('truth'));
     
-    figure(1)
-    clf
-    scatter_twomoons_classify(data, u_avg, params('label_data'))
-    
-    p = count_correct(u_avg, params('label_data'), [zeros(floor(N/2)+1,1) - 1; zeros(N-(floor(N/2)+1),1) + 1]);
     tau_mean = mean(tau_all(burn_in:end));
     alpha_mean = mean(alpha_all(burn_in:end));
     M_mean = mean(M_all(burn_in:end));
-    
-    
-    figure(2)
-    clf
-    subplot(3,1,1)
-    plot(tau_all)
-    xlabel('\tau');
-    subplot(3,1,2)
-    plot(alpha_all)
-    xlabel('\alpha');
-    subplot(3,1,3)
-    plot(M_all)
-    xlabel('M');
-    
-    
-    u_avg_accept = mean(u_accept(burn_in:end))
-    tau_avg_accept = mean(tau_accept(burn_in:end))
-    alpha_avg_accept = mean(alpha_accept(burn_in:end))
-    M_avg_accept = mean(M_accept(burn_in:end))
-
 end

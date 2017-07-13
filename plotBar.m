@@ -17,8 +17,8 @@ function plotBar(avg)
             pneg = pneg + 1;
         end
     end
-    hold on
     bar(posx, posy, 'b')
+    hold on
     bar(negx, negy, 'r')
     hold off
 end

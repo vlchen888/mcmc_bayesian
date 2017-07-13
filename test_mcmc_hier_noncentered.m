@@ -9,8 +9,8 @@ params('label_data') = generate_moons_fidelity(percent_fidelity, N);
 params('data_set') = string('moons');
 params('laplacian') = string('self tuning');
 
-params('num_iterations') = 10000;
-burn_in = 1000;
+params('num_iterations') = 100000;
+burn_in = 5000;
 
 params('p') = 2;
 params('q') = 2;
@@ -31,23 +31,28 @@ params('alpha_epsilon') = 0.5;
 params('tau_epsilon')   = 0.1;
 
 
-[tau_all, alpha_all, std, ~, ~, ~] = mcmc_learn_t_a_noncentered(params);
+[tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] = mcmc_learn_t_a_noncentered(params);
 
 u_avg = mean(sign(std(:, burn_in:end)), 2); %avg the rows
 
-%figure(1)
-%clf
-%scatter_twomoons_classify(data, u_avg, params('label_data'))
+figure(1)
+clf
+scatter_twomoons_classify(data, u_avg, params('label_data'))
+
 p = count_correct(u_avg, params('label_data'), [zeros(floor(N/2)+1,1) - 1; zeros(N-(floor(N/2)+1),1) + 1]);
 tau_mean = mean(tau_all(burn_in:end));
 alpha_mean = mean(alpha_all(burn_in:end));
-%figure(2)
-%clf
-%subplot(2,1,1)
-%plot(tau_all)
-%subplot(2,1,2)
-%plot(alpha_all)
-%xi_avg_accept = mean(xi_accept(burn_in:end))
-%tau_avg_accept = mean(tau_accept(burn_in:end))
-%alpha_avg_accept = mean(alpha_accept(burn_in:end))
+
+figure(2)
+clf
+subplot(2,1,1)
+plot(tau_all)
+xlabel('\tau')
+subplot(2,1,2)
+plot(alpha_all)
+xlabel('\alpha')
+
+xi_avg_accept = mean(xi_accept(burn_in:end))
+tau_avg_accept = mean(tau_accept(burn_in:end))
+alpha_avg_accept = mean(alpha_accept(burn_in:end))
 end
