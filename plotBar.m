@@ -1,24 +1,22 @@
-function plotBar(avg)
-
-    posx = zeros(1,1);
-    posy = zeros(1,1);
-    ppos = 1;
-    negx = zeros(1,1);
-    negy = zeros(1,1);
-    pneg = 1;
-    for i=1:length(avg)
-        if avg(i) > 0
-            posx(ppos) = i;
-            posy(ppos) = avg(i);
-            ppos = ppos + 1;
-        else
-            negx(pneg) = i;
-            negy(pneg) = avg(i);
-            pneg = pneg + 1;
-        end
+function plotBar(plot_me)
+    neg_x = find(plot_me < 0);
+    
+    pos_x = find(plot_me > 0);
+    
+    zero_x = find(plot_me == 0);
+    if ~isempty(zero_x)
+        bar(zero_x, zeros(1,length(zero_x)), 'k');
+        hold on
     end
-    bar(posx, posy, 'b')
-    hold on
-    bar(negx, negy, 'r')
+    
+    if ~isempty(neg_x)
+        bar(neg_x, -ones(1,length(neg_x)), 'r')
+        hold on
+    end
+    
+    if ~isempty(pos_x)
+        bar(pos_x, ones(1,length(pos_x)), 'b');
+    end
     hold off
+
 end

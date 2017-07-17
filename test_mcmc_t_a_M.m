@@ -2,19 +2,28 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
 
     params = containers.Map;
 
-    params('data_set') = string('voting');
-    params('laplacian') = string('un');
+    params('data_set') = string('mnist');
+    params('laplacian') = string('self tuning');
     
     if params('data_set') == string('moons')
         N = 2000;
         data = moondata(1,100,N,sigma);
         params('data') = data;
-        params('label_data') = generate_moons_fidelity(percent_fidelity, N);
+        params('truth') = [-ones(floor(N/2)+1,1); ones(N-(floor(N/2)+1),1)];
+        params('label_data') = generate_fidelity(percent_fidelity, params('truth'), length(data));
     elseif params('data_set') == string('voting')
         load('data3.mat')
         data = X;
         params('data') = data;
-        params('label_data') = generate_voting_fidelity(percent_fidelity);
+        params('truth') = [-ones(267,1); ones(168,1)];
+        params('label_data') = generate_fidelity(percent_fidelity, params('truth'), length(data));
+    elseif params('data_set') == string('mnist')
+        load('mnist49data.mat')
+        params('data') = data;
+        load('mnist49truth.mat')
+        truth = truth(:, 1) - truth(:, 2);
+        params('truth') = truth;
+        params('label_data') = generate_fidelity(percent_fidelity, truth, length(data));
     end
     
     figure(1)
@@ -51,13 +60,7 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     
     params('max_M_jump') = 7;
     
-    if params('data_set') == string('moons')
-        params('truth') = [-ones(floor(N/2)+1,1); ones(N-(floor(N/2)+1),1)];
-    elseif params('data_set') == string('voting')
-        params('truth') = [-ones(267,1); ones(168,1)];
-    end
-    
-    
+        
     [tau_all, alpha_all, M_all, std, ~, ~, ~, ~] ...
         = mcmc_learn_t_a_M_noncentered(params);
     u_avg = mean(sign(std(:, burn_in:end)), 2); %avg the rows

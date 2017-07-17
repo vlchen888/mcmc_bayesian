@@ -24,11 +24,16 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
     alpha_epsilon = params('alpha_epsilon');
     tau_epsilon = params('tau_epsilon');
     
+    tic;
     if params('laplacian') == string('self tuning')
         L = compute_laplacian_selftuning(data);
     elseif params('laplacian') == string('un')
         L = compute_laplacian_standard(data, p, q, l);
     end
+    toc
+    
+    fprintf('Laplacian computation complete!\n');
+    
     lambda = eig(L);
     [phi, ~] = eig(L);
     lambda = lambda(1:params('max_M'));
@@ -187,6 +192,8 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
                 scatter_twomoons_classify(data, sign(std(:,i)), params('label_data'))
             elseif params('data_set') == string('voting')
                 plotBar(std(:,i));
+            elseif params('data_set') == string('mnist')
+                plotBar(std(:,i));
             end
             xlabel('Current u scatter')
 
@@ -194,6 +201,8 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
             if params('data_set') == string('moons')
                 scatter_twomoons_classify(data, curr_avg, params('label_data'))
             elseif params('data_set') == string('voting')
+                plotBar(curr_avg);
+            elseif params('data_set') == string('mnist')
                 plotBar(curr_avg);
             end
             xlabel('Average u scatter')
