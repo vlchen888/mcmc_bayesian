@@ -17,6 +17,8 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
     alpha_epsilon = params('alpha_epsilon');
     tau_epsilon = params('tau_epsilon');
     
+    [num_data, ~] = size(data);
+
     M = 50;
     
     if params('laplacian') == string('self tuning')
@@ -29,7 +31,6 @@ function [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] =...
     phi = phi(:, 1:M);
     lambda = lambda(1:M);
     
-    [num_data, ~] = size(data);
     
     U = zeros(M, num_iterations);
     

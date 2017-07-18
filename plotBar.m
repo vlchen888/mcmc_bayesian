@@ -10,12 +10,12 @@ function plotBar(plot_me)
     end
     
     if ~isempty(neg_x)
-        bar(neg_x, -ones(1,length(neg_x)), 'r')
+        bar(neg_x, plot_me(neg_x), 'r')
         hold on
     end
     
     if ~isempty(pos_x)
-        bar(pos_x, ones(1,length(pos_x)), 'b');
+        bar(pos_x, plot_me(pos_x), 'b');
     end
     hold off
 

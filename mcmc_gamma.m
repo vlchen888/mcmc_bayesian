@@ -1,4 +1,4 @@
-function [u, u_accept] = mcmc_gamma(params)
+function [u_all, u_accept] = mcmc_gamma(params)
     num_iterations = params('num_iterations');
     
     data = params('data');
@@ -25,25 +25,25 @@ function [u, u_accept] = mcmc_gamma(params)
     
     [num_data, ~] = size(data);
             
-    u = zeros(num_data, num_iterations);
+    u_all = zeros(num_data, num_iterations);
     u_accept = zeros(1, num_iterations);
     
     %u(:, 1) = (lambda(1)+tau^2)^(-alpha/2)*phi(:,1);
     for i=1:num_iterations-1
         
         %%%% Propose new state for U %%%%
-        u_star = (1-B^2)^0.5*u(:,i)+B*compute_rand(lambda, phi, tau, alpha);
+        u_star = (1-B^2)^0.5*u_all(:,i)+B*compute_rand(lambda, phi, tau, alpha);
 
         %%%%% COMPUTE TRANSITION PROBABILITY %%%%%
         log_uv = compute_log_likelihood(gamma, label_data, u_star) - ...
-            compute_log_likelihood(gamma, label_data, u(:, i));
+            compute_log_likelihood(gamma, label_data, u_all(:, i));
         transition_uv = exp(log_uv);
 
         if rand(1) < transition_uv %%%% TRANSITION %%%%
-            u(:, i+1) = u_star;
+            u_all(:, i+1) = u_star;
             u_accept(i+1) = 1;
         else
-            u(:, i+1) = u(:, i);
+            u_all(:, i+1) = u_all(:, i);
             u_accept(i+1) = 0;
         end
     end

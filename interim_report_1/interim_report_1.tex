@@ -60,7 +60,7 @@
 %%%%% will eventually need more background -- definition of graph laplacian, weights, use in unsupervised learning, fiedler vector, etc
 In the context of semi-supervised learning, the \textit{clustering} problem refers to attempting to group a set of data or objects into clusters of similar objects. Applications of clustering include image segmentation, social network analysis, and voter classification, but the reader will readily identify numerous other potential applications. We approach the clustering problem from a graph-theoretical point of view, which assigns a node to each data value and weights on edges between nodes to indicate how related the data points are.
 
-Let $Z$ be a set of nodes $\{1, \ldots N\}$. The feature vectors are given by $x : Z \rightarrow \mathbb{R}^d$. $Z' \subset Z$ is a subset of labeled nodes, for which we have label data given by $y : Z' \to \{-1, 1\}$ for {\bf binary} data, and $y : Z' \to \{e^1, \ldots e^k\}$ for {\bf $k$-ary} (multiclass) data.
+Let $Z$ be a set of nodes $\{1, \ldots N\}$. The feature vectors are given by $x : Z \rightarrow \mathbb{R}^d$. $Z' \subset Z$ is a subset of labeled nodes, for which we have label data given by $y : Z' \to \{-1, 1\}$ for {\bf binary} data, and $y : Z' \to \{e_1, \ldots e_k\}$ for {\bf $k$-ary} (multiclass) data.
 
 
 The classifying function is given by the vector $u$, and the label model is given by $y(\ell) = S(u(\ell))$ for $l \in Z'$ (with possible additional corruption by noise). In the case of binary data, $y(\ell) \in \{\pm 1\}$, and for $v \in \mathbb{R}$,
@@ -72,11 +72,11 @@ S(v) = \begin{cases}
 \end{cases}
 \]
 
-In the case of multiclass data, $y(\ell) \in \{e^1, \ldots e^k\}$, $v \in \mathbb{R}^k$ and
+In the case of multiclass data, $y(\ell) \in \{e_1, \ldots e_k\}$, $v \in \mathbb{R}^k$ and
 \[
-S(v) = e^p, \quad p = \underset{r =1,\ldots,k}{\mathrm{argmax}}\;v_r
+S(v) = e_p, \quad p = \underset{r =1,\ldots,k}{\mathrm{argmax}}\;v_r
 \]
-where $\{e^l\}_{l=1}^k$ denotes the standard basis of $\mathbb{R}^k$.
+where $\{e_l\}_{l=1}^k$ denotes the standard basis of $\mathbb{R}^k$.
 
 Given this problem, one goal is to come up with a classification that best fits the data. The research group in which I am working is currently looking at the effectiveness of incorporating Bayesian inference into semi-supervised learning. In the Bayesian approach, the unknown classifying function $u$ is viewed as a random variable, whose distribution is determined by combining the labeling model $y$ with a probability distribution representing our prior beliefs about the classification and derived from the feature vectors. Hierarchical Bayesian methods provide additional flexibility by introducing hyperparameters governing the prior distribution, which are in turn treated as random variables to be inferred.
 
@@ -101,21 +101,31 @@ We order the eigenvectors $q_0, \ldots q_{N-1}$ in increasing order of their cor
 
 For the Bayesian approach, the prior, likelihood and posterior are defined as follows:
 \begin{itemize}
-\item[$\mathbb{P}(u)$:] Prior distributed as $\mathsf{N}(0,C)$ where the covariance matrix $C = (L + \tau^2I)^{-\alpha}$. A sample $u$ from the prior can be made through a realization of the following random sum:
+\item[$\mathbb{P}(u)$:] {\bf Prior} distributed as $\mathsf{N}(0,C)$ where the covariance matrix $C = f(L)^2$ in general, where $f$ is a function that we choose. A sample $u$ from this prior can be made through a realization of the following random sum:
+\begin{equation}
+\label{eqn:general_prior}
+u = \sum_{j=0}^M f(\lambda_j)\xi_j q_j,\quad \xi_j\sim \mathsf{N}(0,1) \quad \text{i.i.d.}
+\end{equation}
+Looking at the form of the sample, it would make sense to impose the restriction that $f$ should be monotonically decreasing so that lower eigenvectors dominate the distribution, a belief consistent with our discussion about graph Laplacian eigenvectors above.
+
+
+We will be mostly using a fixed function $f$, chosen as $f(\lambda) = (\lambda + \tau^2)^{-\alpha/2}$. In this case, $C = (L + \tau^2I)^{-\alpha}$, where $\tau$ and $\alpha$ are hyperparameters that govern the prior, and a sample $u$ from the prior can be made through the following:
 \begin{equation}
 \label{eqn:prior}
 u = \sum_{j=0}^M (\lambda_j + \tau^2)^{-\alpha/2}\xi_j q_j,\quad \xi_j\sim \mathsf{N}(0,1) \quad \text{i.i.d.}
 \end{equation}
-$\tau$ and $\alpha$ are hyperparameters that govern the prior. Note that samples from this prior are dominated by the lower eigenvectors, as when $\lambda$ increases, $(\lambda + \tau^2)^{-\alpha/2}$ decreases. This belief is consistent with our discussion about the graph Laplacian eigenvectors.
+Note that this $f$ is indeed monotonically decreasing.
 
-\item[$\mathbb{P}(y|u)$:] Likelihood, given by $\exp(-\Phi(u))$. There are two definitions for $\Phi(u)$ that we will use.
+Finally, one other possibility is to learn $f$ as well.
+
+\item[$\mathbb{P}(y|u)$:] {\bf Likelihood}, given by $\exp(-\Phi(u))$.
 
 If we believe there is uncertainty in the labels, we could represent this uncertainty as additive Gaussian noise. For $\gamma > 0$, $\Phi(u)$ is chosen as
 \begin{equation}
 \label{eqn:likelihood}
 \Phi(u) = \displaystyle \frac{1}{2\gamma^2}\sum_{\ell\in Z'}|y(\ell)-S(u(\ell))|^2
 \end{equation}
-as introduced in \cite{BLS}. This definition can be derived from the Bayesian level-set model for label uncertainty, which assumes $y(j) = S(u(j)) + \eta_j, \eta_j \sim \mathsf{N}(0,\gamma^2) \quad \text{i.i.d.}$ Then, the conditional distribution $y(j) | u \sim \mathsf{N}(S(u(j)),\gamma^2)$. We can compute the likelihood as follows:
+as introduced in \cite{BLS}. This definition can be derived from the {\bf Bayesian level-set} model for label uncertainty, which assumes $y(j) = S(u(j)) + \eta_j, \eta_j \sim \mathsf{N}(0,\gamma^2) \quad \text{i.i.d.}$ Then, the conditional distribution $y(j) | u \sim \mathsf{N}(S(u(j)),\gamma^2)$. We can compute the likelihood as follows:
 
 \[ \mathbb{P}(y|u) = \prod_{j\in Z'} \mathbb{P}(y(j)|u) \propto \prod_{j\in Z'} \exp\left(-\frac{(y(j)-S(u(j)))^2} {2\gamma^2}\right).\]
 
@@ -132,9 +142,30 @@ If we believe that the label data is certain, $\Phi(u)$ is defined as
 This case can be viewed as the $\gamma\to 0$ limit of \cref{eqn:likelihood} to enforce that $u$ must perfectly respect the labels. Notice that $\exp(-\Phi(u)) = 1$ if and only if the classifying function $u$ respects the label data. Otherwise, $\exp(-\Phi(u)) = 0$.
 
 
-\item[$\mathbb{P}(u|y)$:] Posterior, which by Bayes' theorem is proportional to $\mathbb{P}(u) \mathbb{P}(y | u)$
+One other model for the likelihood is the {\bf probit} model, also used in \cite{BeLuStZy17}, in which we add noise to the classifying function before taking the sign function. Specifically, we assume $y(j) = S(u(j) + \eta_j), \eta_j \sim \mathsf{N}(0,\gamma^2) \quad \text{i.i.d.}$. Denote the normal cumulative distribution function
+\[ \psi(x) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{x}\exp\left(-t^2/2\right) \mathop{dt} \]
+Then, 
+\begin{align*}
+\mathbb{P}(y(j) = 1 | u) =  \mathbb{P}(\mathsf{N}(u(j),\gamma^2) > 0) &= \frac{1}{\sqrt{2\pi\gamma^2}}\int_{0}^{\infty} \exp\left(\frac{-(z-u(j))^2}{2\gamma^2}\right ) dz\\
+&= \frac{1}{\sqrt{2\pi}}\int_{-\frac{u(j)}{\gamma}}^{\infty} \exp\left(-t^2/2\right ) dt\\
+&= 1-\psi(-u(j)/\gamma)\\
+&= \psi(u(j)/\gamma)
+\end{align*}
+where we used the fact that $1-\psi(-x) = \psi(x)$.
+
+Similarly, we can compute $\mathbb{P}(y(j)=-1|u) = \psi(-u(j)/\gamma)$. Since the labels $y(j)$ are either $1$ or $-1$, we can write $\mathbb{P}(y(j)|u) = \psi(y(j)u(j)/\gamma)$. Finally,
+\[ \mathbb{P}(y|u) = \prod_{j\in Z'} \mathbb{P}(y(j)|u) = 
+\prod_{j\in Z'} \psi(y(j)u(j)/\gamma) \]
+and we can see that we would define
+\begin{equation}
+\label{eqn:probit}
+\Phi(u) = -\sum_{j\in Z'} \log \left(\psi(y(j)u(j)/\gamma)\right)
+\end{equation}
+
+\item[$\mathbb{P}(u|y)$:] {\bf Posterior}, which by Bayes' theorem is proportional to $\mathbb{P}(u) \mathbb{P}(y | u)$
 \end{itemize}
 
+\section{Model problems}
 Applications to be considered include the following:
 \begin{itemize}
 \item the voting records: A data set of the voting records on $16$ votes of $435$ individuals from the U.S. House of Representatives. The data is ordered so that all the representatives from the party are contiguous in the indexing.
@@ -142,6 +173,7 @@ Applications to be considered include the following:
 \item MNIST data sets: This data set contains 70,000 images of $28 \times 28$ pixels with handwritten digits $0$ through $9$.
 \end{itemize}
 
+\section{Models}
 My project looks at the effectiveness of different Bayesian hierarchical clustering algorithms. I am implementing these algorithms in MATLAB and testing them on the data sets mentioned. The complexity of the models considered will evolve as follows:
 
 For models (A), (B), and (C), the hyperparameters $\tau,\alpha,M$ refer to the prior in \cref{eqn:prior}
@@ -159,6 +191,10 @@ Model (F) can apply to all of the previous models.
 
 (F) Multiclass, hierarchical on number of classes.
 
+Model (G) focuses on learning the arbitrary function $f$ defined in \cref{eqn:general_prior}. 
+
+(G) Learn $f(\lambda), M$.
+
 To learn $\tau, \alpha$, we will assume uniform priors on intervals $U(0, c)$ for constants $c$. For $M$, we will assume an exponentially or algebraically decaying prior with the reasoning that larger $M$ being less likely. We will refer to the hyperparameters as $\theta$.
 
 \section{Approach}
@@ -174,15 +210,18 @@ To implement model (B), which is hierarchical, we need to sample conditional dis
 \item Update $u^{(n+1)} \sim u|\theta^{(n)}, y$
 \item Update $\theta^{(n+1)} \sim \theta|u^{(n+1)}, y$
 \end{itemize}
-We use $\theta$ to represent the hyperparameters $(\tau, \alpha)$. However, we cannot sample the conditional distributions directly, so we replace direct sampling with Markov Chain Monte Carlo (MCMC) indirect sampling methods, which are invariant with respect to each of the exact conditional distributions. With Metropolis-within-Gibbs, at every step we update $u^{(n+1)}, \tau^{(n+1)}$ and $\alpha^{(n+1)}$ each with MCMC to target these conditional distributions. This is the algorithm that we will be using for the following hierarchical algorithms.
+We use $\theta$ to represent the hyperparameters, which could include $\tau, \alpha,$ and $M$. However, we cannot sample the conditional distributions directly, so we replace direct sampling with Markov Chain Monte Carlo (MCMC) indirect sampling methods, which are invariant with respect to each of the exact conditional distributions. With Metropolis-within-Gibbs, at every step we update $u^{(n+1)}, \tau^{(n+1)}$ and $\alpha^{(n+1)}$ each with MCMC to target these conditional distributions. One method is to update $u, \tau, \alpha$ in a block, by proposing $(u,\theta) \to  (\hat u, \hat \theta)$ and computing the transition probability for this step. 
+
+The algorithms that we will implement will be slightly different, as we will independently propose $u \to \hat u, \tau \to \hat \tau, \alpha \to \hat \alpha, M \to \hat M$, and perform these transitions in separate steps. At each step, we fix all but the proposed parameter, and we compute the transition probability. This is the algorithm that we will be using for the following hierarchical algorithms.
 
 Our first of two hierarchical algorithms for model (B) is deemed ``centered," as contrasted with the second algorithm described later in this section. Using Metropolis-within-Gibbs, we will require an expression for the posterior, so define $f(u,\tau,\alpha)$ as the joint posterior distribution. By Bayes' theorem, 
-\[f(u,\tau,\alpha) \propto \exp(-\Phi(u))\mathbb{P}(u,\tau,\alpha) = \exp(-\Phi(u))\mathbb{P}(u|\theta)\pi_0(\theta).\]
+\[f(u,\tau,\alpha) \propto \exp(-\Phi(u))\times\mathbb{P}(u,\tau,\alpha) = \exp(-\Phi(u))\mathbb{P}(u|\theta)\pi_0(\theta).\]
 Recall from \cref{eqn:prior} that the prior is distributed as $\mathsf{N}(0, C)$ with the covariance matrix $C(\theta) = C(\tau, \alpha) = (L + \tau^2I)^{-\alpha}$. We can write
 
 \begin{equation}
 \label{eqn:centered_post}
-f(u,\tau,\alpha) \propto \exp(-\Phi(u))\times \frac{1}{\sqrt{(2\pi)^d \det C(\theta)}} \exp\left(-\frac{1}{2}\langle u, C(\theta)^{-1}u  \rangle\right) \times \pi_0(\theta).
+f(u,\tau,\alpha) \propto 
+\frac{1}{\sqrt{(2\pi)^d \det C(\tau,\alpha)}} \exp\left(-\Phi(u)-\frac{1}{2}\langle u, C(\tau,\alpha)^{-1}u  \rangle + \log(\pi_0(\tau,\alpha)) \right).
 \end{equation}
 The normalization constant $\det(C(\theta))$ depends on $\tau, \alpha$ now and does not cancel out. Using this expression for the posterior, I implemented the Metropolis-within-Gibbs method for model (B) in \cref{alg:hierarchical_tau_alpha}.
 
@@ -196,7 +235,7 @@ T(\xi,\tau,\alpha) = \sum_{i=1}^M \frac{1}{(\lambda_i+\tau^2)^{\alpha/2}}\xi_iq_
 following \cref{eqn:prior}. This algorithm is ``non-centered" compared to the centered parameterization given in \cref{alg:hierarchical_tau_alpha}, meaning that the unknown classifying variable $\xi$ and the parameters $\theta=(\tau,\alpha)$ are a priori independent \cite{Noncentered}.
 
 This model assumes the prior $\xi \sim \mathsf{N}(0,I)$. Similar to the centered case, define $g(\xi,\tau,\alpha)$ as the joint posterior distribution. By Bayes' theorem, 
-\[g(\xi,\tau,\alpha) \propto \exp(-\Phi(T(\xi,\tau,\alpha)))\mathbb{P}(\xi,\tau,\alpha) = \exp(-\Phi(T(\xi,\tau,\alpha)))\mathbb{P}(\xi)\pi_0(\tau, \alpha)\]
+\[g(\xi,\tau,\alpha) \propto \exp(-\Phi(T(\xi,\tau,\alpha)))\times \mathbb{P}(\xi,\tau,\alpha) = \exp(-\Phi(T(\xi,\tau,\alpha)))\mathbb{P}(\xi)\pi_0(\tau, \alpha)\]
 Note that $\mathbb{P}(\xi) = \frac{1}{\sqrt{(2\pi)^d \det I}} \exp(-\frac{1}{2}\langle \xi, I\xi  \rangle) \propto \exp(-\frac{1}{2}\langle \xi,\xi \rangle)$ and the normalization constants drop out. We obtain:
 \begin{equation}
 \label{eqn:noncentered_post}
@@ -276,42 +315,78 @@ g(\xi,\tau,\alpha) \propto \exp\left( -\Phi(T(\xi,\tau,\alpha))-\frac{1}{2}\lang
 
 
 
+\section{Voting records experiments}
+In each of the following experiments, the labeled data $Z'$ was chosen consistently: members 20-30 was labeled one party and members 280-290 as the other.
 
-\section{Work accomplished}
-So far, I have implemented models (A) and (B) in MATLAB. I applied \cref{alg:generalpCN} on the voting records data set and could get clustering at about 85\% accuracy. One final clustering obtained is shown in \cref{fig:mcmc_gamma_final}.
+For \cref{alg:generalpCN}, fixing $\gamma = 0.0001, \beta = 0.4, \tau = 1, \alpha = 1$, and running for $100000$ iterations with a burn-in period of $1000$, I could get clustering at about 85\% accuracy. One final clustering obtained is shown in \cref{fig:mcmc_gamma_final}, with relevant figures \cref{fig:mcmc_gamma_acceptance} and \cref{fig:mcmc_gamma_senators} that suggest that the chain has converged.
 \begin{figure}[!htb]
-\label{fig:mcmc_gamma_final}
-\caption{Average of signs of $u$ indicate the final clustering}
-\includegraphics[width = \linewidth]{mcmc_gamma/manycorrect_clustering.png}
-\end{figure}
-
-I ran experiments with \cref{alg:hierarchical_tau_alpha} on the voting records data but plotting the traces of $\tau, \alpha$ and looking at the final average suggested that the Markov chain was not converging. We decided that the problem was in part due to the irregularity of the larger eigenvectors, perhaps because of the accuracy of MATLAB's eig solver. Truncating the list of eigenvectors to only consider the first 50 seemed to help the problem, and we were able to observe better clustering. See \cref{fig:centered_voting_avg}, \cref{fig:centered_voting_tau}.
-
-\begin{figure}[H]
 \begin{minipage}{0.48\textwidth}
-    \caption{\label{fig:centered_voting_avg} \cref{alg:hierarchical_tau_alpha} final average after truncating eigenvectors}
-    \includegraphics[width=\linewidth]{centered/final_avg.png}
+    \caption{\label{fig:mcmc_gamma_final} \cref{alg:generalpCN} final average}
+    \includegraphics[width = \linewidth]{voting/mcmc_gamma/final_avg.png}
 \end{minipage}\hfill
 \begin{minipage}{0.48\textwidth}
-    \caption{\label{fig:centered_voting_tau} Trace of $\tau$}
-    \includegraphics[width=\linewidth]{centered/trace_tau.png}
+    \caption{\label{fig:mcmc_gamma_acceptance} \cref{alg:generalpCN} average $u$ acceptance probability}
+    \includegraphics[width=\linewidth]{voting/mcmc_gamma/u_accept.png}
 \end{minipage}
 \end{figure}
 
-Then, we compared the centered and non-centered algorithms. The non-centered \cref{alg:xi_tau_alpha} seems to converge faster than \cref{alg:hierarchical_tau_alpha}, and truncation of the eigenvectors is not necessary. See \cref{fig:noncentered_voting_avg}, \cref{fig:noncentered_voting_tau}
+\begin{figure}[!htb]
+\caption{\label{fig:mcmc_gamma_senators} Running averages of classifications of delegates}
+\centering
+\includegraphics[width=\linewidth]{voting/mcmc_gamma/senator_avgs.png}
+\end{figure}
+Experiments with \cref{alg:hierarchical_tau_alpha} on the voting records data indicated poor mixing in the hyperparameters by looking at traces of $\tau, \alpha$. We decided that the problem was in part due to the irregularity of the larger eigenvectors, perhaps because of the accuracy of MATLAB's eig solver. Truncating the list of eigenvectors to only consider the first 50 seemed to help the problem, and we were able to observe better clustering. Fixing $\gamma = 0.0001, \beta = 0.4, \tau^{(0)}=20,\alpha^{(0)}=20,\tau\in[0.1,60],\alpha\in[0.1,60],\epsilon_\tau=0.1,\epsilon_\alpha=0.1$ and running $100000$ iterations with a burn-in period of $1000$, the accuracy is about 83\%. See \cref{fig:centered_voting_avg}, \cref{fig:centered_voting_accept}, \cref{fig:centered_voting_tau}, \cref{fig:centered_voting_alpha}.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
+\begin{minipage}{0.48\textwidth}
+    \caption{\label{fig:centered_voting_avg} \cref{alg:hierarchical_tau_alpha} after truncating eigenvectors, final average}
+    \includegraphics[width=\linewidth]{voting/centered/final_avg.png}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+    \caption{\label{fig:centered_voting_accept} \cref{alg:hierarchical_tau_alpha} average $u$ acceptance probability}
+    \includegraphics[width=\linewidth]{voting/centered/acceptance_u_probability.png}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[!htb]
+\begin{minipage}{0.48\textwidth}
+    \caption{\label{fig:centered_voting_tau} \cref{alg:hierarchical_tau_alpha} trace of $\tau$}
+    \includegraphics[width=\linewidth]{voting/centered/trace_tau.png}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+    \caption{\label{fig:centered_voting_alpha} \cref{alg:hierarchical_tau_alpha} trace of $\alpha$}
+    \includegraphics[width=\linewidth]{voting/centered/trace_alpha.png}
+\end{minipage}
+
+\end{figure}
+
+Finally, the non-centered \cref{alg:xi_tau_alpha} seems to converge faster than \cref{alg:hierarchical_tau_alpha}, and truncation of the eigenvectors is not necessary. Fixing $\gamma = 0.0001, \beta = 0.1, \tau^{(0)}=20,\alpha^{(0)}=20,\tau\in[0.1,60],\alpha\in[0.1,60],\epsilon_\tau=1,\epsilon_\alpha=1$ and running $100000$ iterations with a burn-in period of $1000$, the accuracy is about 87\%.  See \cref{fig:noncentered_voting_avg}, \cref{fig:noncentered_voting_accept}, \cref{fig:noncentered_voting_tau}, \cref{fig:noncentered_voting_alpha}.
+
+\begin{figure}[!htb]
 \begin{minipage}{0.48\textwidth}
     \caption{\label{fig:noncentered_voting_avg}\cref{alg:xi_tau_alpha} final average}
-    \includegraphics[width=\linewidth]{noncentered/final_avg.png}
+    \includegraphics[width=\linewidth]{voting/noncentered/final_avg.png}
 \end{minipage}\hfill
 \begin{minipage}{0.48\textwidth}
-    \caption{\label{fig:noncentered_voting_tau} Trace of $\tau$}
-    \includegraphics[width=\linewidth]{noncentered/trace_tau.png}
+    \caption{\label{fig:noncentered_voting_accept} \cref{alg:xi_tau_alpha} average $\xi$ acceptance probablity}
+    \includegraphics[width=\linewidth]{voting/noncentered/acceptance_xi_probability.png}
 \end{minipage}
 \end{figure}
 
-Using these algorithms, I also ran experiments to cluster the two-moons data set. We explored using the self-tuning Laplacian, which was introduced in \cite{SelfTuning}. This Laplacian matrix has weights that infer the local spatial scale from the data, removing the need to choose a fixed length-scale parameter. The use of this self-tuning Laplacian in the two-moons data set seems to encode more information in the eigenvectors. Compare \cref{fig:moon_laplacian_un} with \cref{fig:moon_laplacian_selftuning}. 
+\begin{figure}[!htb]
+\begin{minipage}{0.48\textwidth}
+    \caption{\label{fig:noncentered_voting_tau}\cref{alg:xi_tau_alpha} trace of $\tau$}
+    \includegraphics[width=\linewidth]{voting/noncentered/trace_tau.png}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+    \caption{\label{fig:noncentered_voting_alpha} \cref{alg:xi_tau_alpha} trace of $\alpha$}
+    \includegraphics[width=\linewidth]{voting/noncentered/trace_alpha.png}
+\end{minipage}
+\end{figure}
+
+\section{Two moons experiments}
+
+Using these algorithms, I also ran experiments to cluster the two-moons data set, with $r=1, N = 1000, d = 100, \sigma = 0.1$. We explored using the self-tuning Laplacian, which was introduced in \cite{SelfTuning}. This Laplacian matrix has weights that infer the local spatial scale from the data, removing the need to choose a fixed length-scale parameter. The use of this self-tuning Laplacian in the two-moons data set seems to encode more information in the eigenvectors. Compare \cref{fig:moon_laplacian_un} with \cref{fig:moon_laplacian_selftuning}. 
 
 \begin{figure}[!htb]
     \begin{minipage}{0.48\textwidth}
@@ -326,47 +401,75 @@ Using these algorithms, I also ran experiments to cluster the two-moons data set
     \end{minipage}
 \end{figure}
 
-Compare the results from the centered, truncated algorithm and the non-centered self-tuning algorithm in \cref{fig:moon_centered_avg}, \cref{fig:moon_noncentered_avg}, \cref{fig:moon_centered_trace_tau}, \cref{fig:moon_noncentered_trace_tau}, \cref{fig:moon_centered_trace_alpha}, \cref{fig:moon_noncentered_trace_alpha}.
-\begin{figure}[H]
+For each of the following experiments, we labeled the same $42$ nodes, $21$ in each half-moon, approximately uniformly spaced. Running \cref{alg:generalpCN} on this data set using only the first 50 eigenvectors with $\gamma=0.0001,\beta=0.4,\tau=1,\alpha=1$ with 100000 iterations and a burn-in period of 1000, we could get around 90\% accuracy.
+\begin{figure}[!htb]
     \begin{minipage}{0.48\textwidth}
         \centering
-        \caption{\label{fig:moon_centered_avg} \cref{alg:hierarchical_tau_alpha} with truncation, final average}
-        \includegraphics[width=\linewidth]{graphics/moons/centered_truncated/final_avg.png}
+        \caption{\label{fig:moon_mcmc_gamma_avg} \cref{alg:generalpCN} final average}
+        \includegraphics[width=\linewidth]{graphics/moons/mcmc_gamma/u_avg.png}
     \end{minipage} \hfill
     \begin{minipage}{0.48\textwidth}
         \centering
-        \caption{\label{fig:moon_noncentered_avg} \cref{alg:xi_tau_alpha}, final average}
-        \includegraphics[width=\linewidth]{graphics/moons/noncentered_selftuning/final_avg.png}
+        \caption{\label{fig:moon_mcmc_gamma_accept} \cref{alg:generalpCN} average $u$ acceptance probability}
+        \includegraphics[width=\linewidth]{graphics/moons/mcmc_gamma/u_accept.png}
     \end{minipage}
 \end{figure}
 
-\begin{figure}[H]
+We now compare the results from the centered (\cref{alg:hierarchical_tau_alpha}) and non-centered (\cref{alg:xi_tau_alpha}) algorithms, truncating the number of eigenvectors to $50$ in both cases again. For both algorithms, we fixed $\gamma = 0.1, \beta = 0.4, \tau^{(0)}=20,\alpha^{(0)}=20,\tau\in[0.01,60],\alpha\in[1,60],\epsilon_\tau=0.5,\epsilon_\alpha=1$ and ran $100000$ iterations with a burn-in period of $1000$. With these settings, \cref{alg:hierarchical_tau_alpha} achieves around 90\% accuracy, while \cref{alg:xi_tau_alpha} achieves around 98\%. It still appears that the non-centered algorithm converges faster than the centered algorithm. If the centered algorithm is initialized at $\tau^{(0)} = 1$, the final classification accuracy is very similar to that of the non-centered algorithm. See \cref{fig:moon_centered_avg}, \cref{fig:moon_centered_accept}, \cref{fig:moon_centered_tau}, \cref{fig:moon_centered_alpha}, \cref{fig:moon_noncentered_avg}, \cref{fig:moon_noncentered_accept}, \cref{fig:moon_noncentered_tau}, \cref{fig:moon_noncentered_alpha}.
+
+\begin{figure}[!htb]
     \begin{minipage}{0.48\textwidth}
         \centering
-        \caption{\label{fig:moon_centered_trace_tau} \cref{alg:hierarchical_tau_alpha} with truncation, trace $\tau$}
-        \includegraphics[width=\linewidth]{graphics/moons/centered_truncated/trace_tau.png}
+        \caption{\label{fig:moon_centered_avg} \cref{alg:hierarchical_tau_alpha} final average}
+        \includegraphics[width=\linewidth]{graphics/moons/centered/final_avg.png}
     \end{minipage} \hfill
     \begin{minipage}{0.48\textwidth}
         \centering
-        \caption{\label{fig:moon_noncentered_trace_tau} \cref{alg:xi_tau_alpha}, trace $\tau$}
-        \includegraphics[width=\linewidth]{graphics/moons/noncentered_selftuning/trace_tau.png}
+        \caption{\label{fig:moon_centered_accept} \cref{alg:hierarchical_tau_alpha} average $u$ acceptance probability}
+        \includegraphics[width=\linewidth]{graphics/moons/centered/acceptance_u_probability.png}
     \end{minipage}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \begin{minipage}{0.48\textwidth}
         \centering
-        \caption{\label{fig:moon_centered_trace_alpha} \cref{alg:hierarchical_tau_alpha} with truncation, trace $\alpha$}
-        \includegraphics[width=\linewidth]{graphics/moons/centered_truncated/trace_alpha.png}
+        \caption{\label{fig:moon_centered_tau} \cref{alg:hierarchical_tau_alpha}, trace $\tau$}
+        \includegraphics[width=\linewidth]{graphics/moons/centered/trace_tau.png}
     \end{minipage} \hfill
     \begin{minipage}{0.48\textwidth}
         \centering
-        \caption{\label{fig:moon_noncentered_trace_alpha} \cref{alg:xi_tau_alpha}, trace $\alpha$}
-        \includegraphics[width=\linewidth]{graphics/moons/noncentered_selftuning/trace_alpha.png}
+        \caption{\label{fig:moon_centered_alpha} \cref{alg:hierarchical_tau_alpha}, trace $\alpha$}
+        \includegraphics[width=\linewidth]{graphics/moons/centered/trace_alpha.png}
     \end{minipage}
 \end{figure}
 
-Notice the convergence of $\tau$ and its low variance in the samples for the non-centered self-tuning algorithm. The distribution of $\tau$ is different between the two algorithms because truncating the number of eigenvectors affects the distribution of the posterior.
+\begin{figure}[!htb]
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_noncentered_avg} \cref{alg:xi_tau_alpha} final average}
+        \includegraphics[width=\linewidth]{graphics/moons/noncentered/final_avg.png}
+    \end{minipage} \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_noncentered_accept} \cref{alg:xi_tau_alpha} average $\xi$ acceptance probability}
+        \includegraphics[width=\linewidth]{graphics/moons/noncentered/acceptance_xi_probability.png}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[!htb]
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_noncentered_tau} \cref{alg:xi_tau_alpha}, trace $\tau$}
+        \includegraphics[width=\linewidth]{graphics/moons/noncentered/trace_tau.png}
+    \end{minipage} \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \caption{\label{fig:moon_noncentered_alpha} \cref{alg:xi_tau_alpha}, trace $\alpha$}
+        \includegraphics[width=\linewidth]{graphics/moons/noncentered/trace_alpha.png}
+    \end{minipage}
+\end{figure}
+
+Notice the convergence of $\tau$ and its low variance in the samples for the non-centered self-tuning algorithm.
 
 \section{Challenges}
 Some common issues that I encountered are bugs in my MATLAB code. Some of these bugs included overflow or underflow of ratios, when both numerator and denominator are very large or very small. To improve accuracy, I implemented these ratios as the difference between $\log$s, and took the $\exp$ of the result at the end. I became used to using MATLAB's debugger to step through line-by-line and isolate the mistakes.

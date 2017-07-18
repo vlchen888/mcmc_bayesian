@@ -79,15 +79,14 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
     end
 
     for i=1:num_iterations-1
-        %%%%% Propose new state for xi %%%%%
         
         curr_xi = xi_all(:,i);
         curr_tau = tau_all(i);
         curr_alpha = alpha_all(i);
         curr_M = M_all(i);
-        
         std(:, i) = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
-        
+
+        %%%%% Propose new state for xi %%%%%
         x = compute_rand_xi(length(lambda));
         new_xi = (1-B^2)^0.5*curr_xi+B*x;
         u_curr = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
@@ -155,7 +154,6 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
         curr_alpha = alpha_all(i+1);
         
         %%%%% Propose a new M %%%%%
-        
         new_M = curr_M + compute_rndjump_M(params('max_M_jump'));
         
         if new_M < min_M || new_M > max_M
