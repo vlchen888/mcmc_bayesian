@@ -5,12 +5,13 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
     params('laplacian') = string('self tuning');
 
     if params('data_set') == string('moons')
-        %{
+        
         N = 2000;
         data = moondata(1,100,N,sigma);
         params('data') = data;
         params('label_data') = generate_moons_fidelity(percent_fidelity, N);
-        %}
+        
+        %{
         N = 1000;
         load('intertwine_moon.mat')
         data = d;
@@ -18,6 +19,7 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
         set_pos     = 50:20:450;
         set_neg     = 550:20:950;
         params('label_data') = init(length(data),set_neg,set_pos);
+        %}
 
     elseif params('data_set') == string('voting')
         load('data3.mat')
@@ -38,20 +40,20 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
     params('l') = 1.25;
     %
 
-    %{
+    
     % For moons
     params('gamma') = 0.1;
     params('B') = 0.1;
     params('init_tau') = 1;
-    params('init_alpha') = 35;
-    %}
+    params('init_alpha') = 1;
     
+    %{
     params('gamma')         = 0.0001;
     params('B')             = 0.4;
     
     params('init_tau')      = 1;
     params('init_alpha')    = 1;
-    
+    %}
 
     [u_all, u_accept] = mcmc_gamma(params);
     u_avg = mean(sign(u_all(:, burn_in:end)), 2); %avg the rows

@@ -1,8 +1,0 @@
-Laplacian: self tuning, sym
-N = 2000
-Gamma = 0.1
-Tau = 0
-Alpha = 1
-Eigenvectors: 2-50
-
-This one performs really well for large sigma=0.1, but really poorly for small sigma=0.02.

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  17 JUL 2017 15:10
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  18 JUL 2017 14:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -503,37 +503,90 @@ LaTeX Info: Redefining \nameref on input line 54.
 \makeMPintoPDFobject=\count151
 \everyMPtoPDFconversion=\toks43
 )
+LaTeX Font Info:    Try loading font information for U+msa on input line 59.
+ (/usr/local/texlive/2015/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Try loading font information for U+msb on input line 59.
+
+(/usr/local/texlive/2015/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+<graphics/summary.png, id=18, 2409.0pt x 602.25pt>
+File: graphics/summary.png Graphic file (type png)
+ <use graphics/summary.png>
+Package pdftex.def Info: graphics/summary.png used on input line 65.
+(pdftex.def)             Requested size: 419.16621pt x 104.7888pt.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 69.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\tau' on input line 69.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 69.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 69.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\alpha' on input line 69.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 69.
+
+<graphics/alpha_averages.png, id=19, 2409.0pt x 602.25pt>
+File: graphics/alpha_averages.png Graphic file (type png)
+
+<use graphics/alpha_averages.png>
+Package pdftex.def Info: graphics/alpha_averages.png used on input line 73.
+(pdftex.def)             Requested size: 419.16621pt x 104.7888pt.
+ (./compare.bbl [1
+
+{/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./graph
+ics/summary.png (PNG copy)> <./graphics/alpha_averages.png (PNG copy)>])
 \tf@thm=\write4
 \openout4 = `compare.thm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 63.
- [1
-
-{/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 63.
-
-(./compare.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 63.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 63.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 80.
+ [2]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 80.
+ (./compare.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 80.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 80.
 Package rerunfilecheck Info: File `compare.out' has not changed.
-(rerunfilecheck)             Checksum: B6E9B75E0A1D1B7639590DA2190C2CBA;96.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 63.
+(rerunfilecheck)             Checksum: 1BAB7510EE538789936DACF475788ECD;143.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 80.
  ) 
 Here is how much of TeX's memory you used:
- 9034 strings out of 493089
- 139712 string characters out of 6134842
- 253159 words of memory out of 5000000
- 12448 multiletter control sequences out of 15000+600000
- 4247 words of font info for 16 fonts, out of 8000000 for 9000
+ 9114 strings out of 493089
+ 140915 string characters out of 6134842
+ 257159 words of memory out of 5000000
+ 12494 multiletter control sequences out of 15000+600000
+ 9400 words of font info for 37 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 37i,8n,39p,270b,319s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 37i,8n,39p,612b,407s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
-></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><
-/usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb>
-Output written on compare.pdf (1 page, 35268 bytes).
+></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb
+></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
+</usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></
+usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></us
+r/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/l
+ocal/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/loca
+l/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local
+/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/t
+exlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti8.pfb>
+Output written on compare.pdf (2 pages, 199791 bytes).
 PDF statistics:
- 34 PDF objects out of 1000 (max. 8388607)
- 27 compressed objects within 1 object stream
- 4 named destinations out of 1000 (max. 500000)
- 17 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 81 PDF objects out of 1000 (max. 8388607)
+ 64 compressed objects within 1 object stream
+ 10 named destinations out of 1000 (max. 500000)
+ 35 words of extra memory for PDF output out of 10000 (max. 10000000)
 
