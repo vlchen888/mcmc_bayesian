@@ -41,18 +41,11 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
     
     [num_data, ~] = size(data);
     
-    xi_all = zeros(length(lambda), num_iterations);
+    xi_all = zeros(params('max_M'), num_iterations);
     
     %%%%% Initialization from Fiedler Vector?? %%%%%
     xi_all(2, 1) = (lambda(2)+init_tau^2)^(init_alpha/2);
     %xi_all(2, 1) = 1;
-    
-    %%%%% Noisy initialization?? %%%%%
-    %xi_all(:,1) = compute_rand_xi(num_data)/1000;
-    %xi_all(2, 1) = 1;
-     
-    %%%%% Random initialization? %%%%%
-    %xi_all(:,1) = compute_rand_xi(num_data)/2;
     
     tau_all = zeros(1, num_iterations);
     tau_all(1) = init_tau;
@@ -79,7 +72,6 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
     end
 
     for i=1:num_iterations-1
-        
         curr_xi = xi_all(:,i);
         curr_tau = tau_all(i);
         curr_alpha = alpha_all(i);
@@ -173,53 +165,55 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
         end
         
         %%%% Movie things %%%%
-        if params('movie') && i >= params('burn_in') && mod(i,2500)==0
+        
+        if i >= params('burn_in') && mod(i,2500)==0
             curr_avg = mean(sign(std(:,params('burn_in'):i)), 2);
             
             fprintf('Sample number: %d\n', i);
-            fprintf('\tClassification accuracy: %f\n', count_correct(curr_avg, params('label_data'), params('truth')));
-            fprintf('\tAcceptance rates: xi:%f, tau:%f, alpha:%f, M %f\n',...
+            fprintf('Classification accuracy: %f\n', count_correct(curr_avg, params('label_data'), params('truth')));
+            fprintf('Acceptance rates: \n\txi:%f \n\ttau:%f \n\talpha:%f \n\tM:%f \n',...
                 sum(xi_accept)/i,sum(tau_accept)/i,sum(alpha_accept)/i,sum(M_accept)/i);
+            if params('movie')
+                subplot(231)
+                plot(std(:,i))
+                xlabel('Current u')
 
-            subplot(231)
-            plot(std(:,i))
-            xlabel('Current u')
+                subplot(232)
+                if params('data_set') == string('moons')
+                    scatter_twomoons_classify(data, sign(std(:,i)), params('label_data'))
+                elseif params('data_set') == string('voting')
+                    plotBar(std(:,i));
+                elseif params('data_set') == string('mnist')
+                    plotBar(std(:,i));
+                end
+                xlabel('Current u scatter')
 
-            subplot(232)
-            if params('data_set') == string('moons')
-                scatter_twomoons_classify(data, sign(std(:,i)), params('label_data'))
-            elseif params('data_set') == string('voting')
-                plotBar(std(:,i));
-            elseif params('data_set') == string('mnist')
-                plotBar(std(:,i));
+                subplot(233)
+                if params('data_set') == string('moons')
+                    scatter_twomoons_classify(data, curr_avg, params('label_data'))
+                elseif params('data_set') == string('voting')
+                    plotBar(curr_avg);
+                elseif params('data_set') == string('mnist')
+                    plotBar(curr_avg);
+                end
+                xlabel('Average u scatter')
+
+                subplot(234)
+                plot(tau_all(1:i));
+                xlabel('\tau trace')
+
+                subplot(235)
+                plot(alpha_all(1:i));
+                xlabel('\alpha trace')
+
+                subplot(236)
+                plot(M_all(1:i));
+                xlabel('M trace')
+
+                fname = sprintf('figs/step_%i.png',step_num);
+                print('-r144','-dpng',fname);
+                step_num = step_num + 1;
             end
-            xlabel('Current u scatter')
-
-            subplot(233)
-            if params('data_set') == string('moons')
-                scatter_twomoons_classify(data, curr_avg, params('label_data'))
-            elseif params('data_set') == string('voting')
-                plotBar(curr_avg);
-            elseif params('data_set') == string('mnist')
-                plotBar(curr_avg);
-            end
-            xlabel('Average u scatter')
-            
-            subplot(234)
-            plot(tau_all(1:i));
-            xlabel('\tau trace')
-            
-            subplot(235)
-            plot(alpha_all(1:i));
-            xlabel('\alpha trace')
-            
-            subplot(236)
-            plot(M_all(1:i));
-            xlabel('M trace')
-            
-            fname = sprintf('figs/step_%i.png',step_num);
-            print('-r144','-dpng',fname);
-            step_num = step_num + 1;
         end
         
     end
