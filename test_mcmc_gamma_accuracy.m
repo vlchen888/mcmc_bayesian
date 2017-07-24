@@ -45,7 +45,7 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
     params('gamma') = 0.1;
     params('B') = 0.1;
     params('init_tau') = 1;
-    params('init_alpha') = 1;
+    params('init_alpha') = 35;
     
     %{
     params('gamma')         = 0.0001;
@@ -68,7 +68,7 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
         plot(movmean(u_accept,[length(u_accept) 0]))
         ylabel('u acceptance probability')
         figure(4)
-        set(gcf, 'Position', [100, 300, 800, 300])
+        set(gcf, 'Position', [100, 300, 600, 500])
         scatter_twomoons_classify(data, u_avg, params('label_data'))
         
         p = count_correct(u_avg, params('label_data'), [zeros(floor(N/2)+1,1) - 1; zeros(N-(floor(N/2)+1),1) + 1]);

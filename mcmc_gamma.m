@@ -17,13 +17,14 @@ function [u_all, u_accept] = mcmc_gamma(params)
         L = compute_laplacian_standard(data, p, q, l);
     end
     
+    [num_data, ~] = size(data);
+
     lambda = eig(L);
     [phi, ~] = eig(L);
-    M = 50;
+    M = 150;
     lambda = lambda(1:M);
     phi = phi(:,1:M);
     
-    [num_data, ~] = size(data);
             
     u_all = zeros(num_data, num_iterations);
     u_accept = zeros(1, num_iterations);

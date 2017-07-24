@@ -2,8 +2,8 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
 
     params = containers.Map;
 
-    params('data_set') = string('moons');
-    params('laplacian') = string('self tuning');
+    params('data_set') = string('voting');
+    params('laplacian') = string('un');
     
     if params('data_set') == string('moons')
         N = 2000;
@@ -44,7 +44,7 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     params('B') = 0.05;
     params('init_tau') = 1;
     params('init_alpha') = 35;
-    params('init_M') = 30;
+    params('init_M') = 100;
     
     params('min_tau')       = 0.1;
     params('max_tau')       = 60;
@@ -53,18 +53,18 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     params('max_alpha')     = 60;
     
     params('min_M')       = 1;
-    params('max_M')       = 200;
+    params('max_M')       = 435;
     
     params('alpha_epsilon') = 0;
     params('tau_epsilon')   = 0;
     
-    params('max_M_jump') = 7;
+    params('max_M_jump') = 20;
     
         
     [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M_accept] ...
         = mcmc_learn_t_a_M_noncentered(params);
     u_avg = mean(sign(std(:, burn_in:end)), 2); %avg the rows
-        
+    
     p = count_correct(u_avg, params('label_data'), params('truth'));
     
     tau_mean = mean(tau_all(burn_in:end));
@@ -72,8 +72,13 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     M_mean = mean(M_all(burn_in:end));
     
     figure(2)
-    set(gcf, 'Position', [100, 300, 600, 500])
-    scatter_twomoons_classify(data, u_avg, params('label_data'))
+    if params('data_set') == string('moons')
+        set(gcf, 'Position', [100, 300, 600, 500])
+        scatter_twomoons_classify(data, u_avg, params('label_data'))
+    elseif params('data_set') == string('voting')
+        set(gcf, 'Position', [100, 300, 800, 300])
+        plotBar(u_avg)
+    end
     
     figure(3)
     set(gcf, 'Position', [100, 300, 800, 300])
@@ -82,10 +87,15 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     
     figure(4)
     set(gcf, 'Position', [100, 300, 800, 300])
+    plot(1:params('num_iterations'), alpha_all, 1:params('num_iterations'), movmean(alpha_all, [length(alpha_all) 0]));
+    legend('\alpha trace', '\alpha running average');
+    
+    figure(5)
+    set(gcf, 'Position', [100, 300, 800, 300])
     plot(movmean(xi_accept, [length(xi_accept) 0]));
     title('\xi acceptance probability')
     
-    figure(5)
+    figure(6)
     set(gcf, 'Position', [100, 300, 800, 300])
     plot(movmean(M_accept, [length(M_accept) 0]));
     title('M acceptance probability')

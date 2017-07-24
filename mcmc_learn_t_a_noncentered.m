@@ -27,7 +27,7 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
     
     
     [num_data, ~] = size(data);
-    M = 50;
+    M = 600;
     phi = phi(:, 1:M);
     lambda = lambda(1:M);
     

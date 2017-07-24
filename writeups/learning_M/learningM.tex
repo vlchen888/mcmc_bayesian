@@ -55,25 +55,64 @@
 \maketitle
 \setlength{\unitlength}{1in}
 \setlength{\parindent}{0in}
-\section{Introduction}
-Inspired by the experiment comparing the different clustering algorithms given in \cite{BeLuStZy17}, we ran a similar set of experiments to determine if a hierarchical approach was beneficial to clustering. The clustering algorithms we want to compare are: Fiedler thresholding, nonhierarchical pCN, and two hierarchical algorithms for learning $\tau,\alpha$ as well as the classifying function $u$.
-For each of the four algorithms tested, 50 random realizations of the two moons data set were generated with $r=1,N=2000,d=100,$ and varying $\sigma$. We used the same RNG seed for the trials across different algorithms so that these 50 realizations are consistent over the different algorithms tested. With each two moons realization, we tested the classification accuracy with varying fidelity percents for the labeled data. Again, the chosen labeled set $Z'$ is consistent across the trials for different algorithms. Our results are summarized in \cref{fig:compare_hier}.
+\section{Algorithm for hierarchical towards $\tau, \alpha, M$}
+\begin{equation}
+\label{eqn:noncentered_T}
+T(\xi,\tau,\alpha, M) = \sum_{i=1}^M \frac{1}{(\lambda_i+\tau^2)^{\alpha/2}}\xi_iq_i = u
+\end{equation}
+
+
+\begin{equation}
+\label{eqn:noncentered_post}
+g(\xi,\tau,\alpha, M) \propto \exp\left( -\Phi(T(\xi,\tau,\alpha,M))-\frac{1}{2}\langle \xi,\xi \rangle + \log(\pi_0(\tau,\alpha,M)) \right)
+\end{equation}
+
+
+\begin{algorithm}
+
+\caption{Non-centered parameterization, hierarchical with $\tau, \alpha, M$}
+\label{alg:hier_t_a_M}
+\begin{algorithmic}
+\State Choose $\xi^{(0)} \in \mathbb{R}^N, \tau^{(0)}, \alpha^{(0)}, M^{(0)} > 0, \beta \in (0, 1]$ and $\epsilon_1, \epsilon_2 > 0$.
+\For{$k=0$ to $S$}
+\State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim \mathsf{N}(0, I)$
+\State Make transition $\xi^{(k)} \to \hat\xi^{(k)}$ with probability
+\[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)})) - \Phi(T(\hat\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)}))\right) \right\}\] \Comment{$T$ defined in \cref{eqn:noncentered_T}}
+
+\State Propose $\hat\tau^{(k)} = \tau^{(k)} + \epsilon_1 \rho^{(k)}, \rho^{(k)} \sim \mathsf{N}(0,1)$
+\State Make transition $\tau^{(k)} \to \hat\tau^{(k)}$ with probability
+\[ A(\tau^{(k)} \to \hat\tau^{(k)}) 
+= \min\left\{1, \frac{g(\xi^{(k+1)},\hat\tau^{(k)},\alpha^{(k)},M^{(k)})}{g(\xi^{(k+1)},\tau^{(k)},\alpha^{(k)},M^{(k)})} \right\}\] \Comment{$g$ defined in \cref{eqn:noncentered_post}}
+
+\State Propose $\hat\alpha^{(k)} = \alpha^{(k)} + \epsilon_2 \sigma^{(k)}, \sigma^{(k)} \sim \mathsf{N}(0,1)$
+\State Make transition $\alpha^{(k)} \to \hat\alpha^{(k)}$ with probability
+\[ A(\alpha^{(k)} \to \hat\alpha^{(k)}) 
+= \min\left\{1, \frac{g(\xi^{(k+1)},\tau^{(k+1)},\hat \alpha^{(k)},M^{(k)})}{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k)},M^{(k)})} \right\}\]
+\State Propose $\hat M^{(k)} = M^{(k)} + Q$, with jump $Q$ distributed as $\mathbb{P}(Q=k) \propto \frac{1}{1+|k|}$, $|Q|$ bounded.
+\State Make transition $M^{(k)} \to \hat M^{(k)}$ with probability
+\[ A(M^{(k)} \to \hat M^{(k)}) = 
+\min\left\{1, \frac{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k+1)},\hat M^{(k)})}{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k+1)},M^{(k)})} \right\}
+\]
+\EndFor
+\State \Return $\{ T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}), \tau^{(k)}, \alpha^{k} \}$
+\end{algorithmic}
+\end{algorithm}
+
+\section{$M$ and $\sigma$ relation}
+We tested our algorithm on the two moons dataset with varying $\sigma$, fixing $3\%$ labeled nodes. We also fixed $\tau=1,\alpha=35$ by setting $\epsilon_1=\epsilon_2=0$, so the algorithm is only learning $\xi$ and $M$. We initialized $M^{(0)} = 30$. We can see that for small $\sigma = 0.02$, $M$ is very small as only the first few eigenvectors are necessary (see \cref{fig:learnM_sigma_0.02}). However, when we choose a larger $\sigma = 0.2$, $M$ needs to be larger (see \cref{fig:learnM_sigma_0.20}). For $\sigma = 0.02$, the classification accuracy was 100\%. For $\sigma = 0.2$, the classification accuracy was 90.21\%.
 
 \begin{figure}[!htb]
-\label{fig:compare_hier}
-\caption{Classification accuracy of different algorithms for two moons dataset compared with $\sigma$ and percent fidelity. Plotted is the median classification accuracy with error bars that indicate the 25 and 75-th quantiles over the 50 trials for each parameter combination. For the pCN and hierarchical algorithms, we used spectral projection up to the first 50 eigenvectors. We ran 100000 iterations with a burn-in period of 1000, and we fixed $\gamma = 0.1$.}
-\includegraphics[width=\linewidth]{summary.png}
+\caption{\label{fig:learnM_sigma_0.02} $\sigma=0.02$, trace of $M$}
+\includegraphics[width=\linewidth]{old/sigma_0_02/M_trace.png}
 \end{figure}
-
-\section{Learning $\tau$ and $\alpha$}
-In these experiments, the hierarchical algorithms performed much better in classifying the two moons dataset than the nonhierarchical algorithm. We fixed $\tau=\alpha=1$ in the nonhierarchical pCN, while we set $\tau^{(0)}=\alpha^{(0)} = 1$ for the hierarchical algorithms. In the hierarchical algorithms, e allowed $\tau \in [0.01,60]$ and $\alpha \in [0.1,60]$ as the uniform priors.
 \begin{figure}[!htb]
-\label{fig:compare_alpha}
-\caption{Average values of $\alpha$ from the MCMC. Plotted is the median of the averages of $\alpha$ with error bars that indicate the 25 and 75-th quantiles over the 50 trials for each parameter combination. Notice that $\alpha$ is on average much larger in the hierarchical algorithms.}
-\includegraphics[width=\linewidth]{alpha_averages.png}
+\caption{\label{fig:learnM_sigma_0.20} $\sigma=0.2$, trace of $M$}
+\includegraphics[width=\linewidth]{old/sigma_0_20/M_trace.png}
 \end{figure}
 
-It appears that fixing $\alpha = 1$ in the nonhierarchical algorithm is partially responsible for the discrepancy in performance. With small $\alpha$, the prior on $u$ drops off more slowly with the higher eigenvectors, while larger $\alpha$ enforces that these higher eigenvectors have less influence on $u$. This suggests that for the two moons data set, information for binary classification is concentrated in the lower eigenvectors, as expected.
+\section{Nonhierarchical vs. Hierarchical}
+
+
 
 \bibliographystyle{siamplain}
 \bibliography{references}

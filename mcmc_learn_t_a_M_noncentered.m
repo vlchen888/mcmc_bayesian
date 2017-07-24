@@ -230,15 +230,11 @@ end
 
 function T = compute_T(xi, tau, alpha, M, lambda, phi)
     x = (lambda(1:M) + tau^2).^(-alpha/2) .* xi(1:M);
-    T = convert_std_basis(x, phi(:,1:M));
+    T = phi(:,1:M)*x;
 end
 
 function x = compute_rand_xi(num_data)
     x = normrnd(0, 1, num_data, 1);
-end
-
-function u = convert_std_basis(x, phi)
-    u = phi*x;
 end
 
 function j = compute_rndjump_M(k)
