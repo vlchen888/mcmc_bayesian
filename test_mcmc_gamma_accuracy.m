@@ -1,8 +1,8 @@
 function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
 
     params = containers.Map;
-    params('data_set') = string('voting');
-    params('laplacian') = string('un');
+    params('data_set') = string('moons');
+    params('laplacian') = string('self tuning');
 
     if params('data_set') == string('moons')
         
@@ -29,7 +29,9 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
         params('label_data') = generate_fidelity(percent_fidelity, params('truth'), length(data));
     end
 
-
+    figure(3)
+    plot(params('label_data'))
+    
     params('num_iterations') = 100000;
     burn_in = 5000;
 
@@ -41,7 +43,7 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
 
     
     
-    params('gamma') = 0.0001;
+    params('gamma') = 0.1;
     params('B') = 0.4;
     params('init_tau') = 2;
     params('init_alpha') = 35;

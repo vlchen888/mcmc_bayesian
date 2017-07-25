@@ -40,8 +40,8 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     params('l') = 1.25;
     %
     
-    params('gamma') = 0.0001;
-    params('B') = 0.4;
+    params('gamma') = 0.1;
+    params('B') = 0.1;
     params('init_tau') = 2;
     params('init_alpha') = 35;
     params('init_M') = 50;

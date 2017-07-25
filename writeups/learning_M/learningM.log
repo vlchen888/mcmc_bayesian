@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  25 JUL 2017 13:11
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  25 JUL 2017 14:13
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -550,7 +550,7 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 102.
 
-<graphics/old/sigma_0_02/M_trace.png, id=31, 1606.0pt x 602.25pt>
+<graphics/old/sigma_0_02/M_trace.png, id=32, 1606.0pt x 602.25pt>
 File: graphics/old/sigma_0_02/M_trace.png Graphic file (type png)
 
 <use graphics/old/sigma_0_02/M_trace.png>
@@ -558,7 +558,7 @@ Package pdftex.def Info: graphics/old/sigma_0_02/M_trace.png used on input line
  106.
 (pdftex.def)             Requested size: 419.16621pt x 157.1878pt.
 
-<graphics/old/sigma_0_20/M_trace.png, id=32, 1606.0pt x 602.25pt>
+<graphics/old/sigma_0_20/M_trace.png, id=33, 1606.0pt x 602.25pt>
 File: graphics/old/sigma_0_20/M_trace.png Graphic file (type png)
 
 <use graphics/old/sigma_0_20/M_trace.png>
@@ -568,7 +568,7 @@ Package pdftex.def Info: graphics/old/sigma_0_20/M_trace.png used on input line
  [1
 
 {/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-<graphics/voting/nonhier/u_avg.png, id=68, 1606.0pt x 602.25pt>
+<graphics/voting/nonhier/u_avg.png, id=69, 1606.0pt x 602.25pt>
 File: graphics/voting/nonhier/u_avg.png Graphic file (type png)
 
 <use graphics/voting/nonhier/u_avg.png>
@@ -576,7 +576,7 @@ Package pdftex.def Info: graphics/voting/nonhier/u_avg.png used on input line 1
 22.
 (pdftex.def)             Requested size: 201.19798pt x 75.44647pt.
 
-<graphics/voting/nonhier/u_accept.png, id=69, 1606.0pt x 602.25pt>
+<graphics/voting/nonhier/u_accept.png, id=70, 1606.0pt x 602.25pt>
 File: graphics/voting/nonhier/u_accept.png Graphic file (type png)
 
 <use graphics/voting/nonhier/u_accept.png>
@@ -584,7 +584,7 @@ Package pdftex.def Info: graphics/voting/nonhier/u_accept.png used on input lin
 e 127.
 (pdftex.def)             Requested size: 201.19798pt x 75.44647pt.
 
-<graphics/voting/nonhier/senator_traces.png, id=70, 1606.0pt x 602.25pt>
+<graphics/voting/nonhier/senator_traces.png, id=71, 1606.0pt x 602.25pt>
 File: graphics/voting/nonhier/senator_traces.png Graphic file (type png)
 
 <use graphics/voting/nonhier/senator_traces.png>
@@ -594,7 +594,7 @@ ut line 133.
  [2 <./graphics/old/sigma_0_02/M_trace.png (PNG copy)> <./graphics/old/sigma_0_
 20/M_trace.png (PNG copy)> <./graphics/voting/nonhier/u_avg.png (PNG copy)> <./
 graphics/voting/nonhier/u_accept.png (PNG copy)>]
-<graphics/voting/hier/M_trace.png, id=90, 1606.0pt x 602.25pt>
+<graphics/voting/hier/M_trace.png, id=91, 1606.0pt x 602.25pt>
 File: graphics/voting/hier/M_trace.png Graphic file (type png)
 
 <use graphics/voting/hier/M_trace.png>
@@ -602,7 +602,7 @@ Package pdftex.def Info: graphics/voting/hier/M_trace.png used on input line 14
 0.
 (pdftex.def)             Requested size: 201.19798pt x 75.44647pt.
 
-<graphics/voting/hier/M_accept.png, id=91, 1606.0pt x 602.25pt>
+<graphics/voting/hier/M_accept.png, id=92, 1606.0pt x 602.25pt>
 File: graphics/voting/hier/M_accept.png Graphic file (type png)
 
 <use graphics/voting/hier/M_accept.png>
@@ -610,7 +610,7 @@ Package pdftex.def Info: graphics/voting/hier/M_accept.png used on input line 1
 45.
 (pdftex.def)             Requested size: 201.19798pt x 75.44647pt.
 
-<graphics/voting/hier/u_avg.png, id=92, 1606.0pt x 602.25pt>
+<graphics/voting/hier/u_avg.png, id=93, 1606.0pt x 602.25pt>
 File: graphics/voting/hier/u_avg.png Graphic file (type png)
 
 <use graphics/voting/hier/u_avg.png>
@@ -618,7 +618,7 @@ Package pdftex.def Info: graphics/voting/hier/u_avg.png used on input line 153.
 
 (pdftex.def)             Requested size: 201.19798pt x 75.44647pt.
 
-<graphics/voting/hier/xi_accept.png, id=93, 1606.0pt x 602.25pt>
+<graphics/voting/hier/xi_accept.png, id=94, 1606.0pt x 602.25pt>
 File: graphics/voting/hier/xi_accept.png Graphic file (type png)
 
 <use graphics/voting/hier/xi_accept.png>
@@ -626,18 +626,113 @@ Package pdftex.def Info: graphics/voting/hier/xi_accept.png used on input line
 158.
 (pdftex.def)             Requested size: 201.19798pt x 75.44647pt.
 
-<graphics/voting/hier/34_eigvec.png, id=94, 1606.0pt x 602.25pt>
+<graphics/voting/hier/34_eigvec.png, id=95, 1606.0pt x 602.25pt>
 File: graphics/voting/hier/34_eigvec.png Graphic file (type png)
 
 <use graphics/voting/hier/34_eigvec.png>
 Package pdftex.def Info: graphics/voting/hier/34_eigvec.png used on input line 
 164.
 (pdftex.def)             Requested size: 419.16621pt x 157.1878pt.
- (./learningM.bbl [3 <./graphics/voting/nonhier/senator_traces.png (PNG copy)> 
-<./graphics/voting/hier/M_trace.png (PNG copy)> <./graphics/voting/hier/M_accep
-t.png (PNG copy)> <./graphics/voting/hier/u_avg.png (PNG copy)> <./graphics/vot
-ing/hier/xi_accept.png (PNG copy)> <./graphics/voting/hier/34_eigvec.png (PNG c
-opy)>]
+ [3 <./graphics/voting/nonhier/senator_traces.png (PNG copy)> <./graphics/votin
+g/hier/M_trace.png (PNG copy)> <./graphics/voting/hier/M_accept.png (PNG copy)>
+ <./graphics/voting/hier/u_avg.png (PNG copy)> <./graphics/voting/hier/xi_accep
+t.png (PNG copy)> <./graphics/voting/hier/34_eigvec.png (PNG copy)>]
+<graphics/moons/nonhier1/scatter.png, id=113, 1204.5pt x 1003.75pt>
+File: graphics/moons/nonhier1/scatter.png Graphic file (type png)
+
+<use graphics/moons/nonhier1/scatter.png>
+Package pdftex.def Info: graphics/moons/nonhier1/scatter.png used on input line
+ 176.
+(pdftex.def)             Requested size: 201.19798pt x 167.66394pt.
+
+<graphics/moons/nonhier1/u_accept.png, id=114, 1606.0pt x 602.25pt>
+File: graphics/moons/nonhier1/u_accept.png Graphic file (type png)
+
+<use graphics/moons/nonhier1/u_accept.png>
+Package pdftex.def Info: graphics/moons/nonhier1/u_accept.png used on input lin
+e 181.
+(pdftex.def)             Requested size: 201.19798pt x 75.44647pt.
+
+<graphics/moons/hier1/scatter.png, id=115, 1204.5pt x 1003.75pt>
+File: graphics/moons/hier1/scatter.png Graphic file (type png)
+
+<use graphics/moons/hier1/scatter.png>
+Package pdftex.def Info: graphics/moons/hier1/scatter.png used on input line 18
+9.
+(pdftex.def)             Requested size: 201.19798pt x 167.66394pt.
+
+<graphics/moons/hier1/xi_accept.png, id=116, 1606.0pt x 602.25pt>
+File: graphics/moons/hier1/xi_accept.png Graphic file (type png)
+
+<use graphics/moons/hier1/xi_accept.png>
+Package pdftex.def Info: graphics/moons/hier1/xi_accept.png used on input line 
+194.
+(pdftex.def)             Requested size: 201.19798pt x 75.44647pt.
+
+<graphics/moons/hier1/M_trace.png, id=117, 1606.0pt x 602.25pt>
+File: graphics/moons/hier1/M_trace.png Graphic file (type png)
+
+<use graphics/moons/hier1/M_trace.png>
+Package pdftex.def Info: graphics/moons/hier1/M_trace.png used on input line 20
+2.
+(pdftex.def)             Requested size: 201.19798pt x 75.44647pt.
+
+<graphics/moons/hier1/M_accept.png, id=118, 1606.0pt x 602.25pt>
+File: graphics/moons/hier1/M_accept.png Graphic file (type png)
+
+<use graphics/moons/hier1/M_accept.png>
+Package pdftex.def Info: graphics/moons/hier1/M_accept.png used on input line 2
+07.
+(pdftex.def)             Requested size: 201.19798pt x 75.44647pt.
+
+<graphics/moons/nonhier2/scatter.png, id=119, 1204.5pt x 1003.75pt>
+File: graphics/moons/nonhier2/scatter.png Graphic file (type png)
+
+<use graphics/moons/nonhier2/scatter.png>
+Package pdftex.def Info: graphics/moons/nonhier2/scatter.png used on input line
+ 218.
+(pdftex.def)             Requested size: 201.19798pt x 167.66394pt.
+
+<graphics/moons/nonhier2/u_accept.png, id=120, 1606.0pt x 602.25pt>
+File: graphics/moons/nonhier2/u_accept.png Graphic file (type png)
+
+<use graphics/moons/nonhier2/u_accept.png>
+Package pdftex.def Info: graphics/moons/nonhier2/u_accept.png used on input lin
+e 223.
+(pdftex.def)             Requested size: 201.19798pt x 75.44647pt.
+
+<graphics/moons/hier2/scatter.png, id=121, 1204.5pt x 1003.75pt>
+File: graphics/moons/hier2/scatter.png Graphic file (type png)
+
+<use graphics/moons/hier2/scatter.png>
+Package pdftex.def Info: graphics/moons/hier2/scatter.png used on input line 23
+1.
+(pdftex.def)             Requested size: 201.19798pt x 167.66394pt.
+
+<graphics/moons/hier2/xi_accept.png, id=122, 1606.0pt x 602.25pt>
+File: graphics/moons/hier2/xi_accept.png Graphic file (type png)
+
+<use graphics/moons/hier2/xi_accept.png>
+Package pdftex.def Info: graphics/moons/hier2/xi_accept.png used on input line 
+236.
+(pdftex.def)             Requested size: 201.19798pt x 75.44647pt.
+
+<graphics/moons/hier2/M_trace.png, id=123, 1606.0pt x 602.25pt>
+File: graphics/moons/hier2/M_trace.png Graphic file (type png)
+
+<use graphics/moons/hier2/M_trace.png>
+Package pdftex.def Info: graphics/moons/hier2/M_trace.png used on input line 24
+4.
+(pdftex.def)             Requested size: 201.19798pt x 75.44647pt.
+
+<graphics/moons/hier2/M_accept.png, id=124, 1606.0pt x 602.25pt>
+File: graphics/moons/hier2/M_accept.png Graphic file (type png)
+
+<use graphics/moons/hier2/M_accept.png>
+Package pdftex.def Info: graphics/moons/hier2/M_accept.png used on input line 2
+49.
+(pdftex.def)             Requested size: 201.19798pt x 75.44647pt.
+ (./learningM.bbl
 
 LaTeX Warning: Empty `thebibliography' environment on input line 3.
 
@@ -645,24 +740,35 @@ LaTeX Warning: Empty `thebibliography' environment on input line 3.
 \tf@thm=\write4
 \openout4 = `learningM.thm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 172.
- [4]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 172.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 255.
+ [4 <./graphics/moons/nonhier1/scatter.png (PNG copy)> <./graphics/moons/nonhie
+r1/u_accept.png (PNG copy)> <./graphics/moons/hier1/scatter.png (PNG copy)> <./
+graphics/moons/hier1/xi_accept.png (PNG copy)>]
+
+LaTeX Warning: Text page 5 contains only floats.
+
+[5 <./graphics/moons/hier1/M_trace.png (PNG copy)> <./graphics/moons/hier1/M_ac
+cept.png (PNG copy)> <./graphics/moons/nonhier2/scatter.png (PNG copy)> <./grap
+hics/moons/nonhier2/u_accept.png (PNG copy)> <./graphics/moons/hier2/scatter.pn
+g (PNG copy)> <./graphics/moons/hier2/xi_accept.png (PNG copy)> <./graphics/moo
+ns/hier2/M_trace.png (PNG copy)> <./graphics/moons/hier2/M_accept.png (PNG copy
+)>]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 255.
  (./learningM.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 172.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 172.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 255.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 255.
 Package rerunfilecheck Info: File `learningM.out' has not changed.
-(rerunfilecheck)             Checksum: 46463D9DE0CC5719FAED898FC1367668;366.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 172.
+(rerunfilecheck)             Checksum: 10793BBC91A0DBE821EDFD8513F201FF;362.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 255.
  ) 
 Here is how much of TeX's memory you used:
- 9234 strings out of 493089
- 143766 string characters out of 6134842
+ 9344 strings out of 493089
+ 146771 string characters out of 6134842
  264161 words of memory out of 5000000
- 12577 multiletter control sequences out of 15000+600000
- 10905 words of font info for 42 fonts, out of 8000000 for 9000
+ 12652 multiletter control sequences out of 15000+600000
+ 11603 words of font info for 44 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 37i,8n,39p,1546b,410s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 37i,8n,39p,1563b,371s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb
 ></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb>
@@ -678,10 +784,10 @@ ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texliv
 e/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/
 2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti8.pfb></usr/local/texlive/20
 15/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on learningM.pdf (4 pages, 490085 bytes).
+Output written on learningM.pdf (5 pages, 1023048 bytes).
 PDF statistics:
- 166 PDF objects out of 1000 (max. 8388607)
- 133 compressed objects within 2 object streams
- 33 named destinations out of 1000 (max. 500000)
- 99 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 219 PDF objects out of 1000 (max. 8388607)
+ 173 compressed objects within 2 object streams
+ 58 named destinations out of 1000 (max. 500000)
+ 159 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -111,7 +111,7 @@ We tested our algorithm on the two moons dataset with varying $\sigma$, fixing $
 \end{figure}
 
 \section{Nonhierarchical vs. Hierarchical}
-We will compare pCN with fixed $\tau$ and $\alpha$ against \cref{alg:hier_t_a_M}, using the same fixed $\tau$ and $\alpha$ and learning $M$.
+We will compare pCN with fixed $\tau$ and $\alpha$ against \cref{alg:hier_t_a_M} with the same fixed $\tau$ and $\alpha$, but learning $M$.
 \subsection{Voting records}
 The nonhierarchical algorithm for learning $\tau$ and $\alpha$ gave expected values of $\tau$ and $\alpha$ as $\tau \approx 2$ and $\alpha \approx 35$, so I chose those parameters for the pCN and for \cref{alg:hier_t_a_M}. For the pCN, all $435$ eigenvectors were used. I narrowed the range of $M$ allowed in \cref{alg:hier_t_a_M} to 1 to 70. 5 labeled nodes were selected, consistent across the two methods. The results are not very concrete yet. Tentatively, it seems that being hierarchical does have some benefits, but more experiments are needed. In this particular realization (seeded with $\text{rng}(5)$), the hierarchical algorithm achieves $90.70\%$ while the nonhierarchical algorithm achieves $87.67\%$ classification accuracy. \cref{fig:voting_nonhier_u_avg}, \cref{fig:voting_nonhier_u_accept}, \cref{fig:voting_nonhier_senator_traces}, \cref{fig:voting_hier_M_trace}, \cref{fig:voting_hier_M_accept}, \cref{fig:voting_hier_u_avg}, \cref{fig:voting_hier_xi_accept} show the results of this experiment. Notice in \cref{fig:voting_hier_M_trace} that there seems to be an important eigenvector for classification indexed around 30, as $M$ seldom drops below $30$. Looking at the eigenvectors around index 30, I plotted the 34th eigenvector in \cref{fig:voting_hier_eigenvector}. From a purely visual perspective, it does appear that this eigenvector corresponds decently to the final classification in \cref{fig:voting_hier_u_avg} by looking at where some of the ``spikes'' are.
 
@@ -165,7 +165,90 @@ The nonhierarchical algorithm for learning $\tau$ and $\alpha$ gave expected val
 \end{figure}
 
 \subsection{Two moons}
-I tried a similar set of experiments on the two moons data. I fixed $\tau = 2, \alpha = 35$, again following the expected values of these hyperparameters from the noncentered algorithm that learns $\tau,\alpha$. 
+I tried a similar set of experiments on the two moons data. I fixed $\tau = 2, \alpha = 35$, again following the expected values of these hyperparameters from the noncentered algorithm that learns $\tau,\alpha$. I set the pCN to use the first $100$ eigenvectors, and I set the range for $M$ in \cref{alg:hier_t_a_M} to be $[1, 70]$. The two moons data was generated with $N=2000, d=100, \sigma = 0.2$ and $1\%$ fidelity. The nodes selected for fidelity are random but consistent between the different methods, as is the data itself. The colored diamonds in the scatter plots are the labeled nodes. I ran this test with two different seeds. With seed $\text{rng}(3)$, the two algorithms perform similarly well, as shown in the final clustering in \cref{fig:moons_nonhier1_scatter} and \cref{fig:moons_hier1_scatter}. In \cref{fig:moons_hier1_M_trace}, $M$ seems to have moved from its uniform prior distribution, preferring a mean of around $15$. With $\text{rng}(4)$, the hierarchical algorithm is more accurate than the nonhierarchical one, as seen in the clustering shown in \cref{fig:moons_nonhier2_scatter} and \cref{fig:moons_hier2_scatter}. The trace of $M$ in \cref{fig:moons_hier2_M_trace} seems to show convergence after 50000 iterations, but perhaps it is difficult to say because from around 30000 to 40000 it also looked like it converged. The results again suggest that there is some value to being hierarchical with $M$ even with good choices of $\tau$ and $\alpha$, but more experiments are needed. 
+
+% rng(3)
+
+\begin{figure}[!htb]
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:moons_nonhier1_scatter} Nonhierarchical, seed $\text{rng}(3)$. Final classification projected into first two dimensions.}
+    \includegraphics[width=\linewidth]{moons/nonhier1/scatter.png}
+\end{minipage} \hfill
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:moons_nonhier1_u_accept} Nonhierarchical, seed $\text{rng}(3)$. $u$ acceptance probability.}
+    \includegraphics[width=\linewidth]{moons/nonhier1/u_accept.png}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[!htb]
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:moons_hier1_scatter} Hierarchical, seed $\text{rng}(3)$. Final classification projected into first two dimensions.}
+    \includegraphics[width=\linewidth]{moons/hier1/scatter.png}
+\end{minipage} \hfill
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:moons_hier1_u_accept} Hierarchical, seed $\text{rng}(3)$. $\xi$ acceptance probability.}
+    \includegraphics[width=\linewidth]{moons/hier1/xi_accept.png}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[!htb]
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:moons_hier1_M_trace} Hierarchical, seed $\text{rng}(3)$. $M$ trace.}
+    \includegraphics[width=\linewidth]{moons/hier1/M_trace.png}
+\end{minipage} \hfill
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:moons_hier1_M_accept} Hierarchical, seed $\text{rng}(3)$. $M$ accept.}
+    \includegraphics[width=\linewidth]{moons/hier1/M_accept.png}
+\end{minipage}
+\end{figure}
+
+
+% rng(4)
+
+\begin{figure}[!htb]
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:moons_nonhier2_scatter} Nonhierarchical, seed $\text{rng}(4)$. Final classification projected into first two dimensions.}
+    \includegraphics[width=\linewidth]{moons/nonhier2/scatter.png}
+\end{minipage} \hfill
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:moons_nonhier2_u_accept} Nonhierarchical, seed $\text{rng}(4)$. $u$ acceptance probability.}
+    \includegraphics[width=\linewidth]{moons/nonhier2/u_accept.png}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[!htb]
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:moons_hier2_scatter} Hierarchical, seed $\text{rng}(4)$. Final classification projected into first two dimensions.}
+    \includegraphics[width=\linewidth]{moons/hier2/scatter.png}
+\end{minipage} \hfill
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:moons_hier2_u_accept} Hierarchical, seed $\text{rng}(4)$. $\xi$ acceptance probability.}
+    \includegraphics[width=\linewidth]{moons/hier2/xi_accept.png}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[!htb]
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:moons_hier2_M_trace} Hierarchical, seed $\text{rng}(4)$. $M$ trace.}
+    \includegraphics[width=\linewidth]{moons/hier2/M_trace.png}
+\end{minipage} \hfill
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:moons_hier2_M_accept} Hierarchical, seed $\text{rng}(4)$. $M$ accept.}
+    \includegraphics[width=\linewidth]{moons/hier2/M_accept.png}
+\end{minipage}
+\end{figure}
 
 \bibliographystyle{siamplain}
 \bibliography{references}

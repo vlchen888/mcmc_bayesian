@@ -21,7 +21,7 @@ function [u_all, u_accept] = mcmc_gamma(params)
 
     lambda = eig(L);
     [phi, ~] = eig(L);
-    M = 435;
+    M = 100;
     lambda = lambda(1:M);
     phi = phi(:,1:M);
     
