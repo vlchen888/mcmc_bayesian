@@ -89,7 +89,7 @@ Let the similarity graph be $G$ with weights $w_{ij} \ge 0$. A larger weight ind
 0           & i \neq j. 
 \end{cases}\]
 
-Then, let $L = D - W$ denote the unnormalized graph Laplacian on $\mathbb{R}^N$. Denote the eigenbasis of $L$ by
+Then, let $L = D - W$ denote the unnormalized graph Laplacian on $\mathbb{R}^N$. Also, denote $L_\text{sym} = D^{-1/2}LD^{-1/2}$ as the symmetric normalized graph Laplacian, and $L_\text{rw}=D^{-1}L$ as the random walk normalized graph Laplacian. Denote the eigenbasis of $L$ by
 \begin{equation}
 \label{eqn:laplacian}
 Lq_j = \lambda_j q_j,\quad j=0,\ldots,N-1.
@@ -167,11 +167,35 @@ and we can see that we would define
 
 \section{Model problems}
 Applications to be considered include the following:
-\begin{itemize}
-\item the voting records: A data set of the voting records on $16$ votes of $435$ individuals from the U.S. House of Representatives. The data is ordered so that all the representatives from the party are contiguous in the indexing.
-\item two moons: This is a synthetic data set constructed with two half circles in $\mathbb{R}^2$ with radius one. These are embedded in $\mathbb{R}^{100}$, and data points are sampled from the circles with Gaussian noise added to each of the 100 dimensions.
-\item MNIST data sets: This data set contains 70,000 images of $28 \times 28$ pixels with handwritten digits $0$ through $9$.
-\end{itemize}
+\subsection{Voting records}
+A data set of the voting records on $16$ votes of $435$ individuals from the U.S. House of Representatives. The data is ordered so that all the representatives from the party are contiguous in the indexing. The graph has $N=435$ nodes, with feature vectors that are $d=16$ dimensional. Each component of the feature vectors is either $+1,-1,$ or $0$ to indicate voting for, voting against, or abstaining on a particular bill, respectively. On this data set, we want to perform binary classification with a subset of labeled data. For this problem, we will use the unnormalized Laplacian with fixed length-scale weights. That is, we will define $w_{ij} = \exp\left({-\frac{d(x_i,x_j)}{2l^2}}\right), \quad d_{p,q}(x,y) = ||x-y||^q_p$ with $p=2,q=2,l=1$. \cref{fig:voting_spec} is part of the spectrum of this choice of Laplacian.
+
+\begin{figure}[!htb]
+\caption{\label{fig:voting_spec} Lowest $9$ eigenvectors of unnormalized $L$ of voting records.}
+\includegraphics[width=\linewidth]{laplacians/voting_laplacian.png}
+\end{figure}
+
+\subsection{Two moons}
+This is a synthetic data set constructed with two half circles in $\mathbb{R}^2$ with radius one. These are embedded in $\mathbb{R}^{100}$, and data points are sampled from the circles with Gaussian noise distributed as $\mathsf{N}(0,\sigma^2)$ added to each of the 100 dimensions. In this data set, we will be generating realizations of two moons with $N=1000$ or $N=2000$ nodes, each associated with $d=100$ dimensional feature vectors. This data is again ordered, with the first $N/2$ nodes generated from the first half circle, and the latter $N/2$ from the second. Again, here we want to perform binary classification into the two half circles from which the data was generated. We will be using the self-tuning, symmetric Laplacian for this data set, introduced in \cite{SelfTuning}. This Laplacian matrix has weights that infer the local spatial scale from the data, removing the need to choose a fixed length-scale parameter. The use of this self-tuning Laplacian in the two-moons data set seems to encode more information in the eigenvectors. Compare \cref{fig:moon_spec} with \cref{fig:moon_un_spec}.
+
+\begin{figure}[!htb]
+\caption{\label{fig:moon_spec} Lowest $9$ eigenvectors of self-tuning symmetric $L$ of two moons, $\sigma = 0.04$.}
+\includegraphics[width=\linewidth]{laplacians/moon_laplacian.png}
+\end{figure}
+
+\begin{figure}[!htb]
+\caption{\label{fig:moon_un_spec} Lowest $9$ eigenvectors of unnormalized fixed length $L$ of two moons, $\sigma = 0.04$.}
+\includegraphics[width=\linewidth]{laplacians/moon_laplacian_un.png}
+\end{figure}
+
+\subsection{MNIST data sets}
+This data set contains 70,000 images of $28 \times 28$ pixels with handwritten digits $0$ through $9$. The feature vectors are $d=400$ dimensional and are formed by projection onto the first $50$ PCA components. We will focus on binary classification between the digits $4$ and $9$. We will use the self-tuning, symmetric normalized Laplacian again. See \cref{fig:mnist_spec}.
+
+\begin{figure}[!htb]
+\caption{\label{fig:mnist_spec} Lowest $9$ eigenvectors of self-tuning symmetric $L$ of MNIST, digits $4$ and $9$.}
+\includegraphics[width=\linewidth]{laplacians/mnist_laplacian.png}
+\end{figure}
+
 
 \section{Models}
 My project looks at the effectiveness of different Bayesian hierarchical clustering algorithms. I am implementing these algorithms in MATLAB and testing them on the data sets mentioned. The complexity of the models considered will evolve as follows:
@@ -386,20 +410,7 @@ Finally, the non-centered \cref{alg:xi_tau_alpha} seems to converge faster than 
 
 \section{Two moons experiments}
 
-Using these algorithms, I also ran experiments to cluster the two-moons data set, with $r=1, N = 1000, d = 100, \sigma = 0.1$. We explored using the self-tuning Laplacian, which was introduced in \cite{SelfTuning}. This Laplacian matrix has weights that infer the local spatial scale from the data, removing the need to choose a fixed length-scale parameter. The use of this self-tuning Laplacian in the two-moons data set seems to encode more information in the eigenvectors. Compare \cref{fig:moon_laplacian_un} with \cref{fig:moon_laplacian_selftuning}. 
-
-\begin{figure}[!htb]
-    \begin{minipage}{0.48\textwidth}
-        \centering
-        \caption{\label{fig:moon_laplacian_un} First eigenvectors of unnormalized Laplacian for intertwined moons data}
-        \includegraphics[width=\linewidth]{graphics/moon_laplacian_un.png}
-    \end{minipage} \hfill
-    \begin{minipage}{0.48\textwidth}
-        \centering
-        \caption{\label{fig:moon_laplacian_selftuning} First eigenvectors of unnormalized self-tuning Laplacian for intertwined moons data}
-        \includegraphics[width=\linewidth]{graphics/moon_laplacian_selftuning.png}
-    \end{minipage}
-\end{figure}
+Using these algorithms, I also ran experiments to cluster the two-moons data set, with $r=1, N = 1000, d = 100, \sigma = 0.1$. We used the self-tuning Laplacian introduced in \cite{SelfTuning}.
 
 For each of the following experiments, we labeled the same $42$ nodes, $21$ in each half-moon, approximately uniformly spaced. Running \cref{alg:generalpCN} on this data set using only the first 50 eigenvectors with $\gamma=0.0001,\beta=0.4,\tau=1,\alpha=1$ with 100000 iterations and a burn-in period of 1000, we could get around 90\% accuracy.
 \begin{figure}[!htb]
@@ -415,7 +426,7 @@ For each of the following experiments, we labeled the same $42$ nodes, $21$ in e
     \end{minipage}
 \end{figure}
 
-We now compare the results from the centered (\cref{alg:hierarchical_tau_alpha}) and non-centered (\cref{alg:xi_tau_alpha}) algorithms, truncating the number of eigenvectors to $50$ in both cases again. For both algorithms, we fixed $\gamma = 0.1, \beta = 0.4, \tau^{(0)}=20,\alpha^{(0)}=20,\tau\in[0.01,60],\alpha\in[1,60],\epsilon_\tau=0.5,\epsilon_\alpha=1$ and ran $100000$ iterations with a burn-in period of $1000$. With these settings, \cref{alg:hierarchical_tau_alpha} achieves around 90\% accuracy, while \cref{alg:xi_tau_alpha} achieves around 98\%. It still appears that the non-centered algorithm converges faster than the centered algorithm. If the centered algorithm is initialized at $\tau^{(0)} = 1$, the final classification accuracy is very similar to that of the non-centered algorithm. See \cref{fig:moon_centered_avg}, \cref{fig:moon_centered_accept}, \cref{fig:moon_centered_tau}, \cref{fig:moon_centered_alpha}, \cref{fig:moon_noncentered_avg}, \cref{fig:moon_noncentered_accept}, \cref{fig:moon_noncentered_tau}, \cref{fig:moon_noncentered_alpha}.
+We now compare the results from the centered (\cref{alg:hierarchical_tau_alpha}) and non-centered (\cref{alg:xi_tau_alpha}) algorithms, truncating the number of eigenvectors to $50$ in both cases. For both algorithms, we fixed $\gamma = 0.1, \beta = 0.4, \tau^{(0)}=20,\alpha^{(0)}=20,\tau\in[0.01,60],\alpha\in[1,60],\epsilon_\tau=0.5,\epsilon_\alpha=1$ and ran $100000$ iterations with a burn-in period of $1000$. With these settings, \cref{alg:hierarchical_tau_alpha} achieves around 90\% accuracy, while \cref{alg:xi_tau_alpha} achieves around 98\%. It still appears that the non-centered algorithm converges faster than the centered algorithm. If the centered algorithm is initialized at $\tau^{(0)} = 1$, the final classification accuracy is very similar to that of the non-centered algorithm. See \cref{fig:moon_centered_avg}, \cref{fig:moon_centered_accept}, \cref{fig:moon_centered_tau}, \cref{fig:moon_centered_alpha}, \cref{fig:moon_noncentered_avg}, \cref{fig:moon_noncentered_accept}, \cref{fig:moon_noncentered_tau}, \cref{fig:moon_noncentered_alpha}.
 
 \begin{figure}[!htb]
     \begin{minipage}{0.48\textwidth}

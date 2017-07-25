@@ -1,10 +1,13 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
 \BOOKMARK [1][-]{section.8}{Model problems}{}% 2
-\BOOKMARK [1][-]{section.9}{Models}{}% 3
-\BOOKMARK [1][-]{section.10}{Approach}{}% 4
-\BOOKMARK [1][-]{section.11}{Algorithms}{}% 5
-\BOOKMARK [1][-]{section.18}{Voting records experiments}{}% 6
-\BOOKMARK [1][-]{section.41}{Two moons experiments}{}% 7
-\BOOKMARK [1][-]{section.66}{Challenges}{}% 8
-\BOOKMARK [1][-]{section.67}{Additional resources}{}% 9
-\BOOKMARK [1][-]{section.67}{References}{}% 10
+\BOOKMARK [2][-]{subsection.9}{Voting records}{section.8}% 3
+\BOOKMARK [2][-]{subsection.12}{Two moons}{section.8}% 4
+\BOOKMARK [2][-]{subsection.17}{MNIST data sets}{section.8}% 5
+\BOOKMARK [1][-]{section.20}{Models}{}% 6
+\BOOKMARK [1][-]{section.21}{Approach}{}% 7
+\BOOKMARK [1][-]{section.22}{Algorithms}{}% 8
+\BOOKMARK [1][-]{section.29}{Voting records experiments}{}% 9
+\BOOKMARK [1][-]{section.52}{Two moons experiments}{}% 10
+\BOOKMARK [1][-]{section.73}{Challenges}{}% 11
+\BOOKMARK [1][-]{section.74}{Additional resources}{}% 12
+\BOOKMARK [1][-]{section.74}{References}{}% 13

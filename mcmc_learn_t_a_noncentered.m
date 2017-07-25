@@ -27,7 +27,7 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
     
     
     [num_data, ~] = size(data);
-    M = 600;
+    M = 50;
     phi = phi(:, 1:M);
     lambda = lambda(1:M);
     
@@ -35,7 +35,6 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
     
     %%%%% Initialization from Fiedler Vector?? %%%%%
     xi_all(2, 1) = (lambda(2)+init_tau^2)^(init_alpha/2);
-    %xi_all(2, 1) = 1;
         
     tau_all = zeros(1, num_iterations);
     tau_all(1) = init_tau;

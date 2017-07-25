@@ -111,8 +111,61 @@ We tested our algorithm on the two moons dataset with varying $\sigma$, fixing $
 \end{figure}
 
 \section{Nonhierarchical vs. Hierarchical}
+We will compare pCN with fixed $\tau$ and $\alpha$ against \cref{alg:hier_t_a_M}, using the same fixed $\tau$ and $\alpha$ and learning $M$.
+\subsection{Voting records}
+The nonhierarchical algorithm for learning $\tau$ and $\alpha$ gave expected values of $\tau$ and $\alpha$ as $\tau \approx 2$ and $\alpha \approx 35$, so I chose those parameters for the pCN and for \cref{alg:hier_t_a_M}. For the pCN, all $435$ eigenvectors were used. I narrowed the range of $M$ allowed in \cref{alg:hier_t_a_M} to 1 to 70. 5 labeled nodes were selected, consistent across the two methods. The results are not very concrete yet. Tentatively, it seems that being hierarchical does have some benefits, but more experiments are needed. In this particular realization (seeded with $\text{rng}(5)$), the hierarchical algorithm achieves $90.70\%$ while the nonhierarchical algorithm achieves $87.67\%$ classification accuracy. \cref{fig:voting_nonhier_u_avg}, \cref{fig:voting_nonhier_u_accept}, \cref{fig:voting_nonhier_senator_traces}, \cref{fig:voting_hier_M_trace}, \cref{fig:voting_hier_M_accept}, \cref{fig:voting_hier_u_avg}, \cref{fig:voting_hier_xi_accept} show the results of this experiment. Notice in \cref{fig:voting_hier_M_trace} that there seems to be an important eigenvector for classification indexed around 30, as $M$ seldom drops below $30$. Looking at the eigenvectors around index 30, I plotted the 34th eigenvector in \cref{fig:voting_hier_eigenvector}. From a purely visual perspective, it does appear that this eigenvector corresponds decently to the final classification in \cref{fig:voting_hier_u_avg} by looking at where some of the ``spikes'' are.
 
+\begin{figure}[!htb]
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:voting_nonhier_u_avg} Average of $S(u)$}
+    \includegraphics[width=\linewidth]{voting/nonhier/u_avg.png}
+\end{minipage} \hfill
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:voting_nonhier_u_accept} $u$ acceptance probability}
+    \includegraphics[width=\linewidth]{voting/nonhier/u_accept.png}
+\end{minipage}
+\end{figure}
 
+\begin{figure}[!htb]
+\caption{\label{fig:voting_nonhier_senator_traces} Running average of $S(u(i))$ for select $i$}
+\includegraphics[width=\linewidth]{voting/nonhier/senator_traces.png}
+\end{figure}
+
+\begin{figure}[!htb]
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:voting_hier_M_trace} Trace of $M$}
+    \includegraphics[width=\linewidth]{voting/hier/M_trace.png}
+\end{minipage} \hfill
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:voting_hier_M_accept} $M$ acceptance probability}
+    \includegraphics[width=\linewidth]{voting/hier/M_accept.png}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[!htb]
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:voting_hier_u_avg} Average of $S(u)$}
+    \includegraphics[width=\linewidth]{voting/hier/u_avg.png}
+\end{minipage} \hfill
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \caption{\label{fig:voting_hier_xi_accept} $\xi$ acceptance probability}
+    \includegraphics[width=\linewidth]{voting/hier/xi_accept.png}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[!htb]
+\caption{\label{fig:voting_hier_eigenvector} 34th eigenvector of unnormalized fixed length-scale $L$}
+\includegraphics[width=\linewidth]{voting/hier/34_eigvec.png}
+\end{figure}
+
+\subsection{Two moons}
+I tried a similar set of experiments on the two moons data. I fixed $\tau = 2, \alpha = 35$, again following the expected values of these hyperparameters from the noncentered algorithm that learns $\tau,\alpha$. 
 
 \bibliographystyle{siamplain}
 \bibliography{references}

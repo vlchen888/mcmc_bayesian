@@ -2,8 +2,8 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
 
     params = containers.Map;
 
-    params('data_set') = string('voting');
-    params('laplacian') = string('un');
+    params('data_set') = string('moons');
+    params('laplacian') = string('self tuning');
     
     if params('data_set') == string('moons')
         N = 2000;
@@ -40,11 +40,11 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     params('l') = 1.25;
     %
     
-    params('gamma') = 0.1;
-    params('B') = 0.05;
-    params('init_tau') = 1;
+    params('gamma') = 0.0001;
+    params('B') = 0.4;
+    params('init_tau') = 2;
     params('init_alpha') = 35;
-    params('init_M') = 100;
+    params('init_M') = 50;
     
     params('min_tau')       = 0.1;
     params('max_tau')       = 60;
@@ -53,7 +53,7 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     params('max_alpha')     = 60;
     
     params('min_M')       = 1;
-    params('max_M')       = 435;
+    params('max_M')       = 70;
     
     params('alpha_epsilon') = 0;
     params('tau_epsilon')   = 0;

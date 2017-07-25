@@ -1,8 +1,8 @@
 function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
 
     params = containers.Map;
-    params('data_set') = string('moons');
-    params('laplacian') = string('self tuning');
+    params('data_set') = string('voting');
+    params('laplacian') = string('un');
 
     if params('data_set') == string('moons')
         
@@ -25,14 +25,13 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
         load('data3.mat')
         data = X;
         params('data') = data;
-        set_neg = 20:30;
-        set_pos = 280:290;
-        params('label_data') = init(length(data),set_neg,set_pos);
+        params('truth') = [-ones(267,1); ones(168,1)];
+        params('label_data') = generate_fidelity(percent_fidelity, params('truth'), length(data));
     end
 
 
     params('num_iterations') = 100000;
-    burn_in = 1000;
+    burn_in = 5000;
 
     % not used
     params('p') = 2;
@@ -41,10 +40,10 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
     %
 
     
-    % For moons
-    params('gamma') = 0.1;
-    params('B') = 0.1;
-    params('init_tau') = 1;
+    
+    params('gamma') = 0.0001;
+    params('B') = 0.4;
+    params('init_tau') = 2;
     params('init_alpha') = 35;
     
     %{
@@ -89,12 +88,4 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
 
         
     end
-end
-
-function u = init(num_senators, set_neg, set_pos)
-    u = zeros(num_senators, 1);
-    
-    % label some of the data
-    u(set_pos) = 1;
-    u(set_neg) = -1;
 end

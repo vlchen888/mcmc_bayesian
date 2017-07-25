@@ -18,7 +18,7 @@ params('l') = 1;
 
 params('gamma')         = 0.1;
 params('B')             = 0.4;
-params('init_tau')      = 1;
+params('init_tau')      = 20;
 params('init_alpha')    = 1;
 
 params('min_tau')       = 0.01;
