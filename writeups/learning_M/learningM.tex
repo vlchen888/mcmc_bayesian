@@ -58,7 +58,7 @@
 \section{Algorithm for hierarchical towards $\tau, \alpha, M$}
 \begin{equation}
 \label{eqn:noncentered_T}
-T(\xi,\tau,\alpha, M) = \sum_{i=1}^M \frac{1}{(\lambda_i+\tau^2)^{\alpha/2}}\xi_iq_i = u
+T(\xi,\tau,\alpha, M) = \sum_{i=0}^M \frac{1}{(\lambda_i+\tau^2)^{\alpha/2}}\xi_iq_i = u
 \end{equation}
 
 
@@ -94,7 +94,7 @@ g(\xi,\tau,\alpha, M) \propto \exp\left( -\Phi(T(\xi,\tau,\alpha,M))-\frac{1}{2}
 \min\left\{1, \frac{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k+1)},\hat M^{(k)})}{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k+1)},M^{(k)})} \right\}
 \]
 \EndFor
-\State \Return $\{ T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}), \tau^{(k)}, \alpha^{k} \}$
+\State \Return $\{ T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)}), \tau^{(k)}, \alpha^{k} \}$
 \end{algorithmic}
 \end{algorithm}
 

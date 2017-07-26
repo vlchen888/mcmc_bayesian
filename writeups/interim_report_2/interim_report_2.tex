@@ -41,14 +41,14 @@
 
 \newcommand{\md}[1]{\textcolor{cyan}{#1}}
 
-\newcommand{\TheAuthors}{V. Chen\\ Advised by A. M. Stuart and  M. M. Dunlop}
+\newcommand{\TheAuthors}{V. Chen\\Advised by A. M. Stuart and  M. M. Dunlop\\This SURF is funded by The Aerospace Corporation}
 
 %\newtheorem{theorem}{Theorem}
 %\newtheorem{definition}{Definition}
 
 \graphicspath{ {graphics/} }
 
-\title{SURF 2017 Interim Report 1}
+\title{SURF 2017 Interim Report 2}
 \author{\TheAuthors}
 \date{}
 \begin{document}
@@ -57,114 +57,43 @@
 \setlength{\parindent}{0in}
 
 \section{Introduction}
-    In the context of semi-supervised learning, the \textit{clustering} problem refers to attempting to group a set of data or objects into clusters of similar objects. Applications of clustering include image segmentation, social network analysis, and voter classification, but the reader will readily identify numerous other potential applications. We approach the clustering problem from a graph-theoretical point of view, which assigns a node to each data value and weights on edges between nodes to indicate how related the data points are.
-
-    Let $Z$ be a set of nodes $\{1, \ldots N\}$. The feature vectors are given by $x : Z \rightarrow \mathbb{R}^d$. $Z' \subset Z$ is a subset of labeled nodes, for which we have label data given by $y : Z' \to \{-1, 1\}$ for {\bf binary} data, and $y : Z' \to \{e_1, \ldots e_k\}$ for {\bf $k$-ary} (multiclass) data.
-
-
-    The classifying function is given by the vector $u$, and the label model is given by $y(\ell) = S(u(\ell))$ for $l \in Z'$ (with possible additional corruption by noise). In the case of binary data, $y(\ell) \in \{\pm 1\}$, and for $v \in \mathbb{R}$,
-    \[
-    S(v) = \begin{cases}
-    1 & v>0\\
-    0 & v=0\\
-    -1 & v<0.
-    \end{cases}
-    \]
-
-    In the case of multiclass data, $y(\ell) \in \{e_1, \ldots e_k\}$, $v \in \mathbb{R}^k$ and
-    \[
-    S(v) = e_p, \quad p = \underset{r =1,\ldots,k}{\mathrm{argmax}}\;v_r
-    \]
-    where $\{e_l\}_{l=1}^k$ denotes the standard basis of $\mathbb{R}^k$.
-
-    Given this problem, one goal is to come up with a classification that best fits the data. The research group in which I am working is currently looking at the effectiveness of incorporating Bayesian inference into semi-supervised learning. In the Bayesian approach, the unknown classifying function $u$ is viewed as a random variable, whose distribution is determined by combining the labeling model $y$ with a probability distribution representing our prior beliefs about the classification and derived from the feature vectors. Hierarchical Bayesian methods provide additional flexibility by introducing hyperparameters governing the prior distribution, which are in turn treated as random variables to be inferred.
-
-    Our prior beliefs come from \textit{spectral clustering}, which uses the clustering properties of the eigenvalues and eigenvectors of the graph Laplacian, a matrix defined on the similarity graph constructed from the feature vectors as follows:
-
-    Let the similarity graph be $G$ with weights $w_{ij} \ge 0$. A larger weight indicate a higher degree of similarity between the two nodes. Define $\delta_i = \sum_{j=1}^N w_{ij}$. Then, define matrices $W, D$ as:
-
-    \[W = w_{ij},\quad D = \begin{cases} 
-    \delta_i    & i = j \\
-    0           & i \neq j. 
-    \end{cases}\]
-
-    Then, let $L = D - W$ denote the unnormalized graph Laplacian on $\mathbb{R}^N$. Also, denote $L_\text{sym} = D^{-1/2}LD^{-1/2}$ as the symmetric normalized graph Laplacian, and $L_\text{rw}=D^{-1}L$ as the random walk normalized graph Laplacian. Denote the eigenbasis of $L$ by
-    \begin{equation}
-    \label{eqn:laplacian}
-    Lq_j = \lambda_j q_j,\quad j=0,\ldots,N-1.
-    \end{equation}
-
-    We order the eigenvectors $q_0, \ldots q_{N-1}$ in increasing order of their corresponding eigenvalues. These eigenvalues are always non-negative \cite{Spectral}. The graph Laplacian is important because the eigenvectors corresponding to the smaller eigenvalues are known to hold information about cluster data. In particular, if the graph has ``ideal'' clusters so that the edges between clusters all have weight 0, then the graph Laplacian would have as many eigenvalues 0 as there are clusters, and corresponding eigenvectors would be indicators for the clusters \cite{Spectral}. Even if the data is not ideal, the eigenvectors corresponding to small eigenvalues should hold clustering information. This includes the important Fiedler vector, the second-smallest eigenvector which is useful for bi-partitioning the graph. The eigenvalues and eigenvectors of the graph Laplacian are used to construct the prior probability distribution about $u$.
-
-    % Derivation of prior, likelihood
-
-    For the Bayesian approach, the prior, likelihood and posterior are defined as follows:
-    \begin{itemize}
-    \item[$\mathbb{P}(u)$:] {\bf Prior} distributed as $\mathsf{N}(0,C)$ where the covariance matrix $C = f(L)^2$ in general, where $f$ is a function that we choose. A sample $u$ from this prior can be made through a realization of the following random sum:
-    \begin{equation}
-    \label{eqn:general_prior}
-    u = \sum_{j=0}^M f(\lambda_j)\xi_j q_j,\quad \xi_j\sim \mathsf{N}(0,1) \quad \text{i.i.d.}
-    \end{equation}
-    Looking at the form of the sample, it would make sense to impose the restriction that $f$ should be monotonically decreasing so that lower eigenvectors dominate the distribution, a belief consistent with our discussion about graph Laplacian eigenvectors above.
-
-
-    We will be mostly using a fixed function $f$, chosen as $f(\lambda) = (\lambda + \tau^2)^{-\alpha/2}$. In this case, $C = (L + \tau^2I)^{-\alpha}$, where $\tau$ and $\alpha$ are hyperparameters that govern the prior, and a sample $u$ from the prior can be made through the following:
+    Over the past month, I have been implementing different hierarchical algorithms for the semi-supervised clustering problem. In the Bayesian formulation, recall the prior distribution,
     \begin{equation}
     \label{eqn:prior}
     u = \sum_{j=0}^M (\lambda_j + \tau^2)^{-\alpha/2}\xi_j q_j,\quad \xi_j\sim \mathsf{N}(0,1) \quad \text{i.i.d.}
     \end{equation}
-    Note that this $f$ is indeed monotonically decreasing.
 
-    Finally, one other possibility is to learn $f$ as well.
+    as well as the general form of the prior,
 
-    \item[$\mathbb{P}(y|u)$:] {\bf Likelihood}, given by $\exp(-\Phi(u))$.
-
-    If we believe there is uncertainty in the labels, we could represent this uncertainty as additive Gaussian noise. For $\gamma > 0$, $\Phi(u)$ is chosen as
     \begin{equation}
-    \label{eqn:likelihood}
-    \Phi(u) = \displaystyle \frac{1}{2\gamma^2}\sum_{\ell\in Z'}|y(\ell)-S(u(\ell))|^2
-    \end{equation}
-    as introduced in \cite{BLS}. This definition can be derived from the {\bf Bayesian level-set} model for label uncertainty, which assumes $y(j) = S(u(j)) + \eta_j, \eta_j \sim \mathsf{N}(0,\gamma^2) \quad \text{i.i.d.}$ Then, the conditional distribution $y(j) | u \sim \mathsf{N}(S(u(j)),\gamma^2)$. We can compute the likelihood as follows:
-
-    \[ \mathbb{P}(y|u) = \prod_{j\in Z'} \mathbb{P}(y(j)|u) \propto \prod_{j\in Z'} \exp\left(-\frac{(y(j)-S(u(j)))^2} {2\gamma^2}\right).\]
-
-    So $\Phi(u) = -\log \mathbb{P}(y|u) = \frac{1}{2\gamma^2}\sum_{\ell\in Z'}|y(\ell)-S(u(\ell))|^2$ as desired.
-
-    If we believe that the label data is certain, $\Phi(u)$ is defined as
-    \begin{equation}
-    \label{eqn:gammatozero}
-    \Phi(u) = \begin{cases}
-    0 & S(u(l)) = y(l) \quad \forall l \in Z'\\
-    \infty & \text{otherwise}.
-    \end{cases}
-    \end{equation}
-    This case can be viewed as the $\gamma\to 0$ limit of \cref{eqn:likelihood} to enforce that $u$ must perfectly respect the labels. Notice that $\exp(-\Phi(u)) = 1$ if and only if the classifying function $u$ respects the label data. Otherwise, $\exp(-\Phi(u)) = 0$.
-
-
-    One other model for the likelihood is the {\bf probit} model, also used in \cite{BeLuStZy17}, in which we add noise to the classifying function before taking the sign function. Specifically, we assume $y(j) = S(u(j) + \eta_j), \eta_j \sim \mathsf{N}(0,\gamma^2) \quad \text{i.i.d.}$. Denote the normal cumulative distribution function
-    \[ \psi(x) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{x}\exp\left(-t^2/2\right) \mathop{dt} \]
-    Then, 
-    \begin{align*}
-    \mathbb{P}(y(j) = 1 | u) =  \mathbb{P}(\mathsf{N}(u(j),\gamma^2) > 0) &= \frac{1}{\sqrt{2\pi\gamma^2}}\int_{0}^{\infty} \exp\left(\frac{-(z-u(j))^2}{2\gamma^2}\right ) dz\\
-    &= \frac{1}{\sqrt{2\pi}}\int_{-\frac{u(j)}{\gamma}}^{\infty} \exp\left(-t^2/2\right ) dt\\
-    &= 1-\psi(-u(j)/\gamma)\\
-    &= \psi(u(j)/\gamma)
-    \end{align*}
-    where we used the fact that $1-\psi(-x) = \psi(x)$.
-
-    Similarly, we can compute $\mathbb{P}(y(j)=-1|u) = \psi(-u(j)/\gamma)$. Since the labels $y(j)$ are either $1$ or $-1$, we can write $\mathbb{P}(y(j)|u) = \psi(y(j)u(j)/\gamma)$. Finally,
-    \[ \mathbb{P}(y|u) = \prod_{j\in Z'} \mathbb{P}(y(j)|u) = 
-    \prod_{j\in Z'} \psi(y(j)u(j)/\gamma) \]
-    and we can see that we would define
-    \begin{equation}
-    \label{eqn:probit}
-    \Phi(u) = -\sum_{j\in Z'} \log \left(\psi(y(j)u(j)/\gamma)\right)
+    \label{eqn:general_prior}
+    u = \sum_{j=0}^M f(\lambda_j)\xi_j q_j,\quad \xi_j\sim \mathsf{N}(0,1) \quad \text{i.i.d.}
     \end{equation}
 
-    \item[$\mathbb{P}(u|y)$:] {\bf Posterior}, which by Bayes' theorem is proportional to $\mathbb{P}(u) \mathbb{P}(y | u)$
-    \end{itemize}
+    The models to be considered for this project evolve as follows:
 
-\section{Model problems}
+    For models (A), (B), and (C), the hyperparameters $\tau,\alpha,M$ refer to the prior in \cref{eqn:prior}
+
+    (A) Use fixed $\tau,\alpha, M=N-1$ to cluster data.\\
+    (B) Learn $\tau,\alpha$; fix $M=N-1$.\\
+    (C) Learn $\tau,\alpha,M$.
+
+    For models (D) and (E), samples from a new prior are given by $u = \sum_{j=0}^M v_j\xi_j q_j$.
+
+    (D) Learn $\{v_j\}_{j=0}^M$ with $M$ fixed.\\
+    (E) Learn $\{v_j\}_{j=0}^M$ and $M$.
+
+    Model (F) can apply to all of the previous models.
+
+    (F) Multiclass, hierarchical on number of classes.
+
+    Model (G) focuses on learning the arbitrary function $f$ defined in \cref{eqn:general_prior}. 
+
+    (G) Learn $f(\lambda), M$.
+
+    So far, I have implemented models (A) through (D). The past month has been devoted to experiments testing individual models and comparing their performances, using metrics such as classification accuracy and variance. Classification accuracy is well defined for the model problems that I tested the data on. These problems are outlined in \cref{sec:model_problems}.
+
+\section{Model problems} \label{sec:model_problems}
     Applications to be considered include the following:
     \subsection{Voting records}
         A data set of the voting records on $16$ votes of $435$ individuals from the U.S. House of Representatives. The data is ordered so that all the representatives from the party are contiguous in the indexing. The graph has $N=435$ nodes, with feature vectors that are $d=16$ dimensional. Each component of the feature vectors is either $+1,-1,$ or $0$ to indicate voting for, voting against, or abstaining on a particular bill, respectively. On this data set, we want to perform binary classification with a subset of labeled data. For this problem, we will use the unnormalized Laplacian with fixed length-scale weights. That is, we will define $w_{ij} = \exp\left({-\frac{d(x_i,x_j)}{2l^2}}\right), \quad d_{p,q}(x,y) = ||x-y||^q_p$ with $p=2,q=2,l=1$. \cref{fig:voting_spec} is part of the spectrum of this choice of Laplacian.
@@ -194,35 +123,6 @@
         \caption{\label{fig:mnist_spec} Lowest $9$ eigenvectors of self-tuning symmetric $L$ of MNIST, digits $4$ and $9$.}
         \includegraphics[width=\linewidth]{laplacians/mnist_laplacian.png}
         \end{figure}
-
-\section{Models}
-    My project looks at the effectiveness of different Bayesian hierarchical clustering algorithms. I am implementing these algorithms in MATLAB and testing them on the data sets mentioned. The complexity of the models considered will evolve as follows:
-
-    For models (A), (B), and (C), the hyperparameters $\tau,\alpha,M$ refer to the prior in \cref{eqn:prior}
-
-    (A) Use fixed $\tau,\alpha, M=N-1$ to cluster data.\\
-    (B) Learn $\tau,\alpha$; fix $M=N-1$.\\
-    (C) Learn $\tau,\alpha,M$.
-
-    For models (D) and (E), samples from a new prior are given by $u = \sum_{j=0}^M v_j\xi_j q_j$.
-
-    (D) Learn $\{v_j\}_{j=0}^M$ with $M$ fixed.\\
-    (E) Learn $\{v_j\}_{j=0}^M$ and $M$.
-
-    Model (F) can apply to all of the previous models.
-
-    (F) Multiclass, hierarchical on number of classes.
-
-    Model (G) focuses on learning the arbitrary function $f$ defined in \cref{eqn:general_prior}. 
-
-    (G) Learn $f(\lambda), M$.
-
-    To learn $\tau, \alpha$, we will assume uniform priors on intervals $U(0, c)$ for constants $c$. For $M$, we will assume an exponentially or algebraically decaying prior with the reasoning that larger $M$ being less likely. We will refer to the hyperparameters as $\theta$.
-
-\section{Approach}
-    One main goal of this project is to study the effectiveness of different hierarchical models. To do this, I have been understanding the algorithms and implementing them in MATLAB. In MATLAB, it is easy to visualize the algorithm by plotting the traces of the hyperparameters and the running averages. I can test the algorithms on the data sets and change parameters to see how they affect the clustering effectiveness. I have been using the voting records and the two moons data sets so far. I also made movies of the algorithms running on these data sets by printing figures and using a video-making tool. These movies are useful for both debugging and assessing the effectiveness of the algorithms. Metrics that are useful for comparing the algorithms include the percent classification accuracy, the variance, and the convergence time. In particular, in our applications on the voting records, the two moons, and the MNIST data sets, the classification accuracy is well defined because there is a true classification. Assessing uncertainty quantification may be more difficult if there is no clear truth.
-
-    The important next step of this project is to write a test suite for the different algorithms that I have implemented so far. We want to create a figure similar to Figure 13 from \cite{BeLuStZy17}, plotting the classification accuracies of the different algorithms over increasing noise variance in the two moons data set. We would like to see if the hierarchical methods lead to improving classification accuracies.
 
 \section{Algorithms}
     This section discusses the algorithms that I have implemented for the hierarchical models.
@@ -341,7 +241,7 @@
 
     \subsection{Model (C)}
 
-\section{Voting records experiments}
+\section{Voting records experiments with models (A) and (B)}
     In each of the following experiments, the labeled data $Z'$ was chosen consistently: members 20-30 was labeled one party and members 280-290 as the other.
 
     For \cref{alg:generalpCN}, fixing $\gamma = 0.0001, \beta = 0.4, \tau = 1, \alpha = 1$, and running for $100000$ iterations with a burn-in period of $1000$, I could get clustering at about 85\% accuracy. One final clustering obtained is shown in \cref{fig:mcmc_gamma_final}, with relevant figures \cref{fig:mcmc_gamma_acceptance} and \cref{fig:mcmc_gamma_senators} that suggest that the chain has converged.
@@ -410,7 +310,7 @@
     \end{minipage}
     \end{figure}
 
-\section{Two moons experiments}
+\section{Two moons experiments with models (A) and (B)}
     Using these algorithms, I also ran experiments to cluster the two-moons data set, with $r=1, N = 1000, d = 100, \sigma = 0.1$. We used the self-tuning Laplacian introduced in \cite{SelfTuning}.
 
     For each of the following experiments, we labeled the same $42$ nodes, $21$ in each half-moon, approximately uniformly spaced. Running \cref{alg:generalpCN} on this data set using only the first 50 eigenvectors with $\gamma=0.0001,\beta=0.4,\tau=1,\alpha=1$ with 100000 iterations and a burn-in period of 1000, we could get around 90\% accuracy.
@@ -483,15 +383,11 @@
 
     Notice the convergence of $\tau$ and its low variance in the samples for the non-centered self-tuning algorithm.
 
-\section{Challenges}
-    Some common issues that I encountered are bugs in my MATLAB code. Some of these bugs included overflow or underflow of ratios, when both numerator and denominator are very large or very small. To improve accuracy, I implemented these ratios as the difference between $\log$s, and took the $\exp$ of the result at the end. I became used to using MATLAB's debugger to step through line-by-line and isolate the mistakes.
+\section{Experiments comparing hierarchical and nonhierarchical algorithms}
 
-    Another challenge was trying to get \cref{alg:hierarchical_tau_alpha}, the centered hierarchical algorithm, to perform well. The first implementation of that algorithm gave traces of the hyperparameters with low mixing and poor clustering of the voting records. Allowing for large ranges for $\tau$ and $\alpha$ did not solve the problem as the MCMC seemed to find one value of $\tau$ and stay stuck at that value. To try to debug the code, I re-implemented the algorithm using more of the linear algebra functionality of MATLAB and improved the readability. This did not solve the problem, and we decided that the problem might have to do with the eig solver of MATLAB failing for larger eigenvalues. We tested this by truncating the list of eigenvectors from $435$ down to only $50$, and the results, as mentioned above, were better. Since this fix is specific to these data sets, moving forward I anticipate that there may be more challenges with this algorithm. Note that the next step in the hierarchical models is to be hierarchical about this truncation level, which would tackle this problem.
+\section{Experiments with model (C)}
 
-    We have also found that $\tau$ seems to have much lower variance than $\alpha$, and it is difficult to see if $\alpha$ has converged. To understand this problem, I have tried looking at histograms for $\alpha$ and saw that the distribution appears different from the prior distribution, since there seems to be a bias towards larger $\alpha$ (an example of this is in \cref{fig:moon_noncentered_alpha}). We do not necessarily expect $\alpha$ to converge to a particular value -- it could just be that $\alpha$ is not strongly informed by the data. We have also observed high levels of correlation between $\tau$ and $\alpha$.
-
-\section{Additional resources}
-    My project is mostly done on my computer, my notebook, and a whiteboard. Most likely, I will not require additional resources other than references to papers and books to read to understand the algorithms.
+\section{Experiments with model (D)}
 
 \bibliographystyle{siamplain}
 \bibliography{references}

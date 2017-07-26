@@ -1,0 +1,22 @@
+\begin{thebibliography}{1}
+
+\bibitem{BeRoStVo08}
+{\sc A.~Beskos, G.~O. Roberts, A.~M. Stuart, and J.~Voss}, {\em
+  \uppercase{MCMC} methods for diffusion bridges}, Stochastics and Dynamics, 8
+  (2008), pp.~319--350.
+
+\bibitem{CoRoStWh13}
+{\sc S.~L. Cotter, G.~O. Roberts, A.~M. Stuart, and D.~White}, {\em
+  \uppercase{MCMC} methods for functions: modifying old algorithms to make them
+  faster}, Statistical Science, 28 (2013), pp.~424--446.
+
+\bibitem{Noncentered}
+{\sc O.~Papaspiliopoulos, G.~O. Roberts, and M.~Sk{\"o}ld}, {\em A general
+  framework for the parametrization of hierarchical models}, Statistical
+  Science,  (2007), pp.~59--73.
+
+\bibitem{SelfTuning}
+{\sc L.~Zelnik-Manor and P.~Perona}, {\em Self-tuning spectral clustering}, in
+  Advances in neural information processing systems, 2005, pp.~1601--1608.
+
+\end{thebibliography}

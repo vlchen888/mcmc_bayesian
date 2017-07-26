@@ -50,12 +50,16 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
     %%%%% Store standard basis vectors %%%%%
     std = zeros(num_data, num_iterations);
     std(:, 1) = compute_T(xi_all(:, 1), init_tau, init_alpha, lambda, phi);
+    
+    uj_all = zeros(M, num_iterations);
         
     for i=1:num_iterations-1
         %%%%% Propose new state for xi %%%%%
         curr_xi = xi_all(:,i);
         curr_tau = tau_all(i);
         curr_alpha = alpha_all(i);
+        
+        uj_all(:, i) = (lambda + curr_tau^2).^(-curr_alpha/2) .* curr_xi;
         
         std(:, i) = compute_T(curr_xi, curr_tau, curr_alpha, lambda, phi);
         
@@ -117,6 +121,9 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
             end
         end      
     end
+    
+    E_u_sq = mean(uj_all.^2,2);
+    fprintf('done\n');
 end
 
 function g = compute_log_g(lambda, phi, xi, tau, alpha, gamma, label_data)
