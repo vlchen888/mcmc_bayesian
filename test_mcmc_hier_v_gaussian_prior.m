@@ -1,9 +1,9 @@
-function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, sigma)
+function p = test_mcmc_hier_v_gaussian_prior(percent_fidelity, sigma)
 
     params = containers.Map;
 
-    params('data_set') = string('voting');
-    params('laplacian') = string('un');
+    params('data_set') = string('moons');
+    params('laplacian') = string('self tuning');
     
     if params('data_set') == string('moons')
         N = 2000;
@@ -32,7 +32,6 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     params('num_iterations') = 100000;
     burn_in = 5000;
     params('burn_in') = burn_in;
-    params('movie') = false;
 
     % not used
     params('p') = 2;
@@ -40,37 +39,18 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     params('l') = 1.25;
     %
     
-    params('gamma') = 0.0001;
-    params('B') = 0.4;
-    params('init_tau') = 2;
-    params('init_alpha') = 35;
-    params('init_M') = 50;
-    
-    params('min_tau')       = 0.1;
-    params('max_tau')       = 60;
-
-    params('min_alpha')     = 0.1;
-    params('max_alpha')     = 60;
-    
-    params('min_M')       = 1;
-    params('max_M')       = 70;
-    
-    params('alpha_epsilon') = 0;
-    params('tau_epsilon')   = 0;
-    
-    params('max_M_jump') = 20;
-    
+    params('gamma') = 0.1;
+    params('B_xi') = 0.1;
+    params('B_v') = 0.1;
+    params('tau') = 2;
+    params('alpha') = 35;
         
-    [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, ...
-        M_accept, E_u_sq] = mcmc_learn_t_a_M_noncentered(params);
+    [std, v_all, xi_all, v_accept, xi_accept] ...
+        = mcmc_learn_v_gaussian_prior(params);
     u_avg = mean(sign(std(:, burn_in:end)), 2); %avg the rows
     
     p = count_correct(u_avg, params('label_data'), params('truth'));
-    
-    tau_mean = mean(tau_all(burn_in:end));
-    alpha_mean = mean(alpha_all(burn_in:end));
-    M_mean = mean(M_all(burn_in:end));
-    
+        
     figure(2)
     if params('data_set') == string('moons')
         set(gcf, 'Position', [100, 300, 600, 500])
@@ -82,22 +62,16 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     
     figure(3)
     set(gcf, 'Position', [100, 300, 800, 300])
-    plot(1:params('num_iterations'), M_all, 1:params('num_iterations'), movmean(M_all, [length(M_all) 0]));
-    legend('M trace', 'M running average');
-    
+    plot(mean(xi_all.*v_all, 2));
+    title('u_j average')
+        
     figure(4)
-    subplot(211)
     set(gcf, 'Position', [100, 300, 800, 300])
+    subplot(211)
     plot(movmean(xi_accept, [length(xi_accept) 0]));
     title('\xi acceptance probability')
     subplot(212)
-    set(gcf, 'Position', [100, 300, 800, 300])
-    plot(movmean(M_accept, [length(M_accept) 0]));
-    title('M acceptance probability')
-    
-    figure(5)
-    set(gcf, 'Position', [100, 300, 800, 300])
-    plot(E_u_sq)
-    title('Mean of u_j^2')
+    plot(movmean(v_accept, [length(v_accept) 0]));
+    title('v acceptance probability')
 
 end

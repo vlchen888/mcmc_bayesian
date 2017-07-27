@@ -210,7 +210,7 @@
         following \cref{eqn:prior}. This algorithm is ``non-centered" compared to the centered parameterization given in \cref{alg:hierarchical_tau_alpha}, meaning that the unknown classifying variable $\xi$ and the parameters $\theta=(\tau,\alpha)$ are a priori independent \cite{Noncentered}.
 
         This model assumes the prior $\xi \sim \mathsf{N}(0,I)$. Similar to the centered case, define $g(\xi,\tau,\alpha)$ as the joint posterior distribution. By Bayes' theorem, 
-        \[g(\xi,\tau,\alpha) \propto \exp(-\Phi(T(\xi,\tau,\alpha)))\times \mathbb{P}(\xi,\tau,\alpha) = \exp(-\Phi(T(\xi,\tau,\alpha)))\mathbb{P}(\xi)\pi_0(\tau, \alpha)\]
+        \[g(\xi,\tau,\alpha) \propto \exp(-\Phi(T(\xi,\tau,\alpha)))\times \mathbb{P}(\xi,\tau,\alpha) = \exp(-\Phi(T(\xi,\tau,\alpha)))\mathbb{P}(\xi)\pi_0(\tau, \alpha).\]
         Note that $\mathbb{P}(\xi) = \frac{1}{\sqrt{(2\pi)^d \det I}} \exp(-\frac{1}{2}\langle \xi, I\xi  \rangle) \propto \exp(-\frac{1}{2}\langle \xi,\xi \rangle)$ and the normalization constants drop out. We obtain:
         \begin{equation}
         \label{eqn:noncentered_post}
@@ -240,6 +240,110 @@
         \end{algorithm}
 
     \subsection{Model (C)}
+        In this algorithm, we aim to learn $M$, the number of eigenvectors we want to use, as well. This algorithm seems promising given the problem we encountered with the irregularity of higher eigenvectors with the algorithms in model (B), which we resolved by truncating the number of eigenvectors. Essentially, we want to be hierarchical about our level of truncation. We take a uniform prior for $M$, typically $\mathsf{U}(1,70)$ or similar. It is convenient to implement this algorithm with the non-centered approach since we do not need to worry about $M$ affecting terms such as the determinant of the covariance. The new equation for $T$, which relates $\xi, \tau, \alpha, M$ to $u$, is:
+        \begin{equation}
+        \label{eqn:noncentered_T_M}
+        T(\xi,\tau,\alpha, M) = \sum_{i=0}^M \frac{1}{(\lambda_i+\tau^2)^{\alpha/2}}\xi_iq_i = u.
+        \end{equation}
+
+        We can compute the joint posterior on $\xi, \tau, \alpha, M$ similarly to the derivation of \cref{eqn:noncentered_post}:
+
+        \begin{equation}
+        \label{eqn:noncentered_post_M}
+        g(\xi,\tau,\alpha, M) \propto \exp\left( -\Phi(T(\xi,\tau,\alpha,M))-\frac{1}{2}\langle \xi,\xi \rangle + \log(\pi_0(\tau,\alpha,M)) \right).
+        \end{equation}
+
+        The only modification from \cref{alg:xi_tau_alpha} is to add a random walk proposal for $M$ and compute the acceptance probability as the ratio of the joint posteriors. This algorithm is given in \cref{alg:hier_t_a_M}.
+
+        \begin{algorithm}
+
+        \caption{Non-centered parameterization, hierarchical with $\tau, \alpha, M$}
+        \label{alg:hier_t_a_M}
+        \begin{algorithmic}
+        \State Choose $\xi^{(0)} \in \mathbb{R}^N, \tau^{(0)}, \alpha^{(0)}, M^{(0)} > 0, \beta \in (0, 1]$ and $\epsilon_1, \epsilon_2 > 0$.
+        \For{$k=0$ to $S$}
+        \State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim \mathsf{N}(0, I)$
+        \State Make transition $\xi^{(k)} \to \hat\xi^{(k)}$ with probability
+        \[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)})) - \Phi(T(\hat\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)}))\right) \right\}\] \Comment{$T$ defined in \cref{eqn:noncentered_T_M}}
+
+        \State Propose $\hat\tau^{(k)} = \tau^{(k)} + \epsilon_1 \rho^{(k)}, \rho^{(k)} \sim \mathsf{N}(0,1)$
+        \State Make transition $\tau^{(k)} \to \hat\tau^{(k)}$ with probability
+        \[ A(\tau^{(k)} \to \hat\tau^{(k)}) 
+        = \min\left\{1, \frac{g(\xi^{(k+1)},\hat\tau^{(k)},\alpha^{(k)},M^{(k)})}{g(\xi^{(k+1)},\tau^{(k)},\alpha^{(k)},M^{(k)})} \right\}\] \Comment{$g$ defined in \cref{eqn:noncentered_post_M}}
+
+        \State Propose $\hat\alpha^{(k)} = \alpha^{(k)} + \epsilon_2 \sigma^{(k)}, \sigma^{(k)} \sim \mathsf{N}(0,1)$
+        \State Make transition $\alpha^{(k)} \to \hat\alpha^{(k)}$ with probability
+        \[ A(\alpha^{(k)} \to \hat\alpha^{(k)}) 
+        = \min\left\{1, \frac{g(\xi^{(k+1)},\tau^{(k+1)},\hat \alpha^{(k)},M^{(k)})}{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k)},M^{(k)})} \right\}\]
+        \State Propose $\hat M^{(k)} = M^{(k)} + Q$, with jump $Q$ distributed as $\mathbb{P}(Q=k) \propto \frac{1}{1+|k|}$, $|Q|$ bounded.
+        \State Make transition $M^{(k)} \to \hat M^{(k)}$ with probability
+        \[ A(M^{(k)} \to \hat M^{(k)}) = 
+        \min\left\{1, \frac{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k+1)},\hat M^{(k)})}{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k+1)},M^{(k)})} \right\}
+        \]
+        \EndFor
+        \State \Return $\{ T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)}), \tau^{(k)}, \alpha^{k} \}$
+        \end{algorithmic}
+        \end{algorithm}
+
+    \subsection{Model (D)}
+        This algorithm reparameterizes the problem in terms of the random vectors $v$ and $\xi$. $v_j$ modifies the scale of influence of $q_j$, the $j$th eigenvector of the graph Laplacian, on the classifying function $u$.
+        \begin{equation}
+        \label{eqn:v_T}
+        T(v,\xi) = \sum_{i=0}^{M} v_i\xi_iq_i = u.
+        \end{equation}
+        Here, $M$ is fixed. We take $\xi \sim \mathsf{N}(0, I)$. For the prior of $v$, the first step is to slightly ``cheat'' by using a working solution to this problem: apply one of the algorithms that learns $\tau, \alpha$ and get estimates for $\mathbb{E} u_j^2$ where $u = \sum_{i=0}^M u_j q_j$. Then, pick the prior for $v$ to be
+        \[v_j \sim \mathsf{U}\left((1-a)(\mathbb{E}u_j^2)^{1/2},(1+a)(\mathbb{E}u_j^2)^{1/2}\right).\]
+        where $a$ is a fixed scalar.
+
+        Finally, we derive an expression for the posterior with Bayes' theorem.
+        \begin{align*}
+        \mathbb{P}(v,\xi | y) &\propto \mathbb{P}(y|v, \xi) \mathbb{P}(v, \xi)\\
+        &\propto \exp \left(-\Phi(T(v,\xi)) \right) \mathbb{P}(v)\mathbb{P}(\xi) \\
+        &\propto \exp \left(-\Phi(T(v,\xi)) + \log (\pi_0(v)) - \frac{1}{2}\langle \xi, \xi \rangle  \right).
+        \end{align*}
+
+        Let $h(v,\xi)$ denote the joint posterior on $v$ and $\xi$. Then,
+        \begin{equation}
+        \label{eqn:learn_v_posterior}
+        h(v, \xi) \propto \exp \left(-\Phi(T(v,\xi)) + \log (\pi_0(v)) - \frac{1}{2}\langle \xi, \xi \rangle  \right).
+        \end{equation}
+
+        The updates for this algorithm will be done as follows:
+
+        \begin{itemize}
+            \item Update $\xi^{(k+1)} | v^{(k)}, y$ with a pCN proposal.
+            \item Update $v^{(k+1)} | \xi^{(k+1)}, y$ with a random walk on the uniform prior for $v$.
+        \end{itemize}
+
+        This algorithm is given in \cref{alg:hier_v}.
+        \begin{algorithm}
+
+        \caption{Non-centered parameterization, hierarchical with $v$}
+        \label{alg:hier_v}
+        \begin{algorithmic}
+        \State Choose $v^{(0)}, \xi^{(0)} \in \mathbb{R}^N, \beta \in (0, 1], \epsilon > 0$.
+        \For{$k=0$ to $S$}
+        \State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim \mathsf{N}(0, I)$
+        \State Make transition $\xi^{(k)} \to \hat\xi^{(k)}$ with probability
+        \[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k)})) - \Phi(T(v^{(k)}, \hat \xi^{(k)}))\right) \right\}\]
+
+        \State Propose $\hat v^{(k)} = v^{(k)} + \epsilon \rho^{(k)}, \rho^{(k)} \sim \mathsf{N}(0,I)$
+        \If {$\hat v^{(k)} _j \not \in  \left[(1-a)(\mathbb{E}u_j^2)^{1/2},(1+a)(\mathbb{E}u_j^2)^{1/2}\right]$ for any $j$} 
+            \State Reject and set $v^{(k+1)} = v^{(k)}$.
+        \Else
+        \State Make transition $v^{(k)} \to \hat v^{(k)}$ with probability
+        \begin{align*}
+         A(v^{(k)} \to \hat v^{(k)}) &= \min\left\{1, \frac{h(\hat v^{(k)}, \xi^{(k+1)})}{h(v^{(k)}, \xi^{(k+1)})}\right\} \\
+         &= \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k+1)}))-\Phi(T(\hat v^{(k)}, \xi^{(k+1)})) \right) \right\}
+         \end{align*}
+        \EndIf
+
+        \EndFor
+        \State \Return $\{ T(v^{(k)},\xi^{(k)}), v^{(k)}, \xi^{(k)} \}$
+        \end{algorithmic}
+        \end{algorithm}
+
+\iffalse
 
 \section{Voting records experiments with models (A) and (B)}
     In each of the following experiments, the labeled data $Z'$ was chosen consistently: members 20-30 was labeled one party and members 280-290 as the other.
@@ -383,11 +487,132 @@
 
     Notice the convergence of $\tau$ and its low variance in the samples for the non-centered self-tuning algorithm.
 
+\fi
+
 \section{Experiments comparing hierarchical and nonhierarchical algorithms}
+    Inspired by the experiment comparing the different clustering algorithms given in \cite{BeLuStZy17}, we ran a similar set of experiments to determine if a hierarchical approach was beneficial to clustering. The clustering algorithms we want to compare are: Fiedler thresholding, nonhierarchical pCN, and two hierarchical algorithms for learning $\tau,\alpha$ as well as the classifying function $u$.
+    For each of the four algorithms tested, 50 random realizations of the two moons data set were generated with $r=1,N=2000,d=100,$ and varying $\sigma$. We used the same RNG seed for the trials across different algorithms so that these 50 realizations are consistent over the different algorithms tested. With each two moons realization, we tested the classification accuracy with varying fidelity percents for the labeled data. Again, the chosen labeled set $Z'$ is consistent across the trials for different algorithms. Our results are summarized in \cref{fig:compare_hier}.
+
+    \begin{figure}[!htb]
+    \label{fig:compare_hier}
+    \caption{Classification accuracy of different algorithms for two moons dataset compared with $\sigma$ and percent fidelity. Plotted is the median classification accuracy with error bars that indicate the 25 and 75-th quantiles over the 50 trials for each parameter combination. For the pCN and hierarchical algorithms, we used spectral projection up to the first 50 eigenvectors. We ran 100000 iterations with a burn-in period of 1000, and we fixed $\gamma = 0.1$.}
+    \includegraphics[width=\linewidth]{compare/summary.png}
+    \end{figure}
+
+    \subsection{Learning $\tau$ and $\alpha$}
+        In these experiments, the hierarchical algorithms performed much better in classifying the two moons dataset than the nonhierarchical algorithm. We fixed $\tau=\alpha=1$ in the nonhierarchical pCN, while we set $\tau^{(0)}=\alpha^{(0)} = 1$ for the hierarchical algorithms. In the hierarchical algorithms, we allowed $\tau \in [0.01,60]$ and $\alpha \in [0.1,60]$ as the uniform priors. The medians of the average values of $\alpha$ given by the hierarchical algorithms are shown in \cref{fig:compare_alpha}.
+        \begin{figure}[!htb]
+        \label{fig:compare_alpha}
+        \caption{Average values of $\alpha$ from the MCMC. Plotted is the median of the averages of $\alpha$ with error bars that indicate the 25 and 75-th quantiles over the 50 trials for each parameter combination. Notice that $\alpha$ is on average much larger in the hierarchical algorithms.}
+        \includegraphics[width=\linewidth]{compare/alpha_averages.png}
+        \end{figure}
+
+        It appears that fixing $\alpha = 1$ in the nonhierarchical algorithm is partially responsible for the discrepancy in performance. With small $\alpha$, the prior on $u$ drops off more slowly with the higher eigenvectors, while larger $\alpha$ enforces that these higher eigenvectors have less influence on $u$. This suggests that for the two moons data set, information for binary classification is concentrated in the lower eigenvectors, as expected.
 
 \section{Experiments with model (C)}
+    \subsection{$M$ and $\sigma$ relation}
+        We tested \cref{alg:hier_t_a_M} on the two moons dataset with varying $\sigma$, fixing $1\%$ labeled nodes. We also fixed $\tau=2,\alpha=35$ by setting $\epsilon_1=\epsilon_2=0$, so the algorithm is only learning $\xi$ and $M$. We initialized $M^{(0)} = 50$, and the uniform prior of $M \sim \mathsf{U}(1, 70)$. We can see that for small $\sigma = 0.06$, $M$ is small as only the first few eigenvectors are necessary (see \cref{fig:learnM_sigma_0.06}). However, when we choose a larger $\sigma = 0.2$, $M$ needs to be larger (see \cref{fig:learnM_sigma_0.20}). For $\sigma = 0.06$, the classification accuracy was 100\%. For $\sigma = 0.2$, the classification accuracy was 91.97\%.
+
+        \begin{figure}[!htb]
+        \caption{\label{fig:learnM_sigma_0.06} $\sigma=0.06$, trace of $M$}
+        \includegraphics[width=\linewidth]{learnM/moons/hier/sigma_0_06/M_trace.png}
+        \end{figure}
+        \begin{figure}[!htb]
+        \caption{\label{fig:learnM_sigma_0.20} $\sigma=0.2$, trace of $M$}
+        \includegraphics[width=\linewidth]{learnM/moons/hier/sigma_0_20/M_trace.png}
+        \end{figure}
+    
+    \subsection{Nonhierarchical vs. Hierarchical}
+        We will compare \cref{alg:generalpCN}, pCN, with fixed $\tau$ and $\alpha$ against \cref{alg:hier_t_a_M} with the same fixed $\tau$ and $\alpha$, but learning $M$.
+        \subsubsection{Voting records}
+            The nonhierarchical algorithm for learning $\tau$ and $\alpha$ gave expected values of $\tau$ and $\alpha$ as $\tau \approx 2$ and $\alpha \approx 35$, so I chose those parameters for the pCN and for \cref{alg:hier_t_a_M}. For the pCN, all $435$ eigenvectors were used. I narrowed the range of $M$ allowed in \cref{alg:hier_t_a_M} to 1 to 70. 5 labeled nodes were selected, consistent across the two methods. In this particular realization (seeded with $\text{rng}(5)$), the hierarchical algorithm achieves $87.74\%$ while the nonhierarchical algorithm achieves $87.67\%$ classification accuracy. \cref{fig:voting_nonhier_u_avg}, \cref{fig:voting_nonhier_u_accept} , and \cref{fig:voting_nonhier_senator_traces} show the results of the pCN. \cref{fig:voting_hier_M_trace}, \cref{fig:voting_hier_u_avg}, \cref{fig:voting_hier_xi_M_accept} show the results the hierarchical algorithm. Notice in \cref{fig:voting_hier_M_trace} that there seems to be an important eigenvector for classification indexed around 30, as $M$ seldom drops below $30$. Looking at the eigenvectors around index 30, I plotted the 34th eigenvector in \cref{fig:voting_hier_eigenvector}. From a purely visual perspective, it does appear that this eigenvector corresponds decently to the final classification in \cref{fig:voting_hier_u_avg} by looking at where some of the ``spikes'' are. After trying some other realizations, it seems that being hierarchical may have some benefits, but more experiments are needed.
+
+            \begin{figure}[!htb]
+            \begin{minipage}{0.48\textwidth}
+                \centering
+                \caption{\label{fig:voting_nonhier_u_avg} \cref{alg:generalpCN}, average of $S(u)$}
+                \includegraphics[width=\linewidth]{learnM/voting/nonhier/u_avg.png}
+            \end{minipage} \hfill
+            \begin{minipage}{0.48\textwidth}
+                \centering
+                \caption{\label{fig:voting_nonhier_u_accept} \cref{alg:generalpCN}, $u$ acceptance probability}
+                \includegraphics[width=\linewidth]{learnM/voting/nonhier/u_accept.png}
+            \end{minipage}
+            \end{figure}
+
+            \begin{figure}[!htb]
+            \centering
+            \caption{\label{fig:voting_nonhier_senator_traces} \cref{alg:generalpCN}, running average of $S(u(i))$ for select $i$}
+            \includegraphics[width=0.8\linewidth]{learnM/voting/nonhier/senator_traces.png}
+            \end{figure}
+
+            \begin{figure}[!htb]
+            \begin{minipage}{0.48\textwidth}
+                \centering
+                \caption{\label{fig:voting_hier_u_avg} \cref{alg:hier_t_a_M}, average of $S(u)$}
+                \includegraphics[width=\linewidth]{learnM/voting/hier/u_avg.png}
+            \end{minipage} \hfill
+            \begin{minipage}{0.48\textwidth}
+                \centering
+                \caption{\label{fig:voting_hier_xi_M_accept} \cref{alg:hier_t_a_M}, $M$ and $\xi$ acceptance probabilities}
+                \includegraphics[width=\linewidth]{learnM/voting/hier/accept_prob.png}
+            \end{minipage}
+            \end{figure}
+
+            \begin{figure}[!htb]
+            \begin{minipage}{0.48\textwidth}
+                \centering
+                \caption{\label{fig:voting_hier_eigenvector} 34th eigenvector of unnormalized fixed length-scale $L$}
+                \includegraphics[width=\linewidth]{learnM/voting/hier/34_eigvec.png}
+            \end{minipage}\hfill
+            \begin{minipage}{0.48\textwidth}
+                \centering
+                \caption{\label{fig:voting_hier_M_trace} \cref{alg:hier_t_a_M}, trace of $M$}
+                \includegraphics[width=\linewidth]{learnM/voting/hier/M_trace.png}
+            \end{minipage}
+            \end{figure}
+
+
+        \subsubsection{Two moons}
+            I tried a similar set of experiments on the two moons data. I fixed $\tau = 2, \alpha = 35$, again following the expected values of these hyperparameters from the noncentered algorithm that learns $\tau,\alpha$. I set the pCN to use the first $100$ eigenvectors, and I set the range for $M$ in \cref{alg:hier_t_a_M} to be $[1, 70]$. The two moons data was generated with $N=2000, d=100, \sigma = 0.2$ and $1\%$ fidelity. The nodes selected for fidelity are random but consistent between the different methods, as is the data itself. The colored diamonds in the scatter plots are the labeled nodes.
+
+            One realization of this test is shown in \cref{fig:moons_nonhier_scatter}, \cref{fig:moons_nonhier_u_accept} for pCN, and \cref{fig:moons_hier_scatter}, \cref{fig:moons_hier_M_xi_accept}, \cref{fig:moons_hier_M_trace} for the hierarchical algorithm.  In this particular realization, the two algorithms performed similarly, as shown in the final clustering in \cref{fig:moons_nonhier_scatter} and \cref{fig:moons_hier_scatter}. In \cref{fig:moons_hier_M_trace}, $M$ seems to have moved from its uniform prior distribution, preferring a mean of around $20$. The results again suggest that there is some value to being hierarchical with $M$ even with good choices of $\tau$ and $\alpha$, but more experiments are needed. 
+
+
+            \begin{figure}[!htb]
+            \begin{minipage}{0.48\textwidth}
+                \centering
+                \caption{\label{fig:moons_nonhier_scatter} pCN, final classification projected into first two dimensions.}
+                \includegraphics[width=\linewidth]{learnM/moons/nonhier/sigma_0_20/scatter.png}
+            \end{minipage} \hfill
+            \begin{minipage}{0.48\textwidth}
+                \centering
+                \caption{\label{fig:moons_nonhier_u_accept} pCN, $u$ acceptance probability.}
+                \includegraphics[width=\linewidth]{learnM/moons/nonhier/sigma_0_20/u_accept.png}
+            \end{minipage}
+            \end{figure}
+
+            \begin{figure}[!htb]
+            \begin{minipage}{0.48\textwidth}
+                \centering
+                \caption{\label{fig:moons_hier_scatter} Hierarchical, final classification projected into first two dimensions.}
+                \includegraphics[width=\linewidth]{learnM/moons/hier/sigma_0_20/scatter.png}
+            \end{minipage} \hfill
+            \begin{minipage}{0.48\textwidth}
+                \centering
+                \caption{\label{fig:moons_hier_M_xi_accept} Hierarchical, $\xi$ acceptance probability.}
+                \includegraphics[width=\linewidth]{learnM/moons/hier/sigma_0_20/accept_prob.png}
+            \end{minipage}
+            \end{figure}
+
+            \begin{figure}[!htb]
+                \centering
+                \caption{\label{fig:moons_hier_M_trace} Hierarchical, seed $\text{rng}(3)$. $M$ trace.}
+                \includegraphics[width=0.6\linewidth]{learnM/moons/hier/sigma_0_20/M_trace.png}
+            \end{figure}
 
 \section{Experiments with model (D)}
+    
 
 \bibliographystyle{siamplain}
 \bibliography{references}

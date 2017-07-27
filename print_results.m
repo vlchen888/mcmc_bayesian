@@ -3,10 +3,10 @@ function [tau_all, alpha_all] = print_results()
 %For printing traces, acceptance probabilities, run statistics, etc.
 %   Set run parameters here.
     params = containers.Map;
-    params('data_set') = string('moons');
+    params('data_set') = string('voting');
     
     params('algorithm') = string('noncentered');
-    params('laplacian') = string('self tuning');
+    params('laplacian') = string('un');
     
     num_iterations = 100000;
     burn_in = 10000;
@@ -55,8 +55,8 @@ function [tau_all, alpha_all] = print_results()
     %}
         
     %%%% NONCENTEREED PARAMS for voting %%%%
-    %{
-    params('gamma')         = 0.0001;
+    
+    params('gamma')         = 0.1;
     params('B')             = 0.1;
 
     params('init_tau')      = 20;
@@ -70,10 +70,10 @@ function [tau_all, alpha_all] = print_results()
 
     params('alpha_epsilon') = 1;
     params('tau_epsilon')   = 1;
-    %}
+    
     
     %%%% NONCENTERED PARAMS for moons %%%%
-    
+    %{
     params('gamma')         = 0.1;
     params('B')             = 0.4;
     params('init_tau')      = 20;
@@ -87,7 +87,7 @@ function [tau_all, alpha_all] = print_results()
 
     params('alpha_epsilon') = 0.5;
     params('tau_epsilon')   = 1;
-    
+    %}
     
     %%%% NONCENTERED PARAMS intertwined moons, self tuning %%%%
     %%%% Gets convergence in ~400 iterations, ~98% accuracy on sigma = 0.1
@@ -153,8 +153,8 @@ function [tau_all, alpha_all] = print_results()
         data = X;
         params('data') = data;
         params('truth') = [-ones(267,1); ones(168,1)];
-        %percent_fidelity = .0115;
-        percent_fidelity = .08;
+        percent_fidelity = .0115;
+        %percent_fidelity = .08;
         params('label_data') = generate_fidelity(percent_fidelity, params('truth'), length(data));        
     elseif params('data_set') == string('moons')
         N = 2000;

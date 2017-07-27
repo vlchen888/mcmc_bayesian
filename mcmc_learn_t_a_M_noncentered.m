@@ -1,5 +1,5 @@
-function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M_accept] =...
-        mcmc_learn_t_a_M_noncentered(params)
+function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, ...
+    alpha_accept, M_accept, E_u_sq] = mcmc_learn_t_a_M_noncentered(params)
     data = params('data');
     num_iterations = params('num_iterations');
     label_data = params('label_data');
@@ -44,8 +44,7 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
     xi_all = zeros(params('max_M'), num_iterations);
     
     %%%%% Initialization from Fiedler Vector?? %%%%%
-    xi_all(2, 1) = (lambda(2)+init_tau^2)^(-init_alpha/2);
-    %xi_all(2, 1) = 1;
+    %xi_all(2, 1) = (lambda(2)+init_tau^2)^(-init_alpha/2);
     
     tau_all = zeros(1, num_iterations);
     tau_all(1) = init_tau;
@@ -65,6 +64,8 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
     %%%%% Store standard basis vectors %%%%%
     std = zeros(num_data, num_iterations);
     
+    %%%%% Store uj %%%%%
+    uj_all = zeros(params('max_M'), num_iterations);
     if params('movie')
         figure(3)
         set(gcf, 'Position', [100, 300, 1200, 800])
@@ -77,7 +78,9 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
         curr_alpha = alpha_all(i);
         curr_M = M_all(i);
         std(:, i) = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
-
+        
+        uj_all(:, i) = (lambda + curr_tau^2).^(-curr_alpha/2) .* curr_xi;
+        
         %%%%% Propose new state for xi %%%%%
         x = compute_rand_xi(length(lambda));
         new_xi = (1-B^2)^0.5*curr_xi+B*x;
@@ -217,6 +220,8 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, M
         end
         
     end
+    
+    E_u_sq = mean(uj_all.^2,2);
 end
 
 function g = compute_log_g(lambda, phi, xi, tau, alpha, M, gamma, label_data)

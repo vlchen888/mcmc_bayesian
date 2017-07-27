@@ -1,4 +1,4 @@
-function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
+function p = test_mcmc_gamma(percent_fidelity, sigma)
 
     params = containers.Map;
     params('data_set') = string('moons');
@@ -8,8 +8,9 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
         
         N = 2000;
         data = moondata(1,100,N,sigma);
+        params('truth') = [-ones(floor(N/2)+1,1); ones(N-(floor(N/2)+1),1)];
         params('data') = data;
-        params('label_data') = generate_moons_fidelity(percent_fidelity, N);
+        params('label_data') = generate_fidelity(percent_fidelity, params('truth'), length(data));
         
         %{
         N = 1000;
@@ -72,7 +73,7 @@ function p = test_mcmc_gamma_accuracy(percent_fidelity, sigma)
         set(gcf, 'Position', [100, 300, 600, 500])
         scatter_twomoons_classify(data, u_avg, params('label_data'))
         
-        p = count_correct(u_avg, params('label_data'), [zeros(floor(N/2)+1,1) - 1; zeros(N-(floor(N/2)+1),1) + 1]);
+        p = count_correct(u_avg, params('label_data'), params('truth'));
     elseif params('data_set') == string('voting')
         figure(1)
         set(gcf, 'Position', [100, 300, 800, 300])

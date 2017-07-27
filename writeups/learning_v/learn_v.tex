@@ -55,57 +55,90 @@
 \maketitle
 \setlength{\unitlength}{1in}
 \setlength{\parindent}{0in}
-\section{Algorithm}
-This algorithm reparameterizes the problem in terms of the random vectors $v$ and $\xi$. $v_j$ represents the scale of influence of $q_j$, the $j$th eigenvector of the graph Laplacian, on the classifying function $u$, while $\xi$ modifies for the sign of the contribution.
-\begin{equation}
-\label{eqn:v_T}
-T(v,\xi) = \sum_{i=0}^{M} v_i\xi_iq_i = u
-\end{equation}
-Here, $M$ is fixed. We take $\xi \sim \mathsf{N}(0, I)$. For the prior of $v$, the first step is to slightly ``cheat'' by using a working solution to this problem: apply one of the algorithms that learns $\tau, \alpha$ and get estimates for $\mathbb{E} u_j^2$ where $u = \sum_{i=0}^M u_j q_j$. Then, pick the prior for $v$ to be
-\[v_j \sim \mathsf{U}\left((1-a)(\mathbb{E}u_j^2)^{1/2},(1+a)(\mathbb{E}u_j^2)^{1/2}\right)\]
-where $a$ is a fixed scalar.
+\section{First algorithm}
+    This algorithm reparameterizes the problem in terms of the random vectors $v$ and $\xi$. $v_j$ modifies the scale of influence of $q_j$, the $j$th eigenvector of the graph Laplacian, on the classifying function $u$.
+    \begin{equation}
+    \label{eqn:v_T}
+    T(v,\xi) = \sum_{i=0}^{M} v_i\xi_iq_i = u
+    \end{equation}
+    Here, $M$ is fixed. We take $\xi \sim \mathsf{N}(0, I)$. For the prior of $v$, the first step is to slightly ``cheat'' by using a working solution to this problem: apply one of the algorithms that learns $\tau, \alpha$ and get estimates for $\mathbb{E} u_j^2$ where $u = \sum_{i=0}^M u_j q_j$. Then, pick the prior for $v$ to be
+    \[v_j \sim \mathsf{U}\left((1-a)(\mathbb{E}u_j^2)^{1/2},(1+a)(\mathbb{E}u_j^2)^{1/2}\right)\]
+    where $a$ is a fixed scalar.
 
-Finally, we derive an expression for the posterior with Bayes' theorem.
-\begin{align*}
-\mathbb{P}(v,\xi | y) &\propto \mathbb{P}(y|v, \xi) \mathbb{P}(v, \xi)\\
-&\propto \exp \left(-\Phi(T(v,\xi)) \right) \mathbb{P}(v)\mathbb{P}(\xi) \\
-&\propto \exp \left(-\Phi(T(v,\xi)) + \log (\pi_0(v)) - \frac{1}{2}\langle \xi, \xi \rangle  \right)
-\end{align*}
+    Finally, we derive an expression for the posterior with Bayes' theorem.
+    \begin{align*}
+    \mathbb{P}(v,\xi | y) &\propto \mathbb{P}(y|v, \xi) \mathbb{P}(v, \xi)\\
+    &\propto \exp \left(-\Phi(T(v,\xi)) \right) \mathbb{P}(v)\mathbb{P}(\xi) \\
+    &\propto \exp \left(-\Phi(T(v,\xi)) + \log (\pi_0(v)) - \frac{1}{2}\langle \xi, \xi \rangle  \right)
+    \end{align*}
 
-Let $h(v,\xi)$ denote the joint posterior on $v$ and $\xi$. Then,
-\begin{equation}
-\label{eqn:learn_v_posterior}
-h(v, \xi) \propto \exp \left(-\Phi(T(v,\xi)) + \log (\pi_0(v)) - \frac{1}{2}\langle \xi, \xi \rangle  \right)
-\end{equation}
+    Let $h(v,\xi)$ denote the joint posterior on $v$ and $\xi$. Then,
+    \begin{equation}
+    \label{eqn:learn_v_posterior}
+    h(v, \xi) \propto \exp \left(-\Phi(T(v,\xi)) + \log (\pi_0(v)) - \frac{1}{2}\langle \xi, \xi \rangle  \right).
+    \end{equation}
 
+    \begin{algorithm}
+    \caption{Non-centered parameterization, hierarchical with $v$}
+    \label{alg:hier_v}
+    \begin{algorithmic}
+    \State Choose $v^{(0)}, \xi^{(0)} \in \mathbb{R}^N, \beta \in (0, 1], \epsilon > 0$.
+    \For{$k=0$ to $S$}
+    \State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim \mathsf{N}(0, I)$
+    \State Make transition $\xi^{(k)} \to \hat\xi^{(k)}$ with probability
+    \[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k)})) - \Phi(T(v^{(k)}, \hat \xi^{(k)}))\right) \right\}\]
 
-\begin{algorithm}
+    \State Propose $\hat v^{(k)} = v^{(k)} + \epsilon \rho^{(k)}, \rho^{(k)} \sim \mathsf{N}(0,I)$
+    \If {$\hat v^{(k)} _j \not \in  \left[(1-a)(\mathbb{E}u_j^2)^{1/2},(1+a)(\mathbb{E}u_j^2)^{1/2}\right]$ for any $j$} 
+        \State Reject and set $v^{(k+1)} = v^{(k)}$.
+    \Else
+    \State Make transition $v^{(k)} \to \hat v^{(k)}$ with probability
+    \begin{align*}
+     A(v^{(k)} \to \hat v^{(k)}) &= \min\left\{1, \frac{h(\hat v^{(k)}, \xi^{(k+1)})}{h(v^{(k)}, \xi^{(k+1)})}\right\} \\
+     &= \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k+1)}))-\Phi(T(\hat v^{(k)}, \xi^{(k+1)})) \right) \right\}
+     \end{align*}
+    \EndIf
 
-\caption{Non-centered parameterization, hierarchical with $v$}
-\label{alg:hier_v}
-\begin{algorithmic}
-\State Choose $v^{(0)}, \xi^{(0)} \in \mathbb{R}^N, \beta \in (0, 1], \epsilon > 0$.
-\For{$k=0$ to $S$}
-\State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim \mathsf{N}(0, I)$
-\State Make transition $\xi^{(k)} \to \hat\xi^{(k)}$ with probability
-\[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k)})) - \Phi(T(v^{(k)}, \hat \xi^{(k)}))\right) \right\}\]
+    \EndFor
+    \State \Return $\{ T(v^{(k)},\xi^{(k)}), v^{(k)}, \xi^{(k)} \}$
+    \end{algorithmic}
+    \end{algorithm}
 
-\State Propose $\hat v^{(k)} = v^{(k)} + \epsilon \rho^{(k)}, \rho^{(k)} \sim \mathsf{N}(0,I)$
-\If {$\hat v^{(k)} _j \not \in  \left[(1-a)(\mathbb{E}u_j^2)^{1/2},(1+a)(\mathbb{E}u_j^2)^{1/2}\right]$ for any $j$} 
-    \State Reject and set $v^{(k+1)} = v^{(k)}$.
-\Else
-\State Make transition $v^{(k)} \to \hat v^{(k)}$ with probability
-\begin{align*}
- A(v^{(k)} \to \hat v^{(k)}) &= \min\left\{1, \frac{h(\hat v^{(k)}, \xi^{(k+1)})}{h(v^{(k)}, \xi^{(k+1)})}\right\} \\
- &= \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k+1)}))-\Phi(T(\hat v^{(k)}, \xi^{(k+1)})) \right) \right\}
- \end{align*}
-\EndIf
+\section{Second algorithm}
+    We can also take a Gaussian prior on $v_j$. With fixed $\tau_0, \alpha_0$, take the prior 
+    \[v_j \sim \mathsf{N}\left(\frac{1}{(\lambda_j + \tau_0^2)^{\alpha_0/2}},\sigma_j^2\right)\]
+    so that in all, $v \sim \mathsf{N}{(\mu, D)}$ with $\mu_j = \frac{1}{(\lambda_j + \tau_0^2)^{\alpha_0/2}}$ and $D = \text{diag}(\sigma_j^2)$. Again, we derive an expression for the joint posterior $h(v,\xi)$:
+    \begin{align*}
+        \mathbb{P}(v,\xi|y) &\propto \mathbb{P}(y|v,\xi) \mathbb{P}(v,\xi)\\
+        &\propto \exp \left(-\Phi(T(v,\xi)) \right) \mathbb{P}(v) \mathbb{P}(\xi)\\
+        &\propto \exp \left(-\Phi(T(v,\xi)) -\frac{1}{2}\langle v - \mu, D^{-1}(v - \mu) \rangle -\frac{1}{2} \langle \xi, \xi \rangle\right).
+    \end{align*}
+    And we obtain:
+    \begin{equation}
+    h(v,\xi) = \exp \left(-\Phi(T(v,\xi)) -\frac{1}{2}\langle v - \mu, D^{-1}(v - \mu) \rangle -\frac{1}{2} \langle \xi, \xi \rangle\right).
+    \end{equation}
 
-\EndFor
-\State \Return $\{ T(v^{(k)},\xi^{(k)}), v^{(k)}, \xi^{(k)} \}$
-\end{algorithmic}
-\end{algorithm}
+    \begin{algorithm}
+    \caption{Non-centered parameterization, hierarchical with $v$, Gaussian prior on $v$}
+    \label{alg:hier_v_gaussian}
+    \begin{algorithmic}
+    \State Choose $v^{(0)}, \xi^{(0)} \in \mathbb{R}^N, \beta_1, \beta_2 \in (0, 1]$.
+    \For{$k=0$ to $S$}
+    \State Propose $\hat\xi^{(k)} = (1-\beta_1^2)^{\frac{1}{2}}\xi^{(k)} + \beta_1 \zeta^{(k)}$, $\zeta^{(k)} \sim \mathsf{N}(0, I)$
+    \State Make transition $\xi^{(k)} \to \hat\xi^{(k)}$ with probability
+    \[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k)})) - \Phi(T(v^{(k)}, \hat \xi^{(k)}))\right) \right\}\]
 
+    \State Propose $\hat v^{(k)} = \mu + (1-\beta_2^2)^{\frac{1}{2}}(v-\mu) + \beta_2 \rho^{(k)}, \rho^{(k)} \sim \mathsf{N}(0,D)$
+
+    \State Make transition $v^{(k)} \to \hat v^{(k)}$ with probability
+    
+    \[ A(v^{(k)} \to \hat v^{(k)}) = \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k+1)}))-\Phi(T(\hat v^{(k)}, \xi^{(k+1)})) \right) \right\} \]
+     
+
+    \EndFor
+    \State \Return $\{ T(v^{(k)},\xi^{(k)}), v^{(k)}, \xi^{(k)} \}$
+    \end{algorithmic}
+    \end{algorithm}
 
 \bibliographystyle{siamplain}
 \bibliography{references}
