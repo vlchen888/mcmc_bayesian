@@ -1,0 +1,14 @@
+# Latex files #
+*.sty
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.thm
+*.cls
+*.bst
+*.DS_Store
+
