@@ -27,6 +27,7 @@ function [std, v_all, xi_all, v_accept, xi_accept] =...
     lambda = lambda(1:M);
     
     mu = (lambda + tau^2).^(-alpha/2);
+    % covariance = I
     sigma = ones(M,1);
     
     std = zeros(length(data), num_iterations);

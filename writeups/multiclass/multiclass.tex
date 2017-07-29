@@ -1,0 +1,93 @@
+\documentclass{siamart1116}
+\usepackage{amsmath, amssymb}
+%\usepackage{amsmath,amssymb,amsfonts,graphicx,amsthm,dsfont}
+%\usepackage{listings}
+%\usepackage{courier}
+\usepackage{enumerate}
+%\usepackage{color}
+%\usepackage[usenames,dvipsnames]{xcolor}
+%\usepackage{hyperref,tikz,mdframed}
+%\hypersetup{colorlinks=true,urlcolor=MidnightBlue,citecolor=PineGreen,linkcolor=BrickRed}
+
+% \lstset{
+% 	basicstyle=\small\ttfamily,
+% 	keywordstyle=\color{blue},
+% 	language=python,
+% 	xleftmargin=16pt,
+% }
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}% http://ctan.org/pkg/algorithmicx
+\usepackage{multicol}
+
+\textwidth=5.8in
+\textheight=9in
+\topmargin=-0.5in
+\headheight=0in
+\headsep=.5in
+\hoffset  -.4in
+\pagestyle{empty}
+
+\newcommand{\Fp}{\mathbb{F}_p}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\kron}[2]{\left(\frac{#1}{#2}\right)}
+\newcommand{\Aut}{\mathrm{Aut}}
+\newcommand{\End}{\mathrm{End}}
+\newcommand{\SO}{\mathrm{SO}}
+\newcommand{\SU}{\mathrm{SU}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\dee}{\mathrm{d}}
+\newcommand{\deee}{\textbf{\text{\emph{d}}}}
+
+\newcommand{\md}[1]{\textcolor{cyan}{#1}}
+
+\newcommand{\TheAuthors}{V. Chen}
+
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{definition}{Definition}
+
+\graphicspath{ {graphics/} }
+
+\title{Multiclass Clustering}
+\author{\TheAuthors}
+\date{}
+\begin{document}
+\maketitle
+\setlength{\unitlength}{1in}
+\setlength{\parindent}{0in}
+\section{Multiclass, nonhierarchical algorithm}
+    We describe the multiclass algorithm. Recall that for $v \in \mathbb{R}^k$, we define $S(v) = e_p, \quad p = \text{argmax} (v_r)$ where $\{e_1, \ldots e_k\}$ is the standard basis of $\mathbb{R}^k$. Now, the classifying function is of the form $u: Z \to \mathbb{R}^k$, or $u = (u^{[1]}, u^{[2]}, \ldots u^{[k]})$ with functions $u^{[j]}: Z \to \mathbb{R}$. Each of the $u^{[j]}$ has prior distribution given by $\mathsf{N}(0, C)$ with $C = (L + \tau^2 I)^{-\alpha}$. We retain
+    \[ \Phi(u) = \frac{1}{2\gamma^2}\sum_{l \in Z'} \text{norm}(y(l) - S(u(l)))^2 \]
+
+    We will implement the non-centered approach. Here, the variable is $\xi = (\xi^{[1]}, \ldots \xi^{[k]})$ where each $\xi^{[j]}$ is associated with $u^{[j]}$ by the following:
+    \[T(\xi^{[j]}) = \sum_{i=1}^M \frac{1}{(\lambda_j + \tau^2)^{\alpha/2}} \xi^{[j]}_i q_i = u^{[j]}\]
+    
+    \begin{equation}
+    \label{eqn:multiclass_T}
+    T(\xi) = (T(\xi^{[1]}), \ldots T(\xi^{[k]}) ) = u
+    \end{equation}
+
+    We can think about $u$ as a $N \times k$ matrix.
+
+    \begin{algorithm}
+
+    \caption{Multiclass, Metropolis-within-Gibbs updates}
+    \label{alg:hier_t_a_M}
+    \begin{algorithmic}
+    \State Choose $\xi^{(0)}_1, \ldots \xi^{(0)}_k \in \mathbb{R}^N, \tau, \alpha, \beta \in (0, 1]$.
+    \For{$i=0$ to $S$}
+        \For{$j=1$ to $k$}
+            \State Propose $\hat\xi^{(i)}_j = (1-\beta^2)^{\frac{1}{2}}\xi^{(i)}_j + \beta \zeta^{(i)}$, $\zeta^{(i)} \sim \mathsf{N}(0, I)$
+            \State Make transition $\xi^{(i)}_j \to \hat\xi^{(i)}_j$ with probability
+            \[ A(\xi^{(i)}_j \to \hat\xi^{(i)}_j) = \min\left\{1, \exp\left(\Phi(T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)})) - \Phi(T(\hat\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)}))\right) \right\}\]
+
+        \EndFor
+    \EndFor
+    
+    \end{algorithmic}
+    \end{algorithm}
+
+
+\bibliographystyle{siamplain}
+\bibliography{references}
+\end{document}
