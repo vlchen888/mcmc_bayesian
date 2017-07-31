@@ -35,7 +35,7 @@ params('tau_epsilon')   = 0.02;
 
 [tau_all, alpha_all, std, u_accept, tau_accept, alpha_accept] = mcmc_learn_t_a(params);
 
-u_avg = mean(sign(std(:, burn_in:end)), 2); %avg the rows
+u_avg = mean(std(:, burn_in:end), 2); %avg the rows
 
 figure(1)
 clf

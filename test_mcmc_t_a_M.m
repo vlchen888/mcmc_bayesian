@@ -2,8 +2,8 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
 
     params = containers.Map;
 
-    params('data_set') = string('voting');
-    params('laplacian') = string('un');
+    params('data_set') = "moons";
+    params('laplacian') = "self tuning";
     
     if params('data_set') == string('moons')
         N = 2000;
@@ -40,8 +40,8 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     params('l') = 1.25;
     %
     
-    params('gamma') = 0.0001;
-    params('B') = 0.4;
+    params('gamma') = 0.1;
+    params('B') = 0.1;
     params('init_tau') = 2;
     params('init_alpha') = 35;
     params('init_M') = 50;
@@ -63,7 +63,7 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
         
     [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, ...
         M_accept, E_u_sq] = mcmc_learn_t_a_M_noncentered(params);
-    u_avg = mean(sign(std(:, burn_in:end)), 2); %avg the rows
+    u_avg = mean(std(:, burn_in:end), 2); %avg the rows
     
     p = count_correct(u_avg, params('label_data'), params('truth'));
     

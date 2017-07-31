@@ -57,7 +57,7 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
         
         if mod(i,2500) == 0
             figure(1)
-            u_avg = mean(sign(std(:,1:i)), 2);
+            u_avg = mean(std(:,1:i), 2);
             plot(u_avg)
             drawnow
             p = count_correct(u_avg, params('label_data'), params('truth'));
@@ -133,9 +133,6 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
             end
         end      
     end
-    
-    E_u_sq = mean(uj_all.^2,2);
-    fprintf('done\n');
 end
 
 function g = compute_log_g(lambda, phi, xi, tau, alpha, gamma, label_data)

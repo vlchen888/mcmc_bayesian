@@ -43,7 +43,7 @@ function [p, tau_mean, alpha_mean] = test_mcmc_hier_noncentered(percent_fidelity
 
     [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] = mcmc_learn_t_a_noncentered(params);
 
-    u_avg = mean(sign(std(:, burn_in:end)), 2); %avg the rows
+    u_avg = mean(std(:, burn_in:end), 2); %avg the rows
     
     if params('data_set') == "moons"
         figure(1)

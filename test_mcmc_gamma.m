@@ -1,10 +1,10 @@
 function p = test_mcmc_gamma(percent_fidelity, sigma)
 
     params = containers.Map;
-    params('data_set') = string('moons');
-    params('laplacian') = string('self tuning');
+    params('data_set') = "moons";
+    params('laplacian') = "self tuning";
 
-    if params('data_set') == string('moons')
+    if params('data_set') == "moons"
         
         N = 2000;
         data = moondata(1,100,N,sigma);
@@ -22,7 +22,7 @@ function p = test_mcmc_gamma(percent_fidelity, sigma)
         params('label_data') = init(length(data),set_neg,set_pos);
         %}
 
-    elseif params('data_set') == string('voting')
+    elseif params('data_set') == "voting"
         load('data3.mat')
         data = X;
         params('data') = data;
@@ -58,10 +58,10 @@ function p = test_mcmc_gamma(percent_fidelity, sigma)
     %}
 
     [u_all, u_accept] = mcmc_gamma(params);
-    u_avg = mean(sign(u_all(:, burn_in:end)), 2); %avg the rows
+    u_avg = mean(u_all(:, burn_in:end), 2); %avg the rows
 
     
-    if params('data_set') == string('moons')
+    if params('data_set') == "moons"
         figure(1)
         set(gcf, 'Position', [100, 300, 800, 300])
         plotBar(u_avg)
@@ -74,7 +74,7 @@ function p = test_mcmc_gamma(percent_fidelity, sigma)
         scatter_twomoons_classify(data, u_avg, params('label_data'))
         
         p = count_correct(u_avg, params('label_data'), params('truth'));
-    elseif params('data_set') == string('voting')
+    elseif params('data_set') == "voting"
         figure(1)
         set(gcf, 'Position', [100, 300, 800, 300])
         plotBar(u_avg)

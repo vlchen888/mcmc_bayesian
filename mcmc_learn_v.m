@@ -11,6 +11,8 @@ function [std, v_all, xi_all, v_accept, xi_accept] =...
     B = params('B');
     a = params('a');
     epsilon = params('epsilon');
+    tau = params('tau');
+    alpha = params('alpha');
     
     if params('laplacian') == string('self tuning')
         L = compute_laplacian_selftuning(data);
@@ -26,13 +28,12 @@ function [std, v_all, xi_all, v_accept, xi_accept] =...
     lambda = lambda(1:M);
     
     % Arrays min_v, max_v
-    load('moon_E_u_sq.mat');
-    min_v = (1-a) * E_u_sq.^0.5;
-    max_v = (1+a) * E_u_sq.^0.5;
+    min_v = (1-a) * (lambda + tau^2).^(-alpha/2);
+    max_v = (1+a) * (lambda + tau^2).^(-alpha/2);
     
     std = zeros(length(data), num_iterations);
     v_all   = zeros(M, num_iterations);
-    v_all(:,1) = E_u_sq.^0.5;
+    v_all(:,1) = (lambda + tau^2).^(-alpha/2);
     v_accept = zeros(1, num_iterations);
     xi_all  = zeros(M, num_iterations);
     xi_accept = zeros(1, num_iterations);

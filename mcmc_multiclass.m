@@ -1,4 +1,4 @@
-function [signs_all] = mcmc_multiclass(params)
+function [xi_curr] = mcmc_multiclass(params)
     data = params('data');
     num_iterations = params('num_iterations');
     label_data = params('label_data');
@@ -26,21 +26,20 @@ function [signs_all] = mcmc_multiclass(params)
     lambda = lambda(1:M);
     
     xi_curr = zeros(M, k);
-    signs_all = zeros(k, num_data, num_iterations);
+    u_all = zeros(num_data, k, num_iterations);
     
     %%%%% Acceptance probabilities %%%%%
     xi_accept       = zeros(k, num_iterations);
     
     tic;    
     for i=1:num_iterations-1
-        signs_all(:,:,i) = compute_S(compute_T(xi_curr(:,:), tau, alpha, lambda, phi), k);
+        %signs_all(:,:,i) = compute_S(compute_T(xi_curr, tau, alpha, lambda, phi), k);
+        u_all(:,:,i) = phi * ((lambda + tau^2).^(-alpha/2) .* xi_curr);
         
         if mod(i, 2500) == 0
             figure(1)
-            avg_label = mean(signs_all(:,:,1:i), 3);
-            [~, I] = max(avg_label);
-            A = eye(k);
-            curr_label = A(:,I);
+            avg_label = mean(u_all, 3);
+            curr_label = compute_S(avg_label, k);
             p = count_correct_multiclass(curr_label, params('label_data'), params('truth'));
             fprintf('Sample number: %d, Time elapsed: %.2f\n', i, toc);
             fprintf('Classification accuracy: %.4f\n', p);

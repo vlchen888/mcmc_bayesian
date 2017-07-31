@@ -25,9 +25,9 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, ...
     tau_epsilon = params('tau_epsilon');
     
     tic;
-    if params('laplacian') == string('self tuning')
+    if params('laplacian') == "self tuning"
         L = compute_laplacian_selftuning(data);
-    elseif params('laplacian') == string('un')
+    elseif params('laplacian') == "un"
         L = compute_laplacian_standard(data, p, q, l);
     end
     toc
@@ -170,7 +170,7 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, ...
         %%%% Movie things %%%%
         
         if i >= params('burn_in') && mod(i,2500)==0
-            curr_avg = mean(sign(std(:,params('burn_in'):i)), 2);
+            curr_avg = mean(std(:,params('burn_in'):i), 2);
             
             fprintf('Sample number: %d\n', i);
             fprintf('Classification accuracy: %f\n', count_correct(curr_avg, params('label_data'), params('truth')));

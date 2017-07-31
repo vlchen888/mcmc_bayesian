@@ -47,7 +47,7 @@ function p = test_mcmc_hier_v_gaussian_prior(percent_fidelity, sigma)
         
     [std, v_all, xi_all, v_accept, xi_accept] ...
         = mcmc_learn_v_gaussian_prior(params);
-    u_avg = mean(sign(std(:, burn_in:end)), 2); %avg the rows
+    u_avg = mean(std(:, burn_in:end), 2); %avg the rows
     
     p = count_correct(u_avg, params('label_data'), params('truth'));
         
