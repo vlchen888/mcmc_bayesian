@@ -4,12 +4,18 @@ function mnist_heatmap( labels, truth, digs)
     [nums_labels, ~] = find(labels);
     [nums_truth, ~] = find(truth);
     
-    Digit = digs(nums_truth)';
+    TrueDigit = digs(nums_truth)';
     LabeledAs = digs(nums_labels)';
+    count = zeros(length(truth'),1);
+    for i=1:length(digs)
+        inds = find(TrueDigit==digs(i));
+        count(inds) = 1/length(inds);
+    end
     
     
-    t = table(LabeledAs, Digit);
-    heatmap(t, 'LabeledAs', 'Digit');
+    t = table(LabeledAs,TrueDigit,count);
+    heatmap(t, 'LabeledAs', 'TrueDigit','ColorVariable','count','ColorMethod','sum'...
+        , 'ColorMap', hot);
 
 end
 

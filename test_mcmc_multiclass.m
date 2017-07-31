@@ -4,14 +4,24 @@ function p = test_mcmc_multiclass(percent_fidelity)
 
     params('laplacian') = "self tuning";
     
-    digs = [4, 9];
+    digs = [1, 4, 9];
+    saved = true;
+    
     params('digs') = digs;
-    k = 2;
+    k = length(digs);
     params('k') = k;
-    load('mnist49data.mat')
-    params('data') = data;
-    load('mnist49truth.mat')
-    params('truth') = truth';
+    if saved
+        load('mnistdata.mat')
+        params('data') = data;
+        load('mnisttruth.mat')
+        params('truth') = truth';
+    else
+        [data, truth] = generate_mnist_data(digs);
+        save('mnistdata.mat','data');
+        save('mnisttruth.mat','truth');
+        params('data') = data;
+        params('truth') = truth';
+    end
     params('label_data') = generate_fidelity_multiclass(percent_fidelity, params('truth'), length(data), k);
     
     params('num_iterations') = 100000;
@@ -25,12 +35,10 @@ function p = test_mcmc_multiclass(percent_fidelity)
     %
     
     params('gamma') = 0.1;
-    params('B') = 0.4;
+    params('B') = 0.1;
     params('tau') = 2;
     params('alpha') = 35;
     
-    
-        
     [signs_all] ...
         = mcmc_multiclass(params);
     final_class = compute_S(mean((signs_all(:, :, burn_in:end)), 3));

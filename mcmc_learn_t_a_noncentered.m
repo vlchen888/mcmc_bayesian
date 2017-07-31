@@ -17,9 +17,9 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
     alpha_epsilon = params('alpha_epsilon');
     tau_epsilon = params('tau_epsilon');
     
-    if params('laplacian') == string('self tuning')
+    if params('laplacian') == "self tuning"
         L = compute_laplacian_selftuning(data);
-    elseif params('laplacian') == string('un')
+    elseif params('laplacian') == "un"
         L = compute_laplacian_standard(data, p, q, l);
     end
     lambda = eig(L);
@@ -54,6 +54,18 @@ function [tau_all, alpha_all, std, xi_accept, tau_accept, alpha_accept] =...
     uj_all = zeros(M, num_iterations);
         
     for i=1:num_iterations-1
+        
+        if mod(i,2500) == 0
+            figure(1)
+            u_avg = mean(sign(std(:,1:i)), 2);
+            plot(u_avg)
+            drawnow
+            p = count_correct(u_avg, params('label_data'), params('truth'));
+            fprintf('Sample number: %d\n', i);
+            fprintf('Classification accuracy: %.4f\n', p);
+            fprintf('\txi accept acceptance probability: %.4f\n', mean(xi_accept(1:i)));
+        end
+        
         %%%%% Propose new state for xi %%%%%
         curr_xi = xi_all(:,i);
         curr_tau = tau_all(i);
