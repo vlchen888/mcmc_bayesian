@@ -66,12 +66,7 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, ...
     
     %%%%% Store uj %%%%%
     uj_all = zeros(params('max_M'), num_iterations);
-    if params('movie')
-        figure(3)
-        set(gcf, 'Position', [100, 300, 1200, 800])
-        step_num = 1;
-    end
-
+    tic;
     for i=1:num_iterations-1
         curr_xi = xi_all(:,i);
         curr_tau = tau_all(i);
@@ -132,6 +127,7 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, ...
                 alpha_all(i+1) = alpha_all(i);
                 alpha_accept(i+1) = 0;
             else
+                
                 log_alpha = compute_log_g(lambda, phi, curr_xi, curr_tau, new_alpha, curr_M, gamma, label_data) ...
                 - compute_log_g(lambda, phi, curr_xi, curr_tau, curr_alpha, curr_M, gamma, label_data);
                 transition_alpha = exp(log_alpha);
@@ -155,8 +151,8 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, ...
             M_all(i+1) = M_all(i);
             M_accept(i+1) = 0;
         else
-            log_M = compute_log_g(lambda, phi, curr_xi, curr_tau, curr_alpha, new_M, gamma, label_data) ...
-                - compute_log_g(lambda, phi, curr_xi, curr_tau, curr_alpha, curr_M, gamma, label_data);
+            log_M = compute_phi(gamma, label_data, compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi)) ...
+                - compute_phi(gamma, label_data, compute_T(curr_xi, curr_tau, curr_alpha, new_M, lambda, phi));            
             transition_M = exp(log_M);
             if rand(1) < transition_M
                 M_all(i+1) = new_M;
@@ -172,50 +168,49 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, ...
         if i >= params('burn_in') && mod(i,2500)==0
             curr_avg = mean(std(:,params('burn_in'):i), 2);
             
-            fprintf('Sample number: %d\n', i);
+            fprintf('Sample number: %d, Elapsed time: %.4f\n', i, toc);
             fprintf('Classification accuracy: %f\n', count_correct(curr_avg, params('label_data'), params('truth')));
             fprintf('Acceptance rates: \n\txi:%f \n\ttau:%f \n\talpha:%f \n\tM:%f \n',...
                 sum(xi_accept)/i,sum(tau_accept)/i,sum(alpha_accept)/i,sum(M_accept)/i);
             if params('movie')
+                figure(2)
                 subplot(231)
-                plot(std(:,i))
-                xlabel('Current u')
-
-                subplot(232)
-                if params('data_set') == string('moons')
-                    scatter_twomoons_classify(data, sign(std(:,i)), params('label_data'))
-                elseif params('data_set') == string('voting')
-                    plotBar(std(:,i));
-                elseif params('data_set') == string('mnist')
-                    plotBar(std(:,i));
-                end
-                xlabel('Current u scatter')
-
-                subplot(233)
-                if params('data_set') == string('moons')
+                set(gcf, 'Position', [100, 300, 1000, 500])
+                if params('data_set') == "moons"
                     scatter_twomoons_classify(data, curr_avg, params('label_data'))
-                elseif params('data_set') == string('voting')
+                elseif params('data_set') == "voting"
                     plotBar(curr_avg);
-                elseif params('data_set') == string('mnist')
+                elseif params('data_set') == "mnist"
                     plotBar(curr_avg);
                 end
                 xlabel('Average u scatter')
 
+                subplot(232)
+                plot(1:i, M_all(1:i), 1:i, movmean(M_all(1:i), [i 0]));
+                legend('M trace', 'M running average');
+
+                subplot(233)
+                plot(movmean(xi_accept(1:i), [i 0]));
+                title('\xi acceptance probability')
+                
                 subplot(234)
-                plot(tau_all(1:i));
-                xlabel('\tau trace')
+                plot(movmean(M_accept(1:i), [i 0]));
+                title('M acceptance probability')
 
                 subplot(235)
-                plot(alpha_all(1:i));
-                xlabel('\alpha trace')
+                plot(mean(uj_all(:, params('burn_in'):i),2))
+                title('Average u_j')
 
                 subplot(236)
-                plot(M_all(1:i));
-                xlabel('M trace')
+                histogram(M_all(1:i),'BinWidth',1);
+                title('M histogram')
+                
+                drawnow
+                pause(.5)
 
-                fname = sprintf('figs/step_%i.png',step_num);
-                print('-r144','-dpng',fname);
-                step_num = step_num + 1;
+                %fname = sprintf('figs/step_%i.png',step_num);
+                %print('-r144','-dpng',fname);
+                %step_num = step_num + 1;
             end
         end
         

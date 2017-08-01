@@ -29,7 +29,7 @@ function [xi_curr] = mcmc_multiclass(params)
     u_all = zeros(num_data, k, num_iterations);
     
     %%%%% Acceptance probabilities %%%%%
-    xi_accept       = zeros(k, num_iterations);
+    xi_accept = zeros(k, num_iterations);
     
     tic;    
     for i=1:num_iterations-1

@@ -57,32 +57,33 @@
 \setlength{\parindent}{0in}
 \section{Multiclass, nonhierarchical algorithm}
     We describe the multiclass algorithm. Recall that for $v \in \mathbb{R}^k$, we define $S(v) = e_p, \quad p = \text{argmax} (v_r)$ where $\{e_1, \ldots e_k\}$ is the standard basis of $\mathbb{R}^k$. Now, the classifying function is of the form $u: Z \to \mathbb{R}^k$, or $u = (u^{[1]}, u^{[2]}, \ldots u^{[k]})$ with functions $u^{[j]}: Z \to \mathbb{R}$. Each of the $u^{[j]}$ has prior distribution given by $\mathsf{N}(0, C)$ with $C = (L + \tau^2 I)^{-\alpha}$. We retain
-    \[ \Phi(u) = \frac{1}{2\gamma^2}\sum_{l \in Z'} \text{norm}(y(l) - S(u(l)))^2 \]
+    \[ \Phi(u) = \frac{1}{2\gamma^2}\sum_{l \in Z'} \text{norm}(y(l) - S(u(l)))^2. \]
 
     We will implement the non-centered approach. Here, the variable is $\xi = (\xi^{[1]}, \ldots \xi^{[k]})$ where each $\xi^{[j]}$ is associated with $u^{[j]}$ by the following:
-    \[T(\xi^{[j]}) = \sum_{i=1}^M \frac{1}{(\lambda_j + \tau^2)^{\alpha/2}} \xi^{[j]}_i q_i = u^{[j]}\]
-    
+    \[T(\xi^{[j]}) = \sum_{i=1}^M \frac{1}{(\lambda_j + \tau^2)^{\alpha/2}} \xi^{[j]}_i q_i = u^{[j]}.\]
+    Then, define:
     \begin{equation}
     \label{eqn:multiclass_T}
-    T(\xi) = (T(\xi^{[1]}), \ldots T(\xi^{[k]}) ) = u
+    T(\xi) = (T(\xi^{[1]}), \ldots T(\xi^{[k]}) ) = u.
     \end{equation}
-
-    We can think about $u$ as a $N \times k$ matrix.
-
+    
     \begin{algorithm}
 
     \caption{Multiclass, Metropolis-within-Gibbs updates}
     \label{alg:hier_t_a_M}
-    \begin{algorithmic}
-    \State Choose $\xi^{(0)}_1, \ldots \xi^{(0)}_k \in \mathbb{R}^N, \tau, \alpha, \beta \in (0, 1]$.
+    \begin{algorithmic}[1]
+    \State Choose $\xi^{(0)} = (\xi^{[1],(0)}, \ldots \xi^{[k],(0)}), \xi^{[j],(0)} \in \mathbb{R}^M$. Choose $\tau, \alpha, \beta \in (0, 1]$. 
     \For{$i=0$ to $S$}
         \For{$j=1$ to $k$}
-            \State Propose $\hat\xi^{(i)}_j = (1-\beta^2)^{\frac{1}{2}}\xi^{(i)}_j + \beta \zeta^{(i)}$, $\zeta^{(i)} \sim \mathsf{N}(0, I)$
-            \State Make transition $\xi^{(i)}_j \to \hat\xi^{(i)}_j$ with probability
-            \[ A(\xi^{(i)}_j \to \hat\xi^{(i)}_j) = \min\left\{1, \exp\left(\Phi(T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)})) - \Phi(T(\hat\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)}))\right) \right\}\]
+            \State Propose $\hat\xi^{[j],(i)} = (1-\beta^2)^{\frac{1}{2}}\xi^{[j],(i)} + \beta \zeta^{(i)}$, $\zeta^{(i)} \sim \mathsf{N}(0, I)$
+            \State Define $\hat \xi = (\xi^{[1],(i+1)}, \ldots \xi^{[j-1],(i+1)}, \hat\xi^{[j],(i)}, \xi^{[j+1],(i)}, \ldots)$
+            \State Make transition $\xi^{(i)} \to \hat\xi$ with probability
+            \[ A(\xi^{(i)} \to \hat\xi) = \min\left\{1, \exp\left(\Phi(T(\xi^{(i)})) - \Phi(T(\hat \xi))\right) \right\}\]
 
         \EndFor
     \EndFor
+
+    \State \Return $\{T(\xi^{(i)})\}$
     
     \end{algorithmic}
     \end{algorithm}

@@ -133,7 +133,7 @@
         \begin{algorithm}
         \caption{General pCN adapted from \cite{CoRoStWh13}}
         \label{alg:generalpCN}
-        \begin{algorithmic}
+        \begin{algorithmic}[1]
         \State{Select $u^{(0)}$. Select $\tau, \alpha$. Select $\beta \in [0, 1]$}
         \For{$k = 0$ to $S$}
         \State{Sample $v$ from the prior distribution given in \cref{eqn:prior}}
@@ -169,7 +169,7 @@
         \begin{algorithm}
         \caption{Hierarchical on $\tau, \alpha$}
         \label{alg:hierarchical_tau_alpha}
-        \begin{algorithmic}
+        \begin{algorithmic}[1]
         \State Initialize $u^{(0)} = q_1$, the Fiedler vector expressed in the standard basis.
         \State Initialize $\tau^{(0)}, \alpha^{(0)}$. Select $\beta \in [0, 1]$
         \State Pick $\epsilon_1, \epsilon_2$, the jump sizes for $\tau, \alpha$ respectively.
@@ -220,7 +220,7 @@
         \begin{algorithm}
         \caption{Non-centered parameterization: sampling $\xi, \tau, \alpha$}
         \label{alg:xi_tau_alpha}
-        \begin{algorithmic}
+        \begin{algorithmic}[1]
         \State Choose $\xi^{(0)} \in \mathbb{R}^N, \alpha^{(0)}, \tau^{(0)} > 0, \beta \in (0, 1]$ and $\epsilon_1, \epsilon_2 > 0$.
         \For{$k=0$ to $S$}
         \State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim \mathsf{N}(0, I)$
@@ -242,8 +242,8 @@
     \subsection{Model (C)}
         In this algorithm, we aim to learn $M$, the number of eigenvectors we want to use, as well. This algorithm seems promising given the problem we encountered with the irregularity of higher eigenvectors with the algorithms in model (B), which we resolved by truncating the number of eigenvectors. Essentially, we want to be hierarchical about our level of truncation. We take a uniform prior for $M$, typically $\mathsf{U}(1,70)$ or similar. It is convenient to implement this algorithm with the non-centered approach since we do not need to worry about $M$ affecting terms such as the determinant of the covariance. The new equation for $T$, which relates $\xi, \tau, \alpha, M$ to $u$, is:
         \begin{equation}
-        \label{eqn:noncentered_T_M}
-        T(\xi,\tau,\alpha, M) = \sum_{i=0}^M \frac{1}{(\lambda_i+\tau^2)^{\alpha/2}}\xi_iq_i = u.
+            \label{eqn:noncentered_T_M}
+            T(\xi,\tau,\alpha, M) = \sum_{i=0}^M \frac{1}{(\lambda_i+\tau^2)^{\alpha/2}}\xi_iq_i = u.
         \end{equation}
 
         We can compute the joint posterior on $\xi, \tau, \alpha, M$ similarly to the derivation of \cref{eqn:noncentered_post}:
@@ -259,7 +259,7 @@
 
         \caption{Non-centered parameterization, hierarchical with $\tau, \alpha, M$}
         \label{alg:hier_t_a_M}
-        \begin{algorithmic}
+        \begin{algorithmic}[1]
         \State Choose $\xi^{(0)} \in \mathbb{R}^N, \tau^{(0)}, \alpha^{(0)}, M^{(0)} > 0, \beta \in (0, 1]$ and $\epsilon_1, \epsilon_2 > 0$.
         \For{$k=0$ to $S$}
         \State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim \mathsf{N}(0, I)$
@@ -291,8 +291,8 @@
         \label{eqn:v_T}
         T(v,\xi) = \sum_{i=0}^{M} v_i\xi_iq_i = u.
         \end{equation}
-        Here, $M$ is fixed. We take $\xi \sim \mathsf{N}(0, I)$. For the prior of $v$, the first step is to slightly ``cheat'' by using a working solution to this problem: apply one of the algorithms that learns $\tau, \alpha$ and get estimates for $\mathbb{E} u_j^2$ where $u = \sum_{i=0}^M u_j q_j$. Then, pick the prior for $v$ to be
-        \[v_j \sim \mathsf{U}\left((1-a)(\mathbb{E}u_j^2)^{1/2},(1+a)(\mathbb{E}u_j^2)^{1/2}\right).\]
+        Here, $M$ is fixed. We take $\xi \sim \mathsf{N}(0, I)$. Using good estimates for $\tau, \alpha$, perhaps obtained by algorithms that learn $\tau, \alpha$, set the prior on $v$ to be:
+        \[v_j \sim \mathsf{U}\left((1-a)(\lambda_j+\tau^2)^{-\alpha/2},(1+a)(\lambda_j+\tau^2)^{-\alpha/2}\right)\]
         where $a$ is a fixed scalar.
 
         Finally, we derive an expression for the posterior with Bayes' theorem.
@@ -317,32 +317,75 @@
 
         This algorithm is given in \cref{alg:hier_v}.
         \begin{algorithm}
+            \caption{Non-centered parameterization, hierarchical with $v$}
+            \label{alg:hier_v}
+            \begin{algorithmic}[1]
+            \State Choose $v^{(0)}, \xi^{(0)} \in \mathbb{R}^N, \beta \in (0, 1], \epsilon > 0$.
+            \For{$k=0$ to $S$}
+            \State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim \mathsf{N}(0, I)$
+            \State Make transition $\xi^{(k)} \to \hat\xi^{(k)}$ with probability
+            \[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k)})) - \Phi(T(v^{(k)}, \hat \xi^{(k)}))\right) \right\}\]
 
-        \caption{Non-centered parameterization, hierarchical with $v$}
-        \label{alg:hier_v}
-        \begin{algorithmic}
-        \State Choose $v^{(0)}, \xi^{(0)} \in \mathbb{R}^N, \beta \in (0, 1], \epsilon > 0$.
+            \State Propose $\hat v^{(k)} = v^{(k)} + \epsilon \rho^{(k)}, \rho^{(k)} \sim \mathsf{N}(0,I)$
+            \If {$\hat v^{(k)} _j$ is outside of its prior interval for any $j$} 
+                \State Reject and set $v^{(k+1)} = v^{(k)}$.
+            \Else
+            \State Make transition $v^{(k)} \to \hat v^{(k)}$ with probability
+            \begin{align*}
+             A(v^{(k)} \to \hat v^{(k)}) &= \min\left\{1, \frac{h(\hat v^{(k)}, \xi^{(k+1)})}{h(v^{(k)}, \xi^{(k+1)})}\right\} \\
+             &= \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k+1)}))-\Phi(T(\hat v^{(k)}, \xi^{(k+1)})) \right) \right\}
+             \end{align*}
+            \EndIf
+
+            \EndFor
+            \State \Return $\{ T(v^{(k)},\xi^{(k)}), v^{(k)}, \xi^{(k)} \}$
+            \end{algorithmic}
+        \end{algorithm}
+
+    \subsection{Model (E)}
+        This model extends model (D), trying to learn $M$ as well. Define:
+        \begin{equation}
+        T(v,\xi,M) = \sum_{i=0}^{M} v_i\xi_iq_i = u.
+        \end{equation}
+        Taking the uniform prior on $v$, we obtain:
+        \begin{equation}
+        \label{eqn:learn_v_M_posterior}
+        h(v, \xi, M) \propto \exp \left(-\Phi(T(v,\xi, M)) + \log (\pi_0(v, M)) - \frac{1}{2}\langle \xi, \xi \rangle  \right).
+        \end{equation}
+        This approach is described in \cref{alg:hier_v_M}.
+        \begin{algorithm}
+        \caption{Non-centered parameterization, hierarchical with $v, M$}
+        \label{alg:hier_v_M}
+        \begin{algorithmic}[1]
+        \State Choose $v^{(0)}, \xi^{(0)} \in \mathbb{R}^N, M^{(0)}, \beta \in (0, 1], \epsilon > 0$.
         \For{$k=0$ to $S$}
         \State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim \mathsf{N}(0, I)$
         \State Make transition $\xi^{(k)} \to \hat\xi^{(k)}$ with probability
-        \[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k)})) - \Phi(T(v^{(k)}, \hat \xi^{(k)}))\right) \right\}\]
+        \[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k)}, M^{(k)})) - \Phi(T(v^{(k)}, \hat \xi^{(k)}, M^{(k)}))\right) \right\}\]
 
         \State Propose $\hat v^{(k)} = v^{(k)} + \epsilon \rho^{(k)}, \rho^{(k)} \sim \mathsf{N}(0,I)$
-        \If {$\hat v^{(k)} _j \not \in  \left[(1-a)(\mathbb{E}u_j^2)^{1/2},(1+a)(\mathbb{E}u_j^2)^{1/2}\right]$ for any $j$} 
+        \If {$\hat v^{(k)} _j$ is outside of its prior interval for any $j$} 
             \State Reject and set $v^{(k+1)} = v^{(k)}$.
         \Else
         \State Make transition $v^{(k)} \to \hat v^{(k)}$ with probability
         \begin{align*}
-         A(v^{(k)} \to \hat v^{(k)}) &= \min\left\{1, \frac{h(\hat v^{(k)}, \xi^{(k+1)})}{h(v^{(k)}, \xi^{(k+1)})}\right\} \\
-         &= \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k+1)}))-\Phi(T(\hat v^{(k)}, \xi^{(k+1)})) \right) \right\}
+         A(v^{(k)} \to \hat v^{(k)}) &= \min\left\{1, \frac{h(\hat v^{(k)}, \xi^{(k+1)}, M^{(k)})}{h(v^{(k)}, \xi^{(k+1)}, M^{(k)})}\right\} \\
+         &= \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k+1)},M^{(k)}))-\Phi(T(\hat v^{(k)}, \xi^{(k+1)}, M^{(k)})) \right) \right\}
          \end{align*}
         \EndIf
+
+        \State Propose $\hat M^{(k)} = M^{(k)} + Q$, with jump $Q$ distributed as $\mathbb{P}(Q=k) \propto \frac{1}{1+|k|}$, $|Q|$ bounded.
+        \State Make transition $M^{(k)} \to \hat M^{(k)}$ with probability
+
+        \begin{align*}
+        A(M^{(k)} \to \hat M^{(k)}) &= \min\left\{1, \frac{h( v^{(k+1)}, \xi^{(k+1)}, \hat M^{(k)}  )}{h( v^{(k+1)}, \xi^{(k+1)}, M^{(k)} )} \right\}\\
+        &=\min\left\{1, \exp\left(\Phi(v^{(k+1)}, \xi^{(k+1)}, M^{(k)} ) - \Phi(v^{(k+1)}, \xi^{(k+1)}, \hat M^{(k)} )\right)\right\}
+        \end{align*}
 
         \EndFor
         \State \Return $\{ T(v^{(k)},\xi^{(k)}), v^{(k)}, \xi^{(k)} \}$
         \end{algorithmic}
         \end{algorithm}
-
 \iffalse
 
 \section{Voting records experiments with models (A) and (B)}
@@ -611,8 +654,22 @@
                 \includegraphics[width=0.6\linewidth]{learnM/moons/hier/sigma_0_20/M_trace.png}
             \end{figure}
 
-\section{Experiments with model (D)}
+\section{Experiments with model (E)}
+    We run some experiments with model (E) on the two moons dataset. We again fix $\tau = 2, \alpha = 35$, and pick $a=0.5$ to create the prior on $v$. We pick the walk size for $v$ to be $\epsilon = 1.0\times 10^{-13}$. We allow the prior on $M$ to be uniform, $\mathsf{U}(1,70)$. If we compare this algorithm against model (C) with fixed $\tau, \alpha$, this is equivalent to setting $\epsilon = 0$ and fixing $v$ to be at the mean of its prior. Learning $v$ and $M$ does not seem to greatly affect the classification accuracy compared to just learning $M$. Consider the following run on two moons, with fidelity = 1\%, $\sigma = 0.2$, in \cref{fig:modelE_learn_v} and \cref{fig:modelE_fixed_v}. The model that learns $v, M$ obtained $85.45\%$ accuracy while the one that only learns $M$ obtained $86.52\%$ accuracy. The histograms of $M$ appear very similar, with the same cutoff observed at the $14$th index. The average values of the $u_j$ coefficients also seem to agree in magnitude and sign between the two algorithms.
+
+    \begin{figure}
+        \caption{\label{fig:modelE_learn_v}Learning $v, M$. The bottom left figure was one observation of the $v_j$.}
+        \includegraphics[width=\linewidth]{learnv/v_uniform_prior/all.png}
+    \end{figure}
+
+    \begin{figure}
+        \caption{\label{fig:modelE_fixed_v}Learning only $M$}
+        \includegraphics[width=\linewidth]{learnv/v_fixed/all.png}
+    \end{figure}
     
+\section{Goals}
+    One research goal for the remainder of the summer is to gather more data comparing the algorithm that learns $M$ against the nonhierarchical algorithm to determine if the method is beneficial. It will also be interesting to better analyze the relationship between $\sigma$ and $M$ in the two moons dataset. Preliminary experiments suggest that in low $\sigma$ data, small $M$ is enough for an accurate clustering, but in large $\sigma$, higher $M$ is necessary as more eigenvectors are needed to fit the problem. It could be interesting to create a plot of average $M$ versus increasing $\sigma$ to test this hypothesis. \\
+    Another goal is to study the effectiveness of the hierarchical methods on multiclass datasets. In particular, I am working on implementing these algorithms to handle the MNIST data set, which features up to 10 different classes.
 
 \bibliographystyle{siamplain}
 \bibliography{references}

@@ -39,6 +39,31 @@ function [std, v_all, xi_all, v_accept, xi_accept] =...
     xi_accept = zeros(1, num_iterations);
     
     for k=1:num_iterations-1
+        if k >= params('burn_in') && mod(k,2500) == 0
+            figure(2)
+            set(gcf, 'Position', [100, 300, 600, 500])
+            std_avg = mean(std(:,params('burn_in'):k),2);
+            subplot(221)
+            if params('data_set') == "moons"
+                scatter_twomoons_classify(data, std_avg, params('label_data'))
+            elseif params('data_set') == "voting"
+                plotBar(std_avg)
+            end
+
+            subplot(222)
+            plot(mean(xi_all(:,params('burn_in'):k).*v_all(:,params('burn_in'):k), 2));
+            title('u_j average')
+
+            subplot(223)
+            plot(movmean(xi_accept(1:k), [length(xi_accept) 0]));
+            title('\xi acceptance probability')
+            
+            subplot(224)
+            plot(movmean(v_accept(1:k), [length(v_accept) 0]));
+            title('v acceptance probability')
+            drawnow
+            pause(0.5);
+        end
         std(:, k) = compute_T(v_all(:,k), xi_all(:,k), phi);
         hat_xi = (1-B^2)^0.5 * xi_all(:, k) + B*normrnd(0, 1, M, 1);
         log_xi = compute_phi(gamma, label_data, compute_T(v_all(:,k),xi_all(:,k),phi)) - ...
