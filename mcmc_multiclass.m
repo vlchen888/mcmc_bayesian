@@ -1,4 +1,4 @@
-function [xi_curr] = mcmc_multiclass(params)
+function [u_all] = mcmc_multiclass(params)
     data = params('data');
     num_iterations = params('num_iterations');
     label_data = params('label_data');
@@ -37,14 +37,18 @@ function [xi_curr] = mcmc_multiclass(params)
         u_all(:,:,i) = phi * ((lambda + tau^2).^(-alpha/2) .* xi_curr);
         
         if mod(i, 2500) == 0
-            figure(1)
             avg_label = mean(u_all, 3);
             curr_label = compute_S(avg_label, k);
             p = count_correct_multiclass(curr_label, params('label_data'), params('truth'));
             fprintf('Sample number: %d, Time elapsed: %.2f\n', i, toc);
             fprintf('Classification accuracy: %.4f\n', p);
             fprintf('\txi accept acceptance probability: %.4f\n', mean(xi_accept(:,1:i),2));
+            figure(1)
             mnist_heatmap(curr_label, params('truth'), params('digs'));
+            
+            figure(2)
+            plot(u_all(:,:,i))
+            
             drawnow
         end
         
