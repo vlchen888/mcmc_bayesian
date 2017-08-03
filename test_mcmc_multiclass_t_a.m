@@ -14,17 +14,17 @@ function p = test_mcmc_multiclass_t_a(percent_fidelity)
         load('mnistdata.mat')
         params('data') = data;
         load('mnisttruth.mat')
-        params('truth') = truth';
+        params('truth') = truth;
     else
         [data, truth] = generate_mnist_data(digs);
         save('mnistdata.mat','data');
         save('mnisttruth.mat','truth');
         params('data') = data;
-        params('truth') = truth';
+        params('truth') = truth;
     end
     params('label_data') = generate_fidelity_multiclass(percent_fidelity, params('truth'), length(data), k);
     
-    params('num_iterations') = 100000;
+    params('num_iterations') = 100001;
     burn_in = 5000;
     params('burn_in') = burn_in;
 
@@ -51,14 +51,8 @@ function p = test_mcmc_multiclass_t_a(percent_fidelity)
     params('alpha_max') = 60;
     
     [u_all] = mcmc_multiclass_t_a(params);
-    final_class = compute_S(mean((u_all(:, :, burn_in:end)), 3));
+    final_class = compute_S_multiclass(mean((u_all(:, :, burn_in:end)), 3), k);
     
     p = count_correct_multiclass(final_class, params('label_data'), params('truth'));
     
-end
-
-function S = compute_S(u)
-    [~, I] = max(u,[],2);
-    A = eye(length(u));
-    S = A(:, I);
 end

@@ -1,4 +1,4 @@
-function [u_all] = mcmc_multiclass_t_a(params)
+function [u_all] = mcmc_multiclass_t_a_same(params)
     data = params('data');
     num_iterations = params('num_iterations');
     label_data = params('label_data');
@@ -38,59 +38,59 @@ function [u_all] = mcmc_multiclass_t_a(params)
     M = 50;
     phi = phi(:, 1:M);
     lambda = lambda(1:M);
+    tau_all = zeros(1, num_iterations);
+    alpha_all = zeros(1, num_iterations);
+    tau_all(1) = init_tau;
+    alpha_all(1) = init_alpha;
     
     xi_curr = zeros(M, k);
     u_all = zeros(num_data, k, num_iterations);
-    taus_curr = zeros(1, k);
-    alphas_curr = zeros(1, k);
-    
-    taus_curr(1,:) = init_tau;
-    alphas_curr(1,:) = init_alpha;
-    
-    taus_all = zeros(k, num_iterations);
-    alphas_all = zeros(k, num_iterations);
-    
+        
     %%%%% Acceptance probabilities %%%%%
     xi_accept = zeros(k, num_iterations);
-    tau_accept = zeros(k, num_iterations);
-    alpha_accept = zeros(k, num_iterations);
+    tau_accept = zeros(1, num_iterations);
+    alpha_accept = zeros(1, num_iterations);
     
     tic;    
     for i=1:num_iterations-1
+        tau_curr = tau_all(i);
+        alpha_curr = alpha_all(i);
         %signs_all(:,:,i) = compute_S(compute_T(xi_curr, tau, alpha, lambda, phi), k);
-        taus_all(:, i) = taus_curr;
-        alphas_all(:, i) = alphas_curr;
-        u_all(:,:,i) = compute_T(xi_curr, taus_curr, alphas_curr, lambda, phi);
+        u_all(:,:,i) = compute_T(xi_curr, tau_curr, alpha_curr, lambda, phi);
         
-        if mod(i, 2500) == 0
-            % avg_label = mean(u_all(:,:,1:i), 3);
+        if i >= params('burn_in') && mod(i, 2500) == 0
             
             avg_label = zeros(num_data, k);
             for ii = params('burn_in') : i
                 avg_label = avg_label + compute_S_multiclass(squeeze(u_all(:,:,ii)), k);
             end
-            
+            %avg_label = mean(u_all(:,:,params('burn_in'):i),3);
             curr_label = compute_S_multiclass(avg_label, k);
-            
             p = count_correct_multiclass(curr_label, params('label_data'), params('truth'));
             fprintf('Sample number: %d, Time elapsed: %.2f\n', i, toc);
             fprintf('Classification accuracy: %.4f\n', p);
             fprintf('\txi accept acceptance probability: %.4f\n', mean(xi_accept(:,1:i),2));
-            fprintf('\ttau accept acceptance probability: %.4f\n', mean(tau_accept(:,1:i),2));
-            fprintf('\talpha accept acceptance probability: %.4f\n', mean(alpha_accept(:,1:i),2));
+            fprintf('\ttau accept acceptance probability: %.4f\n', mean(tau_accept(1:i),2));
+            fprintf('\talpha accept acceptance probability: %.4f\n', mean(alpha_accept(1:i),2));
+            fprintf('tau running average: %.4f\n', mean(tau_all(1:i)));
+            fprintf('alpha running average: %.4f\n', mean(alpha_all(1:i)));
             figure(1)
             mnist_heatmap(curr_label, params('truth'), params('digs'));
             
             figure(2)
+            subplot(211)
             plot(u_all(:,:,i))
+            subplot(212)
+            plot((lambda + tau_curr^2).^(-alpha_curr/2) .* xi_curr)
             
             figure(3)
             subplot(211)
-            plot(taus_all(:,1:i)')
-            xlabel('\tau s')
+            plot(tau_all(1:i))
+            plot(1:i,tau_all(1:i),1:i,movmean(tau_all(1:i),[i 0]))
+            xlabel('\tau trace')
             subplot(212)
-            plot(alphas_all(:,1:i)')
-            xlabel('\alpha s')
+            plot(1:i,alpha_all(1:i),1:i,movmean(alpha_all(1:i),[i 0]))
+            xlabel('\alpha trace')
             
             drawnow
         end
@@ -100,8 +100,8 @@ function [u_all] = mcmc_multiclass_t_a(params)
             xi_hat = sqrt(1-B^2)*xi_curr(:,j) + B*normrnd(0,1,M,1);
             xi_new = xi_curr;
             xi_new(:, j) = xi_hat;
-            u_old = compute_T(xi_curr, taus_curr, alphas_curr, lambda, phi);
-            u_new = compute_T(xi_new, taus_curr, alphas_curr, lambda, phi);
+            u_old = compute_T(xi_curr, tau_curr, alpha_curr, lambda, phi);
+            u_new = compute_T(xi_new, tau_curr, alpha_curr, lambda, phi);
             log_xi = compute_phi(gamma, label_data, u_old, k) - ...
                 compute_phi(gamma, label_data, u_new, k);
             if rand(1) < exp(log_xi)
@@ -110,44 +110,54 @@ function [u_all] = mcmc_multiclass_t_a(params)
             else
                 xi_accept(j,i+1) = 0;
             end
-            
-            %tau proposal
-            tau_hat = taus_curr(j) + tau_epsilon * normrnd(0, 1);
+        end
+        
+        %tau proposal
+        if tau_epsilon > 0
+            tau_hat = tau_all(i) + tau_epsilon * normrnd(0, 1);
             if(tau_hat > tau_max) || (tau_hat < tau_min)
-                tau_accept(j,i+1) = 0;
+                tau_all(i+1) = tau_all(i);
+                tau_accept(i+1) = 0;
             else
-                new_taus = taus_curr;
-                new_taus(1, j) = tau_hat;
-                u_old = compute_T(xi_curr, taus_curr, alphas_curr, lambda, phi);
-                u_hat = compute_T(xi_curr, new_taus, alphas_curr, lambda, phi);
+                u_old = compute_T(xi_curr, tau_curr, alpha_curr, lambda, phi);
+                u_hat = compute_T(xi_curr, tau_hat, alpha_curr, lambda, phi);
                 log_tau = compute_phi(gamma, label_data, u_old, k) - compute_phi(gamma, label_data, u_hat, k);
-                
+
                 if rand(1) < exp(log_tau)
-                    taus_curr(1, j) = tau_hat;
-                    tau_accept(j,i+1) = 1;
+                    tau_all(i+1) = tau_hat;
+                    tau_accept(i+1) = 1;
                 else
-                    tau_accept(j,i+1) = 0;
+                    tau_all(i+1) = tau_all(i);
+                    tau_accept(i+1) = 0;
                 end
             end
-            
-            %alpha proposal
-            alpha_hat = alphas_curr(j) + alpha_epsilon * normrnd(0, 1);
+        else
+            tau_all(i+1) = tau_all(i);
+            tau_accept(i+1) = 0;
+        end
+
+        %alpha proposal
+        if alpha_epsilon > 0
+            alpha_hat = alpha_all(i) + alpha_epsilon * normrnd(0, 1);
             if(alpha_hat > alpha_max) || (alpha_hat < alpha_min)
-                alpha_accept(j,i+1) = 0;
+                alpha_all(i+1) = alpha_all(i);
+                alpha_accept(i+1) = 0;
             else
-                new_alphas = alphas_curr;
-                new_alphas(1, j) = alpha_hat;
-                u_old = compute_T(xi_curr, taus_curr, alphas_curr, lambda, phi);
-                u_hat = compute_T(xi_curr, taus_curr, new_alphas, lambda, phi);
+                u_old = compute_T(xi_curr, tau_curr, alpha_curr, lambda, phi);
+                u_hat = compute_T(xi_curr, tau_curr, alpha_hat, lambda, phi);
                 log_alpha = compute_phi(gamma, label_data, u_old, k) - compute_phi(gamma, label_data, u_hat, k);
-                
+
                 if rand(1) < exp(log_alpha)
-                    alphas_curr(1, j) = alpha_hat;
-                    alpha_accept(j,i+1) = 1;
+                    alpha_all(i+1) = alpha_hat;
+                    alpha_accept(i+1) = 1;
                 else
-                    alpha_accept(j,i+1) = 0;
+                    alpha_all(i+1) = alpha_all(i);
+                    alpha_accept(i+1) = 0;
                 end
             end
+        else
+            alpha_all(i+1) = alpha_all(i);
+            alpha_accept(i+1) = 0;
         end
     end
     
@@ -159,6 +169,6 @@ function l = compute_phi(gamma, label_data, u, k)
     l = sum(sum(diff))/(2*gamma^2);
 end
 
-function T = compute_T(xi, taus, alphas, lambda, phi)
-    T = phi* ( (lambda + taus.^2).^(-alphas/2) .* xi);
+function T = compute_T(xi, tau, alpha, lambda, phi)
+    T = phi* ( (lambda + tau^2).^(-alpha/2) .* xi);
 end

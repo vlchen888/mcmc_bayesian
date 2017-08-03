@@ -3,6 +3,6 @@ function label_data = generate_fidelity_multiclass(percent, truth, num_data, k)
 %   Jumps specifies the changing points in the data
 
     y = randsample(num_data, floor(percent*num_data));
-    label_data = zeros(k, num_data);
-    label_data(:,y) = truth(:,y);
+    label_data = zeros(num_data, k);
+    label_data(y,:) = truth(y,:);
 end

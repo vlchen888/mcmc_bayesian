@@ -37,8 +37,8 @@ function [u_all] = mcmc_multiclass(params)
         u_all(:,:,i) = phi * ((lambda + tau^2).^(-alpha/2) .* xi_curr);
         
         if mod(i, 2500) == 0
-            avg_label = mean(u_all, 3);
-            curr_label = compute_S(avg_label, k);
+            avg_label = mean(u_all(:,:,1:i), 3);
+            curr_label = compute_S_multiclass(avg_label, k);
             p = count_correct_multiclass(curr_label, params('label_data'), params('truth'));
             fprintf('Sample number: %d, Time elapsed: %.2f\n', i, toc);
             fprintf('Classification accuracy: %.4f\n', p);
@@ -47,7 +47,21 @@ function [u_all] = mcmc_multiclass(params)
             mnist_heatmap(curr_label, params('truth'), params('digs'));
             
             figure(2)
+            subplot(211)
             plot(u_all(:,:,i))
+            title('Current u')
+            subplot(212)
+            plot(avg_label);
+            title('Average u')
+            
+            figure(3)
+            for kk = 1:k
+                subplot(k,1,kk)
+                plot(movmean(xi_accept(kk,1:i),[i 0]))
+                if kk == 1
+                    title('\xi acceptance probability')
+                end
+            end
             
             drawnow
         end
@@ -70,15 +84,9 @@ function [u_all] = mcmc_multiclass(params)
 end
 
 function l = compute_phi(gamma, label_data, u, k)
-    diff = abs(compute_S(u, k) - label_data)/sqrt(2);
+    diff = abs(compute_S_multiclass(u, k) - label_data)/sqrt(2);
     diff = diff(:, find (sum(label_data) ~= 0) );
     l = sum(sum(diff))/(2*gamma^2);
-end
-
-function S = compute_S(u, k)
-    [~, I] = max(u,[],2);
-    A = eye(k);
-    S = A(:, I);
 end
 
 function T = compute_T(xi, tau, alpha, lambda, phi)

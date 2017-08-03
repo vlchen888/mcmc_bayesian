@@ -1,11 +1,10 @@
-function p = test_mcmc_multiclass(percent_fidelity)
+function p = test_mcmc_multiclass_t_a_same(percent_fidelity)
 
     params = containers.Map;
-
     params('laplacian') = "self tuning";
     
-    digs = [1, 4, 9];
-    saved = true;
+    digs = [1,3,5,7,9];
+    saved = false;
     
     params('digs') = digs;
     k = length(digs);
@@ -36,11 +35,19 @@ function p = test_mcmc_multiclass(percent_fidelity)
     
     params('gamma') = 0.1;
     params('B') = 0.1;
-    params('tau') = 2;
-    params('alpha') = 35;
     
-    [u_all] ...
-        = mcmc_multiclass(params);
+    params('init_tau') = 1.1107;
+    params('init_alpha') = 37.0133;
+    
+    params('tau_epsilon') = 0.1;
+    params('alpha_epsilon') = 0.5;
+    
+    params('tau_min') = 0.1;
+    params('tau_max') = 50;
+    params('alpha_min') = 0.1;
+    params('alpha_max') = 60;
+    
+    [u_all] = mcmc_multiclass_t_a_same(params);
     final_class = compute_S_multiclass(mean((u_all(:, :, burn_in:end)), 3), k);
     
     p = count_correct_multiclass(final_class, params('label_data'), params('truth'));
