@@ -1,5 +1,4 @@
-function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, ...
-    alpha_accept, M_accept, E_u_sq] = mcmc_learn_t_a_M_noncentered(params)
+function [M_all, sign_avg] = mcmc_learn_t_a_M_noncentered(params)
     data = params('data');
     num_iterations = params('num_iterations');
     label_data = params('label_data');
@@ -24,15 +23,15 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, ...
     alpha_epsilon = params('alpha_epsilon');
     tau_epsilon = params('tau_epsilon');
     
-    tic;
+    %tic;
     if params('laplacian') == "self tuning"
         L = compute_laplacian_selftuning(data);
     elseif params('laplacian') == "un"
         L = compute_laplacian_standard(data, p, q, l);
     end
-    toc
+    %toc
     
-    fprintf('Laplacian computation complete!\n');
+    %fprintf('Laplacian computation complete!\n');
     
     lambda = eig(L);
     [phi, ~] = eig(L);
@@ -40,9 +39,8 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, ...
     phi = phi(:, 1:params('max_M'));
     
     [num_data, ~] = size(data);
-    
-    xi_all = zeros(params('max_M'), num_iterations);
-    
+        
+    curr_xi = zeros(params('max_M'), 1);
     %%%%% Initialization from Fiedler Vector?? %%%%%
     %xi_all(2, 1) = (lambda(2)+init_tau^2)^(-init_alpha/2);
     
@@ -62,23 +60,19 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, ...
     M_accept        = zeros(1, num_iterations);
     
     %%%%% Store standard basis vectors %%%%%
-    std = zeros(num_data, num_iterations);
+    sign_avg = zeros(num_data, 1);
     
     %%%%% Store uj %%%%%
-    uj_all = zeros(params('max_M'), num_iterations);
-    tic;
     for i=1:num_iterations-1
-        curr_xi = xi_all(:,i);
         curr_tau = tau_all(i);
         curr_alpha = alpha_all(i);
         curr_M = M_all(i);
-        std(:, i) = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
-        
-        uj_all(:, i) = (lambda + curr_tau^2).^(-curr_alpha/2) .* curr_xi;
-        
+        curr_u = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
+        if i>= params('burn_in')
+            sign_avg = (sign(curr_u) + sign_avg*(i-params('burn_in')))/(i-params('burn_in')+1);
+        end
         %%%%% Propose new state for xi %%%%%
-        x = compute_rand_xi(length(lambda));
-        new_xi = (1-B^2)^0.5*curr_xi+B*x;
+        new_xi = (1-B^2)^0.5*curr_xi+B*compute_rand_xi(length(lambda));
         u_curr = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
         u_new = compute_T(new_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
         log_xi_trans = compute_phi(gamma, label_data, u_curr)...
@@ -87,15 +81,12 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, ...
         
         %%%% Do transition %%%%
         if rand(1) < transition_xi
-            xi_all(:, i+1) = new_xi;
+            curr_xi = new_xi;
             xi_accept(i+1) = 1;
         else
-            xi_all(:, i+1) = xi_all(:, i);
             xi_accept(i+1) = 0;
         end
-        
-        curr_xi = xi_all(:,i+1);
-                
+                        
         %%%%% Propose a new tau %%%%%
         if tau_epsilon > 0
             new_tau = curr_tau + tau_epsilon * normrnd(0, 1);
@@ -165,58 +156,50 @@ function [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, ...
         
         %%%% Movie things %%%%
         
-        if i >= params('burn_in') && mod(i,2500)==0
-            curr_avg = mean(std(:,params('burn_in'):i), 2);
+        if params('movie') && i >= params('burn_in') && mod(i,2500)==0
+            curr_avg = sign_avg;
             
             fprintf('Sample number: %d, Elapsed time: %.4f\n', i, toc);
             fprintf('Classification accuracy: %f\n', count_correct(curr_avg, params('label_data'), params('truth')));
             fprintf('Acceptance rates: \n\txi:%f \n\ttau:%f \n\talpha:%f \n\tM:%f \n',...
-                sum(xi_accept)/i,sum(tau_accept)/i,sum(alpha_accept)/i,sum(M_accept)/i);
-            if params('movie')
-                figure(2)
-                subplot(231)
-                set(gcf, 'Position', [100, 300, 1000, 500])
-                if params('data_set') == "moons"
-                    scatter_twomoons_classify(data, curr_avg, params('label_data'))
-                elseif params('data_set') == "voting"
-                    plotBar(curr_avg);
-                elseif params('data_set') == "mnist"
-                    plotBar(curr_avg);
-                end
-                xlabel('Average u scatter')
-
-                subplot(232)
-                plot(1:i, M_all(1:i), 1:i, movmean(M_all(1:i), [i 0]));
-                legend('M trace', 'M running average');
-
-                subplot(233)
-                plot(movmean(xi_accept(1:i), [i 0]));
-                title('\xi acceptance probability')
-                
-                subplot(234)
-                plot(movmean(M_accept(1:i), [i 0]));
-                title('M acceptance probability')
-
-                subplot(235)
-                plot(mean(uj_all(:, params('burn_in'):i),2))
-                title('Average u_j')
-
-                subplot(236)
-                histogram(M_all(1:i),'BinWidth',1);
-                title('M histogram')
-                
-                drawnow
-                pause(.5)
-
-                %fname = sprintf('figs/step_%i.png',step_num);
-                %print('-r144','-dpng',fname);
-                %step_num = step_num + 1;
+            sum(xi_accept)/i,sum(tau_accept)/i,sum(alpha_accept)/i,sum(M_accept)/i);
+            figure(2)
+            subplot(231)
+            set(gcf, 'Position', [100, 300, 1000, 500])
+            if params('data_set') == "moons"
+                scatter_twomoons_classify(data, curr_avg, params('label_data'))
+            elseif params('data_set') == "voting"
+                plotBar(curr_avg);
+            elseif params('data_set') == "mnist"
+                plotBar(curr_avg);
             end
+            xlabel('Average u scatter')
+
+            subplot(232)
+            plot(1:i, M_all(1:i), 1:i, movmean(M_all(1:i), [i 0]));
+            legend('M trace', 'M running average');
+
+            subplot(233)
+            plot(movmean(xi_accept(1:i), [i 0]));
+            title('\xi acceptance probability')
+
+            subplot(234)
+            plot(movmean(M_accept(1:i), [i 0]));
+            title('M acceptance probability')
+
+            subplot(236)
+            histogram(M_all(1:i),'BinWidth',1);
+            title('M histogram')
+
+            drawnow
+            pause(.5)
+
+            %fname = sprintf('figs/step_%i.png',step_num);
+            %print('-r144','-dpng',fname);
+            %step_num = step_num + 1;
         end
         
     end
-    
-    E_u_sq = mean(uj_all.^2,2);
 end
 
 function g = compute_log_g(lambda, phi, xi, tau, alpha, M, gamma, label_data)

@@ -39,10 +39,8 @@ function p = test_mcmc_multiclass(percent_fidelity)
     params('tau') = 2;
     params('alpha') = 35;
     
-    [u_all] ...
-        = mcmc_multiclass(params);
-    final_class = compute_S_multiclass(mean((u_all(:, :, burn_in:end)), 3), k);
+    u_avg = mcmc_multiclass(params);
     
-    p = count_correct_multiclass(final_class, params('label_data'), params('truth'));
+    p = count_correct_multiclass(compute_S_multiclass(u_avg,k), params('label_data'), params('truth'));
     
 end

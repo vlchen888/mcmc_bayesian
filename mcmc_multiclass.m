@@ -1,4 +1,4 @@
-function [u_all] = mcmc_multiclass(params)
+function u_avg = mcmc_multiclass(params)
     data = params('data');
     num_iterations = params('num_iterations');
     label_data = params('label_data');
@@ -26,35 +26,50 @@ function [u_all] = mcmc_multiclass(params)
     lambda = lambda(1:M);
     
     xi_curr = zeros(M, k);
-    u_all = zeros(num_data, k, num_iterations);
+    u_avg = zeros(num_data, k);
+    sign_avg = zeros(num_data, k);
     
     %%%%% Acceptance probabilities %%%%%
     xi_accept = zeros(k, num_iterations);
     
     tic;    
     for i=1:num_iterations-1
-        %signs_all(:,:,i) = compute_S(compute_T(xi_curr, tau, alpha, lambda, phi), k);
-        u_all(:,:,i) = phi * ((lambda + tau^2).^(-alpha/2) .* xi_curr);
+        u_curr = phi * ((lambda + tau^2).^(-alpha/2) .* xi_curr);
+        sign_curr = compute_S_multiclass(u_curr, k);
+        if i >= params('burn_in')
+            u_avg = (u_avg * (i-params('burn_in')) + u_curr)/(i-params('burn_in') + 1);
+            sign_avg = (sign_avg * (i-params('burn_in')) + sign_curr)/(i-params('burn_in') + 1);
+        end
         
-        if mod(i, 2500) == 0
-            avg_label = mean(u_all(:,:,1:i), 3);
-            curr_label = compute_S_multiclass(avg_label, k);
-            p = count_correct_multiclass(curr_label, params('label_data'), params('truth'));
+        if i >= params('burn_in') && mod(i, 2500) == 0            
+            p = count_correct_multiclass(compute_S_multiclass(u_avg, k), params('label_data'), params('truth'));
+            q = count_correct_multiclass(compute_S_multiclass(sign_avg, k), params('label_data'), params('truth'));
             fprintf('Sample number: %d, Time elapsed: %.2f\n', i, toc);
-            fprintf('Classification accuracy: %.4f\n', p);
+            fprintf('Classification accuracy with S(E(u)): %.4f\n', p);
+            fprintf('Classification accuracy with S(E(S(u))): %.4f\n', q);
             fprintf('\txi accept acceptance probability: %.4f\n', mean(xi_accept(:,1:i),2));
             figure(1)
-            mnist_heatmap(curr_label, params('truth'), params('digs'));
+            set(gcf, 'Position', [0, 500, 500, 400])
+            mnist_heatmap(compute_S_multiclass(u_avg, k), params('truth'), params('digs'), "S(E(u)) classification");
             
             figure(2)
-            subplot(211)
-            plot(u_all(:,:,i))
-            title('Current u')
-            subplot(212)
-            plot(avg_label);
-            title('Average u')
+            set(gcf, 'Position', [0, 500, 500, 400])
+            mnist_heatmap(compute_S_multiclass(sign_avg, k), params('truth'), params('digs'), "S(E(S(u))) classification");
             
             figure(3)
+            set(gcf, 'Position', [0, 0, 600, 400])
+            subplot(311)
+            plot(u_curr)
+            title('Current u')
+            subplot(312)
+            plot((lambda + tau^2).^(-alpha/2) .* xi_curr)
+            title('Current u_j')
+            subplot(313)
+            plot(u_avg);
+            title('Average u')
+            
+            figure(4)
+            set(gcf, 'Position', [0, 0, 600, 400])
             for kk = 1:k
                 subplot(k,1,kk)
                 plot(movmean(xi_accept(kk,1:i),[i 0]))
@@ -85,7 +100,7 @@ end
 
 function l = compute_phi(gamma, label_data, u, k)
     diff = abs(compute_S_multiclass(u, k) - label_data)/sqrt(2);
-    diff = diff(:, find (sum(label_data) ~= 0) );
+    diff = diff(sum(label_data, 2) ~= 0 , :);
     l = sum(sum(diff))/(2*gamma^2);
 end
 

@@ -1,4 +1,4 @@
-function mnist_heatmap( labels, truth, digs)
+function mnist_heatmap(labels, truth, digs, txt)
     %Make MNIST heatmap
     nums_labels = labels * (1:length(digs))';
     nums_truth = truth * (1:length(digs))';
@@ -13,8 +13,8 @@ function mnist_heatmap( labels, truth, digs)
     
     
     t = table(LabeledAs,TrueDigit,count);
-    heatmap(t, 'LabeledAs', 'TrueDigit','ColorVariable','count','ColorMethod','sum'...
+    hmo = heatmap(t, 'LabeledAs', 'TrueDigit','ColorVariable','count','ColorMethod','sum'...
         , 'ColorMap', hot);
-
+    title(txt);
 end
 

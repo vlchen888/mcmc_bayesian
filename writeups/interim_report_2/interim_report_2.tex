@@ -91,7 +91,7 @@
 
     (G) Learn $f(\lambda), M$.
 
-    So far, I have implemented models (A) through (D). The past month has been devoted to experiments testing individual models and comparing their performances, using metrics such as classification accuracy and variance. Classification accuracy is well defined for the model problems that I tested the data on. These problems are outlined in \cref{sec:model_problems}.
+    So far, I have implemented models (A) through (E) and have started working on (F) applied to (A) and (B). The past month has been devoted to experiments testing individual models and comparing their performances, using metrics such as classification accuracy and variance. Classification accuracy is well defined for the model problems that I tested the data on. These problems are outlined in \cref{sec:model_problems}.
 
 \section{Model problems} \label{sec:model_problems}
     Applications to be considered include the following:
@@ -285,7 +285,7 @@
         \end{algorithmic}
         \end{algorithm}
 
-    \subsection{Model (D)}
+    \subsection{Model (D)} \label{sec:algorithms_model_d}
         This algorithm reparameterizes the problem in terms of the random vectors $v$ and $\xi$. $v_j$ modifies the scale of influence of $q_j$, the $j$th eigenvector of the graph Laplacian, on the classifying function $u$.
         \begin{equation}
         \label{eqn:v_T}
@@ -342,7 +342,7 @@
             \end{algorithmic}
         \end{algorithm}
 
-    \subsection{Model (E)}
+    \subsection{Model (E)} \label{sec:algorithms_model_e}
         This model extends model (D), trying to learn $M$ as well. Define:
         \begin{equation}
         T(v,\xi,M) = \sum_{i=0}^{M} v_i\xi_iq_i = u.
@@ -387,8 +387,8 @@
         \end{algorithmic}
         \end{algorithm}
 
-    \subsection{Multiclass}
-        We describe the multiclass algorithm. Recall that for $v \in \mathbb{R}^k$, we define $S(v) = e_p, \quad p = \text{argmax} (v_r)$ where $\{e_1, \ldots e_k\}$ is the standard basis of $\mathbb{R}^k$. Now, the classifying function is of the form $u: Z \to \mathbb{R}^k$, or $u = (u^{[1]}, u^{[2]}, \ldots u^{[k]})$ with functions $u^{[j]}: Z \to \mathbb{R}$. Each of the $u^{[j]}$ has prior distribution given by $\mathsf{N}(0, C)$ with $C = (L + \tau^2 I)^{-\alpha}$. We retain
+    \subsection{Multiclass} \label{sec:algorithms_multiclass}
+        We describe the algorithm to solve the multiclass clustering problem. Recall that for $v \in \mathbb{R}^k$, we define $S(v) = e_p, \quad p = \text{argmax} (v_r)$ where $\{e_1, \ldots e_k\}$ is the standard basis of $\mathbb{R}^k$. Now, the classifying function is of the form $u: Z \to \mathbb{R}^k$, or $u = (u^{[1]}, u^{[2]}, \ldots u^{[k]})$ with functions $u^{[j]}: Z \to \mathbb{R}$. Each of the $u^{[j]}$ has prior distribution given by $\mathsf{N}(0, C)$ with $C = (L + \tau^2 I)^{-\alpha}$. We retain
         \[ \Phi(u) = \frac{1}{2\gamma^2}\sum_{l \in Z'} \text{norm}(y(l) - S(u(l)))^2. \]
 
         We will implement the non-centered approach. Here, the variable is $\xi = (\xi^{[1]}, \ldots \xi^{[k]})$ where each $\xi^{[j]}$ is associated with $u^{[j]}$ by the following:
@@ -694,7 +694,7 @@
             \end{figure}
 
 \section{Experiments with model (E)}
-    We run some experiments with model (E) on the two moons dataset. We again fix $\tau = 2, \alpha = 35$, and pick $a=0.5$ to create the prior on $v$. We pick the walk size for $v$ to be $\epsilon = 1.0\times 10^{-13}$. We allow the prior on $M$ to be uniform, $\mathsf{U}(1,70)$. If we compare this algorithm against model (C) with fixed $\tau, \alpha$, this is equivalent to setting $\epsilon = 0$ and fixing $v$ to be at the mean of its prior. Learning $v$ and $M$ does not seem to greatly affect the classification accuracy compared to just learning $M$. Consider the following run on two moons, with fidelity = 1\%, $\sigma = 0.2$, in \cref{fig:modelE_learn_v} and \cref{fig:modelE_fixed_v}. The model that learns $v, M$ obtained $85.45\%$ accuracy while the one that only learns $M$ obtained $86.52\%$ accuracy. The histograms of $M$ appear very similar, with the same cutoff observed at the $14$th index. The average values of the $u_j$ coefficients also seem to agree in magnitude and sign between the two algorithms.
+    We run some experiments with \cref{alg:hier_v_M}, model (E), on the two moons dataset. We again fix $\tau = 2, \alpha = 35$, and pick $a=0.5$ to create the prior on $v$. We pick the walk size for $v$ to be $\epsilon = 1.0\times 10^{-13}$. We allow the prior on $M$ to be uniform, $\mathsf{U}(1,70)$. If we compare this algorithm against model (C) with fixed $\tau, \alpha$, this is equivalent to setting $\epsilon = 0$ and fixing $v$ to be at the mean of its prior. Learning $v$ and $M$ does not seem to greatly affect the classification accuracy compared to just learning $M$. Consider the following run on two moons, with fidelity = 1\%, $\sigma = 0.2$, in \cref{fig:modelE_learn_v} and \cref{fig:modelE_fixed_v}. The model that learns $v, M$ obtained $85.45\%$ accuracy while the one that only learns $M$ obtained $86.52\%$ accuracy. The histograms of $M$ appear very similar, with the same cutoff observed at the $14$th index. The average values of the $u_j$ coefficients also seem to agree in magnitude and sign between the two algorithms.
 
     \begin{figure}
         \caption{\label{fig:modelE_learn_v}Learning $v, M$. The bottom left figure was one observation of the $v_j$.}
@@ -706,12 +706,59 @@
         \includegraphics[width=\linewidth]{learnv/v_fixed/all.png}
     \end{figure}
     
-\section{Multiclass experiments}
-    We use the MNIST dataset and attempt to cluster $k$ different digits.
+\section{Multiclass experiments} \label{sec:Multiclass experiments}
+    We use the MNIST dataset and attempt to cluster $k$ different digits. We want to compare the algorithm that learns $\tau, \alpha$ against the nonhierarchical algorithm with fixed $\tau, \alpha$, so we fix $\tau=2, \alpha=35$ for the nohierarchical algorithm and initialize $\tau=2, \alpha=35$ for the hierarchical algorithm. Additionally, for the hierarchical algorithm we currently restrict $(\tau,\alpha)$ to be the same for each of the $k$ priors. We fix $\gamma = 0.1, \beta = 0.1$ for both algorithms. We test on the digits $[1, 4, 9]$ with the same $1\%$ fidelity selected between the two trials. The final classification is given by $S(\mathbb{E}(S(u)))$, with a burn-in of 5000 and 100000 total iterations. The hierarchical algorithm obtained $94.33\%$ accuracy while the nonhierarchical algorithm obtained $88.67\%$. This observation supports the claim that there is value in learning $\tau, \alpha$. See \cref{fig:multiclass_nonhier_table}, \cref{fig:multiclass_nonhier_accept}, \cref{fig:multiclass_hier_t_a_same_table}, \cref{fig:multiclass_hier_t_a_same_accept}, \cref{fig:multiclass_hier_t_a_same_trace}.
 
+    Using $S(\mathbb{E}(S(u)))$ seems to give a better accuracy for the hierarchical algorithm than $S(\mathbb{E}(u))$, which would only obtain $88.62\%$ accuracy for the above example. This seems to have to do with the high variance in the scale of $u$, which allows a few observations to dominate the classification. However, the choice of $S(\mathbb{E}(u))$ is more natural perhaps, since $\mathbb{E}(u)$ is the expected value of $u$ in the posterior distribution.
+
+    \begin{figure}[!htb]
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \caption{\label{fig:multiclass_nonhier_table} Nonhierarchical multiclass $[1, 4, 9]$, final classification}
+            \includegraphics[width=\linewidth]{multiclass/nonhier/table.png}
+        \end{minipage}\hfill
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \caption{\label{fig:multiclass_nonhier_accept} Nonhierarchical multiclass $[1, 4, 9]$, $\xi$ acceptance probability}
+            \includegraphics[width=\linewidth]{multiclass/nonhier/xi_accept.png}
+        \end{minipage}
+    \end{figure}
+
+    \begin{figure}[!htb]
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \caption{\label{fig:multiclass_hier_t_a_same_table} Hierarchical multiclass $[1, 4, 9]$, final classification}
+            \includegraphics[width=\linewidth]{multiclass/hier_t_a_same/table.png}
+        \end{minipage}\hfill
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \caption{\label{fig:multiclass_hier_t_a_same_accept} Hierarchical multiclass $[1, 4, 9]$, $\xi$ acceptance probability}
+            \includegraphics[width=\linewidth]{multiclass/hier_t_a_same/xi_accept.png}
+        \end{minipage}
+    \end{figure}
+
+    \begin{figure}[!htb]
+        \centering
+        \caption{\label{fig:multiclass_hier_t_a_same_trace} Hierarchical multiclass $[1, 4, 9]$, $\tau$ and $\alpha$ traces}
+        \includegraphics[width=0.8\linewidth]{multiclass/hier_t_a_same/a_t_trace.png}
+    \end{figure}
+
+    \begin{figure}[!htb]
+        \centering
+        \caption{\label{fig:multiclass_hier_t_a_same_learn_t} Hierarchical multiclass $[1, 4, 9]$, $\tau_0 = 20$ and learning $\tau$}
+        \includegraphics[width=0.8\linewidth]{multiclass/learn_t/trace.png}
+    \end{figure}
+    We can also see the same behavior with $\tau$ that we observed in the binary case. Initializing $\tau = 20$ and $\alpha = 35$ in \cref{fig:multiclass_hier_t_a_same_learn_t}, we can see that $\tau$ learns that it should be small, averaging around $0.6$. This value seems pretty consistent across different initial values of $\tau$. We can also see that there is strong correlation between $\tau$ and $\alpha$, for instance by visually matching the extrema in \cref{fig:multiclass_hier_t_a_same_trace}.
+
+\section{Challenges}
+    One problem I have been running into is that these MCMC simulations take a while to run. Since a large number of iterations is needed to ensure convergence and there is matrix multiplication for converting from eigenbasis to standard basis, large test suites are time consuming. My workaround for this problem is to run these tests overnight and analyze the results in the morning.
+
+    Another problem I encountered was the difference between $S(\mathbb{E}(S(u)))$ and $S(\mathbb{E}(u))$ as the choice of the classifying function. While $S(\mathbb{E}(u))$ is more natural as discussed in \cref{sec:Multiclass experiments}, this allows large $u$ to dominate the entire classification, and large $u$ can arise when $\tau$ is small, $\alpha$ is large, and the choice is accepted. I noticed this issue when I saw that the classification sometimes would get stuck at a percentage with little change for the remaining iterations. My solution has been to use $S(\mathbb{E}(S(u)))$ for now, and it seems to give better classification.
+    
 \section{Goals}
     One research goal for the remainder of the summer is to gather more data comparing the algorithm that learns $M$ against the nonhierarchical algorithm to determine if the method is beneficial. It will also be interesting to better analyze the relationship between $\sigma$ and $M$ in the two moons dataset. Preliminary experiments suggest that in low $\sigma$ data, small $M$ is enough for an accurate clustering, but in large $\sigma$, higher $M$ is necessary as more eigenvectors are needed to fit the problem. It could be interesting to create a plot of average $M$ versus increasing $\sigma$ to test this hypothesis. \\
-    Another goal is to study the effectiveness of the hierarchical methods on multiclass datasets. In particular, I am working on implementing these algorithms to handle the MNIST data set, which features up to 10 different classes.
+    Also, I hope to look at different prior choices for $v$ for \cref{alg:hier_v} and \cref{alg:hier_v_M}. It appears that learning $v_j$ and $M$ with a uniform prior on $v_j$ is similar to just learning $M$, so a different prior choice could be useful. For example, one idea is to define $l_j = \frac{1}{v_j^2}$ and assume a gamma distribution for $l_j$ with shape depending on $j$. \\
+    Another goal is to study different multiclass hierarchical methods and implement a multiclass algorithm that learns $M$. I am working on implementing the different choices described in \cref{sec:algorithms_multiclass}. In particular, independently evolving hyperparameters $\tau, \alpha, M$ for each of the $k$ priors should be studied.
 
 \bibliographystyle{siamplain}
 \bibliography{references}

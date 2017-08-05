@@ -4,8 +4,8 @@ function p = test_mcmc_multiclass_t_a(percent_fidelity)
 
     params('laplacian') = "self tuning";
     
-    digs = [1, 4, 7, 9];
-    saved = false;
+    digs = [1, 4, 9];
+    saved = true;
     
     params('digs') = digs;
     k = length(digs);

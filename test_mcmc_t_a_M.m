@@ -1,4 +1,4 @@
-function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, sigma)
+function [p, M_mean, M_median, M_min] = test_mcmc_t_a_M(percent_fidelity, sigma)
 
     params = containers.Map;
 
@@ -27,9 +27,9 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     end
     
     params('num_iterations') = 100000;
-    burn_in = 5000;
+    burn_in = 10000;
     params('burn_in') = burn_in;
-    params('movie') = true;
+    params('movie') = false;
 
     % not used
     params('p') = 2;
@@ -37,7 +37,7 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     params('l') = 1.25;
     %
     
-    params('gamma') = 0.1;
+    params('gamma') = sigma;
     params('B') = 0.1;
     params('init_tau') = 2;
     params('init_alpha') = 35;
@@ -52,34 +52,16 @@ function [p, tau_mean, alpha_mean, M_mean] = test_mcmc_t_a_M(percent_fidelity, s
     params('min_M')       = 1;
     params('max_M')       = 70;
     
-    params('alpha_epsilon') = 0.5;
+    params('alpha_epsilon') = 0;
     params('tau_epsilon')   = 0;
     
     params('max_M_jump') = 20;
     
         
-    [tau_all, alpha_all, M_all, std, xi_accept, tau_accept, alpha_accept, ...
-        M_accept, E_u_sq] = mcmc_learn_t_a_M_noncentered(params);
-    u_avg = mean(std(:, burn_in:end), 2); %avg the rows
-    
-    p = count_correct(u_avg, params('label_data'), params('truth'));
-    
-    tau_mean = mean(tau_all(burn_in:end));
-    alpha_mean = mean(alpha_all(burn_in:end));
+    [M_all, sign_avg] = mcmc_learn_t_a_M_noncentered(params);
+    p = count_correct(sign(sign_avg), params('label_data'), params('truth'));
     M_mean = mean(M_all(burn_in:end));
+    M_median = median(M_all(burn_in:end));
+    M_min = min(M_all(burn_in:end));
     
-    %{
-    figure(2)
-    if params('data_set') == "moons"
-        set(gcf, 'Position', [100, 300, 600, 500])
-        scatter_twomoons_classify(data, u_avg, params('label_data'))
-    elseif params('data_set') == "voting"
-        set(gcf, 'Position', [100, 300, 800, 300])
-        plotBar(u_avg)
-    end
-    %}
-    figure(3)
-    plot(alpha_all);
-    
-
 end
