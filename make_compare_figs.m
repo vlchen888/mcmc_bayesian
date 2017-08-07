@@ -1,5 +1,5 @@
 % To make figures after experiments
-function make_figs(record, sigma_arr, fidelity_arr, color)
+function make_compare_figs(record, sigma_arr, fidelity_arr, color)
     for a = 1:length(fidelity_arr)
         subplot(1,3,a)
         % change me
