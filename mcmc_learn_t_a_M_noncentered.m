@@ -1,4 +1,4 @@
-function [M_all, sign_avg] = mcmc_learn_t_a_M_noncentered(params)
+function cont = mcmc_learn_t_a_M_noncentered(params)
     data = params('data');
     num_iterations = params('num_iterations');
     label_data = params('label_data');
@@ -39,7 +39,6 @@ function [M_all, sign_avg] = mcmc_learn_t_a_M_noncentered(params)
     phi = phi(:, 1:params('max_M'));
     
     [num_data, ~] = size(data);
-        
     curr_xi = zeros(params('max_M'), 1);
     %%%%% Initialization from Fiedler Vector?? %%%%%
     %xi_all(2, 1) = (lambda(2)+init_tau^2)^(-init_alpha/2);
@@ -49,6 +48,8 @@ function [M_all, sign_avg] = mcmc_learn_t_a_M_noncentered(params)
     
     alpha_all = zeros(1, num_iterations);
     alpha_all(1) = init_alpha;
+    
+    uj_avg = zeros(1, params('max_M'));
     
     M_all = zeros(1, num_iterations);
     M_all(1) = init_M;
@@ -62,21 +63,30 @@ function [M_all, sign_avg] = mcmc_learn_t_a_M_noncentered(params)
     %%%%% Store standard basis vectors %%%%%
     sign_avg = zeros(num_data, 1);
     
+    xi_all = zeros(params('max_M'), num_iterations);
+    v_all = zeros(params('max_M'), num_iterations);
+    
     %%%%% Store uj %%%%%
+    correct_p = zeros(1, num_iterations);
+    tic;
     for i=1:num_iterations-1
         curr_tau = tau_all(i);
         curr_alpha = alpha_all(i);
         curr_M = M_all(i);
+        
+        xi_all(:,i) = curr_xi;
+        v_all(:,i) = (lambda + curr_tau^2).^(-curr_alpha/2)/norm_const(lambda,curr_tau,curr_alpha);
+        
         curr_u = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
         if i>= params('burn_in')
             sign_avg = (sign(curr_u) + sign_avg*(i-params('burn_in')))/(i-params('burn_in')+1);
+            uj_avg = ( v_all(:,i).*xi_all(:,i) + uj_avg*(i-params('burn_in')))/(i-params('burn_in')+1);
         end
         %%%%% Propose new state for xi %%%%%
         new_xi = (1-B^2)^0.5*curr_xi+B*compute_rand_xi(length(lambda));
-        u_curr = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
-        u_new = compute_T(new_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
-        log_xi_trans = compute_phi(gamma, label_data, u_curr)...
-            - compute_phi(gamma, label_data, u_new);
+        u_old = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
+        u_hat = compute_T(new_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
+        log_xi_trans = compute_phi(gamma, label_data, u_old) - compute_phi(gamma, label_data, u_hat);
         transition_xi = exp(log_xi_trans);
         
         %%%% Do transition %%%%
@@ -89,16 +99,17 @@ function [M_all, sign_avg] = mcmc_learn_t_a_M_noncentered(params)
                         
         %%%%% Propose a new tau %%%%%
         if tau_epsilon > 0
-            new_tau = curr_tau + tau_epsilon * normrnd(0, 1);
-            if new_tau < min_tau || new_tau > max_tau
+            tau_hat = curr_tau + tau_epsilon * normrnd(0, 1);
+            if tau_hat < min_tau || tau_hat > max_tau
                 tau_all(i+1) = tau_all(i);
                 tau_accept(i+1) = 0;
             else
-                log_tau = compute_log_g(lambda, phi, curr_xi, new_tau, curr_alpha, curr_M, gamma, label_data) ...
-                - compute_log_g(lambda, phi, curr_xi, curr_tau, curr_alpha, curr_M, gamma, label_data);
+                u_old = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
+                u_hat = compute_T(curr_xi, tau_hat, curr_alpha, curr_M, lambda, phi);
+                log_tau = compute_phi(gamma, label_data, u_old) - compute_phi(gamma, label_data, u_hat);
                 transition_tau = exp(log_tau);
                 if rand(1) < transition_tau
-                    tau_all(i+1) = new_tau;
+                    tau_all(i+1) = tau_hat;
                     tau_accept(i+1) = 1;
                 else
                     tau_all(i+1) = tau_all(i);
@@ -112,18 +123,18 @@ function [M_all, sign_avg] = mcmc_learn_t_a_M_noncentered(params)
         
         %%%%% Propose a new alpha %%%%%
         if alpha_epsilon > 0
-            new_alpha = curr_alpha + alpha_epsilon * normrnd(0, 1);
+            alpha_hat = curr_alpha + alpha_epsilon * normrnd(0, 1);
 
-            if new_alpha < min_alpha || new_alpha > max_alpha
+            if alpha_hat < min_alpha || alpha_hat > max_alpha
                 alpha_all(i+1) = alpha_all(i);
                 alpha_accept(i+1) = 0;
             else
-                
-                log_alpha = compute_log_g(lambda, phi, curr_xi, curr_tau, new_alpha, curr_M, gamma, label_data) ...
-                - compute_log_g(lambda, phi, curr_xi, curr_tau, curr_alpha, curr_M, gamma, label_data);
+                u_old = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
+                u_hat = compute_T(curr_xi, curr_tau, alpha_hat, curr_M, lambda, phi);
+                log_alpha = compute_phi(gamma, label_data, u_old) - compute_phi(gamma, label_data, u_hat);
                 transition_alpha = exp(log_alpha);
                 if rand(1) < transition_alpha
-                    alpha_all(i+1) = new_alpha;
+                    alpha_all(i+1) = alpha_hat;
                     alpha_accept(i+1) = 1;
                 else
                     alpha_all(i+1) = alpha_all(i);
@@ -136,31 +147,38 @@ function [M_all, sign_avg] = mcmc_learn_t_a_M_noncentered(params)
         curr_alpha = alpha_all(i+1);
         
         %%%%% Propose a new M %%%%%
-        new_M = curr_M + compute_rndjump_M(params('max_M_jump'));
-        
-        if new_M < min_M || new_M > max_M
-            M_all(i+1) = M_all(i);
-            M_accept(i+1) = 0;
-        else
-            log_M = compute_phi(gamma, label_data, compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi)) ...
-                - compute_phi(gamma, label_data, compute_T(curr_xi, curr_tau, curr_alpha, new_M, lambda, phi));            
-            transition_M = exp(log_M);
-            if rand(1) < transition_M
-                M_all(i+1) = new_M;
-                M_accept(i+1) = 1;
-            else
+        if params('max_M_jump') > 0
+            M_hat = curr_M + compute_rndjump_M(params('max_M_jump'));
+
+            if M_hat < min_M || M_hat > max_M
                 M_all(i+1) = M_all(i);
                 M_accept(i+1) = 0;
+            else
+                u_old = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
+                u_hat = compute_T(curr_xi, curr_tau, curr_alpha, M_hat, lambda, phi);
+                log_M = compute_phi(gamma, label_data, u_old) - compute_phi(gamma, label_data, u_hat);            
+                transition_M = exp(log_M);
+                if rand(1) < transition_M
+                    M_all(i+1) = M_hat;
+                    M_accept(i+1) = 1;
+                else
+                    M_all(i+1) = M_all(i);
+                    M_accept(i+1) = 0;
+                end
             end
+        else
+            M_all(i+1) = M_all(i);
         end
         
         %%%% Movie things %%%%
         
         if params('movie') && i >= params('burn_in') && mod(i,2500)==0
             curr_avg = sign_avg;
+            p = count_correct(curr_avg, params('label_data'), params('truth'));
+            correct_p(i) = p;
             
             fprintf('Sample number: %d, Elapsed time: %.4f\n', i, toc);
-            fprintf('Classification accuracy: %f\n', count_correct(curr_avg, params('label_data'), params('truth')));
+            fprintf('Classification accuracy S(E(S(u))): %f\n', p);
             fprintf('Acceptance rates: \n\txi:%f \n\ttau:%f \n\talpha:%f \n\tM:%f \n',...
             sum(xi_accept)/i,sum(tau_accept)/i,sum(alpha_accept)/i,sum(M_accept)/i);
             figure(2)
@@ -175,21 +193,41 @@ function [M_all, sign_avg] = mcmc_learn_t_a_M_noncentered(params)
             end
             xlabel('Average u scatter')
 
+
+            subplot(232)
+            plot(movmean(xi_accept(1:i), [i 0]));
+            title('\xi acceptance probability')
+            
+            subplot(233)
+            plot(uj_avg);
+            title('Average u_j')
+            
+            subplot(234)
+            plot(1:i,tau_all(1:i),1:i,movmean(tau_all(1:i), [i 0]));
+            title('\tau trace');
+            
+            subplot(235)
+            plot(1:i,alpha_all(1:i),1:i,movmean(alpha_all(1:i), [i 0]));
+            title('\alpha trace');
+            
+            subplot(236)
+            plot(correct_p(correct_p~=0))
+            title('Classification accuracy');
+            
+            % M changing
+            %{
             subplot(232)
             plot(1:i, M_all(1:i), 1:i, movmean(M_all(1:i), [i 0]));
             legend('M trace', 'M running average');
-
-            subplot(233)
-            plot(movmean(xi_accept(1:i), [i 0]));
-            title('\xi acceptance probability')
-
-            subplot(234)
-            plot(movmean(M_accept(1:i), [i 0]));
-            title('M acceptance probability')
-
+            
             subplot(236)
             histogram(M_all(1:i),'BinWidth',1);
             title('M histogram')
+            
+            subplot(234)
+            plot(movmean(M_accept(1:i), [i 0]));
+            title('M acceptance probability')
+            %}
 
             drawnow
             pause(.5)
@@ -198,12 +236,14 @@ function [M_all, sign_avg] = mcmc_learn_t_a_M_noncentered(params)
             %print('-r144','-dpng',fname);
             %step_num = step_num + 1;
         end
-        
     end
-end
-
-function g = compute_log_g(lambda, phi, xi, tau, alpha, M, gamma, label_data)
-    g = -compute_phi(gamma, label_data, compute_T(xi, tau, alpha, M, lambda, phi))-0.5*norm(xi)^2;
+    
+    cont = containers.Map;
+    cont('v_all') = v_all;
+    cont('xi_all') = xi_all;
+    cont('tau_all') = tau_all;
+    cont('alpha_all') = alpha_all;
+    cont('M_all') = M_all;
 end
 
 function l = compute_phi(gamma, label_data, u)
@@ -234,4 +274,8 @@ function j = compute_rndjump_M(k)
             return
         end
     end        
+end
+
+function const = norm_const(lambda, tau, alpha)
+    const = sqrt(sum((lambda+tau^2).^-alpha))/sqrt(length(lambda));
 end

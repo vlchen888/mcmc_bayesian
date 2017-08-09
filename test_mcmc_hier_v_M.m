@@ -1,8 +1,8 @@
-function p = test_mcmc_hier_v_M(percent_fidelity, sigma)
+function cont = test_mcmc_hier_v_M(percent_fidelity, sigma)
 
     params = containers.Map;
 
-    params('data_set') = "moons";
+    params('data_set') = "mnist";
     params('laplacian') = "self tuning";
     
     if params('data_set') == "moons"
@@ -18,15 +18,15 @@ function p = test_mcmc_hier_v_M(percent_fidelity, sigma)
         params('truth') = [-ones(267,1); ones(168,1)];
         params('label_data') = generate_fidelity(percent_fidelity, params('truth'), length(data));
     elseif params('data_set') == "mnist"
-        load('mnist49data.mat')
+        load('mnistdata.mat')
         params('data') = data;
-        load('mnist49truth.mat')
+        load('mnisttruth.mat')
         truth = truth(:, 1) - truth(:, 2);
         params('truth') = truth;
         params('label_data') = generate_fidelity(percent_fidelity, truth, length(data));
     end
     
-    params('num_iterations') = 100000;
+    params('num_iterations') = 100001;
     burn_in = 5000;
     params('burn_in') = burn_in;
 
@@ -39,16 +39,17 @@ function p = test_mcmc_hier_v_M(percent_fidelity, sigma)
     params('gamma') = 0.1;
     params('B') = 0.1;
     params('a') = 0.8;
+    
     %params('epsilon') = 1e-13;
-    params('epsilon') = 1e-13;
-    params('tau') = 2;
+    
+    params('epsilon') = .01;
+    params('tau') = 1;
     params('alpha') = 35;
-    params('min_M') = 1;
-    params('max_M') = 70;
-    params('max_M_jump') = 20;
+    
     params('init_M') = 50;
+    params('max_M_jump') = 0;
+    params('min_M') = 1;
+    params('max_M') = 50;
         
-    std = mcmc_learn_v_M(params);
-    u_avg = mean(std(:, burn_in:end), 2); %avg the rows
-    p = count_correct(u_avg, params('label_data'), params('truth'));   
+    cont = mcmc_learn_v_M(params);
 end

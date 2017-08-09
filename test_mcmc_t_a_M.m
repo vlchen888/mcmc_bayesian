@@ -1,4 +1,4 @@
-function [p, M_mean, M_median, M_min] = test_mcmc_t_a_M(percent_fidelity, sigma)
+function cont = test_mcmc_t_a_M(percent_fidelity, sigma)
 
     params = containers.Map;
 
@@ -18,18 +18,18 @@ function [p, M_mean, M_median, M_min] = test_mcmc_t_a_M(percent_fidelity, sigma)
         params('truth') = [-ones(267,1); ones(168,1)];
         params('label_data') = generate_fidelity(percent_fidelity, params('truth'), length(data));
     elseif params('data_set') == "mnist"
-        load('mnist49data.mat')
+        load('mnistdata.mat')
         params('data') = data;
-        load('mnist49truth.mat')
+        load('mnisttruth.mat')
         truth = truth(:, 1) - truth(:, 2);
         params('truth') = truth;
         params('label_data') = generate_fidelity(percent_fidelity, truth, length(data));
     end
     
-    params('num_iterations') = 100000;
-    burn_in = 10000;
+    params('num_iterations') = 100001;
+    burn_in = 5000;
     params('burn_in') = burn_in;
-    params('movie') = false;
+    params('movie') = true;
 
     % not used
     params('p') = 2;
@@ -39,29 +39,26 @@ function [p, M_mean, M_median, M_min] = test_mcmc_t_a_M(percent_fidelity, sigma)
     
     params('gamma') = sigma;
     params('B') = 0.1;
-    params('init_tau') = 2;
-    params('init_alpha') = 35;
-    params('init_M') = 50;
     
-    params('min_tau')       = 0.1;
-    params('max_tau')       = 60;
+    params('init_tau')      = 2;
+    params('tau_epsilon')   = 0.3;
+    params('min_tau')       = 0.01;
+    params('max_tau')       = 20;
 
+    params('init_alpha')    = 35;
+    params('alpha_epsilon') = 0.1;
     params('min_alpha')     = 0.1;
     params('max_alpha')     = 60;
     
-    params('min_M')       = 1;
-    params('max_M')       = 70;
+    params('init_M')        = 50;
+    params('max_M_jump')    = 20;
+    params('min_M')         = 1;
+    params('max_M')         = 50;
     
-    params('alpha_epsilon') = 0;
-    params('tau_epsilon')   = 0;
-    
-    params('max_M_jump') = 20;
-    
-        
-    [M_all, sign_avg] = mcmc_learn_t_a_M_noncentered(params);
-    p = count_correct(sign(sign_avg), params('label_data'), params('truth'));
-    M_mean = mean(M_all(burn_in:end));
-    M_median = median(M_all(burn_in:end));
-    M_min = min(M_all(burn_in:end));
+    cont = mcmc_learn_t_a_M_noncentered(params);
+    %p = count_correct(sign(sign_avg), params('label_data'), params('truth'));
+    %M_mean = mean(M_all(burn_in:end));
+    %M_median = median(M_all(burn_in:end));
+    %M_min = min(M_all(burn_in:end));
     
 end
