@@ -4,7 +4,7 @@ function p = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
     params('laplacian') = "self tuning";
     
     digs = [4,9];
-    saved = false;
+    saved = true;
     
     params('digs') = digs;
     k = length(digs);
@@ -33,24 +33,24 @@ function p = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
     params('l') = 1.25;
     %
     
-    params('gamma') = 0.1;
+    params('gamma') = 0.0001;
     params('B') = 0.1;
     
     params('init_tau') = 1;
     params('tau_epsilon') = 0.1;
     params('tau_min') = 0.01;
-    params('tau_max') = 50;
+    params('tau_max') = 20;
     
     
     params('init_alpha') = 35;
-    params('alpha_epsilon') = 0.5;
+    params('alpha_epsilon') = 6;
     params('alpha_min') = 0.1;
-    params('alpha_max') = 60;
+    params('alpha_max') = 90;
     
     params('init_M') = 50;
     params('M_max_jump') = 0;
     params('M_min') = 1;
-    params('M_max') = 70;
+    params('M_max') = 50;
     
     [u_avg, sign_avg] = mcmc_multiclass_t_a_M_same(params);
     final_class = compute_S_multiclass(sign_avg, k);

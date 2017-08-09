@@ -59,6 +59,10 @@ function [u_avg, sign_avg] = mcmc_multiclass_t_a_M_same(params)
     alpha_accept = zeros(1, num_iterations);
     M_accept = zeros(1, num_iterations);
     
+    uj_avg = zeros(M_max, k);
+    
+    %%%%% Store correct percent %%%%%
+    correct_p = zeros(1, num_iterations);
     tic;    
     for i=1:num_iterations-1
         tau_curr = tau_all(i);
@@ -69,12 +73,17 @@ function [u_avg, sign_avg] = mcmc_multiclass_t_a_M_same(params)
         if i >= params('burn_in')
             u_avg = (u_avg * (i-params('burn_in')) + u_curr)/(i-params('burn_in') + 1);
             sign_avg = (sign_avg * (i-params('burn_in')) + sign_curr)/(i-params('burn_in') + 1);
+            
+            uj_curr = (lambda + tau_curr^2).^(-alpha_curr/2) .* xi_curr / norm_const(lambda,tau_curr,alpha_curr);
+            uj_avg = (uj_avg * (i-params('burn_in')) + uj_curr)/(i-params('burn_in') + 1);
         end
         
         %% Make figures
         if i >= params('burn_in') && mod(i, 2500) == 0
-            p = count_correct_multiclass(compute_S_multiclass(u_avg, k), params('label_data'), params('truth'));
+            p = count_correct_multiclass(compute_S_multiclass(u_avg, k), params('label_data'), params('truth'));            
             q = count_correct_multiclass(compute_S_multiclass(sign_avg, k), params('label_data'), params('truth'));
+            
+            correct_p(i) = q;
             fprintf('Sample number: %d, Time elapsed: %.2f\n', i, toc);
             fprintf('Classification accuracy with S(E(u)): %.4f\n', p);
             fprintf('Classification accuracy with S(E(S(u))): %.4f\n', q);
@@ -92,21 +101,17 @@ function [u_avg, sign_avg] = mcmc_multiclass_t_a_M_same(params)
             figure(3)
             set(gcf, 'Position', [500, 500, 500, 700])
             
-            subplot(411)
+            subplot(311)
             plot(u_curr)
             title('Current u')
             
-            subplot(412)
-            plot((lambda + tau_curr^2).^(-alpha_curr/2) .* xi_curr)
-            title('Current u_j')
+            subplot(312)
+            plot(uj_avg)
+            title('Average u_j')
             
-            subplot(413)
+            subplot(313)
             plot(u_avg);
             title('Average u')
-            
-            subplot(414)
-            plot(sign_avg);
-            title('Average S(u)')
             
             figure(4)
             set(gcf, 'Position', [500, 0, 500, 300])
@@ -130,6 +135,11 @@ function [u_avg, sign_avg] = mcmc_multiclass_t_a_M_same(params)
             subplot(313)
             plot(1:i,M_all(1:i),1:i,movmean(M_all(1:i),[i 0]))
             xlabel('M trace')
+            
+            figure(6)
+            set(gcf, 'Position', [1000, 500, 500, 300])
+            plot(correct_p(correct_p~=0))
+            title('Classification accuracy');
             
             drawnow
         end
@@ -224,17 +234,18 @@ function [u_avg, sign_avg] = mcmc_multiclass_t_a_M_same(params)
     end
     
 end
-
+%% Likelihood
 function l = compute_phi(gamma, label_data, u, k)
     diff = abs(compute_S_multiclass(u, k) - label_data)/sqrt(2);
     diff = diff(sum(label_data, 2) ~= 0, :);
     l = sum(sum(diff))/(2*gamma^2);
 end
-
+%% Map from parameters to u
 function T = compute_T(xi, tau, alpha, M, lambda, phi)
-    T = phi(:,1:M)* ( (lambda(1:M) + tau^2).^(-alpha/2) .* xi(1:M,:));
+    T = phi(:,1:M)* ( (lambda(1:M) + tau^2).^(-alpha/2) .* xi(1:M,:)) / norm_const(lambda, tau, alpha);
 end
 
+%% M random jump
 function j = compute_rndjump_M(k)
     prob_arr = zeros(2*k+1,1);
     for i = -k:k
@@ -249,4 +260,9 @@ function j = compute_rndjump_M(k)
             return
         end
     end        
+end
+
+%% Normalization const
+function const = norm_const(lambda, tau, alpha)
+    const = sqrt(sum((lambda+tau^2).^-alpha))/sqrt(length(lambda));
 end

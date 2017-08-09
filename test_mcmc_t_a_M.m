@@ -2,7 +2,7 @@ function cont = test_mcmc_t_a_M(percent_fidelity, sigma)
 
     params = containers.Map;
 
-    params('data_set') = "moons";
+    params('data_set') = "mnist";
     params('laplacian') = "self tuning";
     
     if params('data_set') == "moons"
@@ -37,25 +37,25 @@ function cont = test_mcmc_t_a_M(percent_fidelity, sigma)
     params('l') = 1.25;
     %
     
-    params('gamma') = sigma;
+    params('gamma') = 0.0001;
     params('B') = 0.1;
     
-    params('init_tau')      = 2;
-    params('tau_epsilon')   = 0.3;
+    params('init_tau')      = 5;
+    params('tau_epsilon')   = 0.1;
     params('min_tau')       = 0.01;
     params('max_tau')       = 20;
 
     params('init_alpha')    = 35;
-    params('alpha_epsilon') = 0.1;
+    params('alpha_epsilon') = 0.3;
     params('min_alpha')     = 0.1;
     params('max_alpha')     = 60;
     
     params('init_M')        = 50;
-    params('max_M_jump')    = 20;
+    params('max_M_jump')    = 0;
     params('min_M')         = 1;
     params('max_M')         = 50;
     
-    cont = mcmc_learn_t_a_M_noncentered(params);
+    cont = mcmc_t_a_M_noncentered(params);
     %p = count_correct(sign(sign_avg), params('label_data'), params('truth'));
     %M_mean = mean(M_all(burn_in:end));
     %M_median = median(M_all(burn_in:end));
