@@ -1,4 +1,4 @@
-function [u_avg, sign_avg] = mcmc_multiclass_t_a_M_same(params)
+function [correct_p] = mcmc_multiclass_t_a_M_same(params)
     data = params('data');
     num_iterations = params('num_iterations');
     label_data = params('label_data');
@@ -76,17 +76,19 @@ function [u_avg, sign_avg] = mcmc_multiclass_t_a_M_same(params)
             
             uj_curr = (lambda + tau_curr^2).^(-alpha_curr/2) .* xi_curr / norm_const(lambda,tau_curr,alpha_curr);
             uj_avg = (uj_avg * (i-params('burn_in')) + uj_curr)/(i-params('burn_in') + 1);
+            if mod(i, 2500) == 0
+                %p = count_correct_multiclass(compute_S_multiclass(u_avg, k), params('label_data'), params('truth'));            
+                q = count_correct_multiclass(compute_S_multiclass(sign_avg, k), params('label_data'), params('truth'));
+
+                correct_p(i) = q;
+            end
         end
         
         %% Make figures
-        if i >= params('burn_in') && mod(i, 2500) == 0
-            p = count_correct_multiclass(compute_S_multiclass(u_avg, k), params('label_data'), params('truth'));            
-            q = count_correct_multiclass(compute_S_multiclass(sign_avg, k), params('label_data'), params('truth'));
-            
-            correct_p(i) = q;
+        if params('movie') && i >= params('burn_in') && mod(i, 2500) == 0
             fprintf('Sample number: %d, Time elapsed: %.2f\n', i, toc);
-            fprintf('Classification accuracy with S(E(u)): %.4f\n', p);
-            fprintf('Classification accuracy with S(E(S(u))): %.4f\n', q);
+            %fprintf('Classification accuracy with S(E(u)): %.4f\n', p);
+            fprintf('Classification accuracy with S(E(S(u))): %.4f\n', correct_p(i));
             fprintf('\txi accept acceptance probability: %.4f\n', mean(xi_accept(:,1:i),2));
             fprintf('\ttau accept acceptance probability: %.4f\n', mean(tau_accept(1:i)));
             fprintf('\talpha accept acceptance probability: %.4f\n', mean(alpha_accept(1:i)));
@@ -233,6 +235,7 @@ function [u_avg, sign_avg] = mcmc_multiclass_t_a_M_same(params)
         end
     end
     
+    correct_p = correct_p(correct_p~=0);
 end
 %% Likelihood
 function l = compute_phi(gamma, label_data, u, k)

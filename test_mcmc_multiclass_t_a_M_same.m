@@ -1,12 +1,13 @@
-function p = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
+function correct_p = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
 
     params = containers.Map;
     params('laplacian') = "self tuning";
     
-    digs = [4,9];
+    digs = [1,3,4,5,9];
     saved = true;
     
     params('digs') = digs;
+    params('movie') = false;
     k = length(digs);
     params('k') = k;
     if saved
@@ -23,7 +24,7 @@ function p = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
     end
     params('label_data') = generate_fidelity_multiclass(percent_fidelity, params('truth'), length(data), k);
     
-    params('num_iterations') = 100001;
+    params('num_iterations') = 25001;
     burn_in = 5000;
     params('burn_in') = burn_in;
 
@@ -36,24 +37,21 @@ function p = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
     params('gamma') = 0.0001;
     params('B') = 0.1;
     
-    params('init_tau') = 1;
-    params('tau_epsilon') = 0.1;
+    params('init_tau') = 0.7;
+    params('tau_epsilon') = 0;
     params('tau_min') = 0.01;
     params('tau_max') = 20;
     
     
-    params('init_alpha') = 35;
-    params('alpha_epsilon') = 6;
+    params('init_alpha') = 40;
+    params('alpha_epsilon') = 1.3;
     params('alpha_min') = 0.1;
     params('alpha_max') = 90;
     
     params('init_M') = 50;
-    params('M_max_jump') = 0;
+    params('M_max_jump') = 20;
     params('M_min') = 1;
-    params('M_max') = 50;
+    params('M_max') = 70;
     
-    [u_avg, sign_avg] = mcmc_multiclass_t_a_M_same(params);
-    final_class = compute_S_multiclass(sign_avg, k);
-    p = count_correct_multiclass(final_class, params('label_data'), params('truth'));
-    
+    correct_p = mcmc_multiclass_t_a_M_same(params);    
 end
