@@ -1,13 +1,14 @@
-function correct_p = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
+function correct_p = test_mcmc_multiclass_adaptive_B(percent_fidelity)
 
     params = containers.Map;
     params('laplacian') = "self tuning";
     
-    digs = [1,3,4,5,9];
+    digs = [4, 9];
     saved = false;
     
     params('digs') = digs;
     params('movie') = true;
+
     k = length(digs);
     params('k') = k;
     if saved
@@ -35,7 +36,6 @@ function correct_p = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
     %
     
     params('gamma') = 0.0001;
-    params('B') = 0.1;
     
     params('init_tau') = 10;
     params('tau_epsilon') = 0.2;
@@ -53,5 +53,11 @@ function correct_p = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
     params('M_min') = 1;
     params('M_max') = 50;
     
-    correct_p = mcmc_multiclass_t_a_M_same(params);    
+    params('B_init') = 0.01;
+    params('B_target_p') = 0.4;
+    params('adaptive') = false;
+    params('B_allow_p') = 0.1;
+    params('B_burn_in') = 15000;
+    
+    correct_p = mcmc_multiclass_adaptive_B(params);    
 end

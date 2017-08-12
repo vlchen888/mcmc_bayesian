@@ -4,11 +4,11 @@ function correct_p = test_mcmc_multiclass_TEST(percent_fidelity)
 
     params('laplacian') = "self tuning";
     
-    digs = [1,3,4,5,9];
+    digs = 0:9;
     saved = true;
     
     params('digs') = digs;
-    params('movie') = false;
+    params('movie') = true;
     k = length(digs);
     params('k') = k;
     if saved

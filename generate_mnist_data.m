@@ -1,7 +1,7 @@
 function [ data, truth ] = generate_mnist_data(digs)
     K = length(digs);
-
-    N0 = round(2*20000/K);
+    num = 4000;
+    N0 = num*10/K;
     [imgs,labels] = readMNIST('train-images-idx3-ubyte','train-labels-idx1-ubyte',N0,0);
 
     data0 = reshape(imgs,400,N0)';

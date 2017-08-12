@@ -1,4 +1,4 @@
-function cont = mcmc_multiclass_t_a_M_same(params)
+function cont = mcmc_multiclass_adaptive_B(params)
     data = params('data');
     num_iterations = params('num_iterations');
     label_data = params('label_data');
@@ -6,7 +6,6 @@ function cont = mcmc_multiclass_t_a_M_same(params)
     q = params('q');
     l = params('l');
     gamma = params('gamma');
-    B = params('B');
     k = params('k');
     
     
@@ -23,7 +22,12 @@ function cont = mcmc_multiclass_t_a_M_same(params)
     alpha_min = params('alpha_min');
     alpha_max = params('alpha_max');
     M_min = params('M_min');
-    M_max = params('M_max'); 
+    M_max = params('M_max');
+    
+    B_init = params('B_init');
+    B_target_p = params('B_target_p');
+    B_allow_p = params('B_allow_p');
+    
     
     tic;
     if params('laplacian') == "self tuning"
@@ -36,7 +40,6 @@ function cont = mcmc_multiclass_t_a_M_same(params)
     
     lambda = eig(L);
     [phi, ~] = eig(L);
-    
     
     [num_data, ~] = size(data);
     phi = phi(:, 1:M_max);
@@ -52,6 +55,8 @@ function cont = mcmc_multiclass_t_a_M_same(params)
     u_avg = zeros(num_data, k);
     sign_avg = zeros(num_data, k);
     
+    B_all = zeros(k, num_iterations);
+    B_all(:,1) = B_init;
         
     %%%%% Acceptance probabilities %%%%%
     xi_accept = zeros(k, num_iterations);
@@ -70,6 +75,8 @@ function cont = mcmc_multiclass_t_a_M_same(params)
         M_curr = M_all(i);
         u_curr = compute_T(xi_curr, tau_curr, alpha_curr, M_curr, lambda, phi);
         sign_curr = compute_S_multiclass(u_curr, k);
+        
+        %% Compute averages and acceptance probabilities
         if i >= params('burn_in')
             u_avg = (u_avg * (i-params('burn_in')) + u_curr)/(i-params('burn_in') + 1);
             sign_avg = (sign_avg * (i-params('burn_in')) + sign_curr)/(i-params('burn_in') + 1);
@@ -95,10 +102,11 @@ function cont = mcmc_multiclass_t_a_M_same(params)
             fprintf('\tM accept acceptance probability: %.4f\n', mean(M_accept(1:i)));
             fprintf('tau running average: %.4f\n', mean(tau_all(1:i)));
             fprintf('alpha running average: %.4f\n', mean(alpha_all(1:i)));
-            
+            %{
             figure(1)
             set(gcf, 'Position', [0, 500, 500, 400])
             mnist_heatmap(compute_S_multiclass(sign_avg, k), params('truth'), params('digs'), "Confusion matrix, S(E(S(u)))");
+            
             
             figure(3)
             set(gcf, 'Position', [500, 500, 500, 700])
@@ -114,9 +122,10 @@ function cont = mcmc_multiclass_t_a_M_same(params)
             subplot(313)
             plot(u_avg);
             title('Average u')
+            %}
             
             figure(4)
-            set(gcf, 'Position', [1000, 0, 500, 900])
+            set(gcf, 'Position', [500, 0, 500, 900])
             for kk = 1:k
                 subplot(k,1,kk)
                 plot(movmean(xi_accept(kk,1:i),[i 0]))
@@ -125,6 +134,7 @@ function cont = mcmc_multiclass_t_a_M_same(params)
                 end
             end
             
+            %{
             figure(5)
             set(gcf, 'Position', [0, 0, 500, 300])
             subplot(311)
@@ -138,17 +148,28 @@ function cont = mcmc_multiclass_t_a_M_same(params)
             plot(1:i,M_all(1:i),1:i,movmean(M_all(1:i),[i 0]))
             xlabel('M trace')
             
+            
             figure(6)
             set(gcf, 'Position', [1000, 500, 500, 300])
             plot(correct_p(correct_p~=0))
             title('Classification accuracy');
+            %}
             
+            figure(7)
+            set(gcf, 'Position', [0, 0, 500, 900])
+            for kk = 1:k
+                subplot(k,1,kk)
+                plot(B_all(kk,1:i))
+                if kk == 1
+                    title('B traces')
+                end
+            end
             drawnow
         end
         
         for j=1:k
             %% xi proposal
-            xi_hat = sqrt(1-B^2)*xi_curr(:,j) + B*normrnd(0,1,M_max,1);
+            xi_hat = sqrt(1-B_all(j,i)^2)*xi_curr(:,j) + B_all(j,i)*normrnd(0,1,M_max,1);
             xi_new = xi_curr;
             xi_new(:, j) = xi_hat;
             u_old = compute_T(xi_curr, tau_curr, alpha_curr, M_curr, lambda, phi);
@@ -232,6 +253,18 @@ function cont = mcmc_multiclass_t_a_M_same(params)
         else
             M_all(i+1) = M_all(i);
             M_accept(i+1) = 0;
+        end
+        
+        %% Updates to B
+        update_period = 100;
+        if params('adaptive') && i >= params('burn_in') && i <= params('B_burn_in') && mod(i, update_period) == 0
+            for j=1:k
+                accept_mov_avg = mean(xi_accept(j, i-update_period+1:i));
+                %accept_tot_avg = mean(xi_accept(j, params('burn_in'):i));
+                B_all(j,i+1) = min(B_all(j, i)*(1 + accept_mov_avg - B_target_p), 1);
+            end
+        else
+            B_all(:,i+1) = B_all(:,i);
         end
     end
     
