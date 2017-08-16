@@ -2,9 +2,6 @@ function cont = mcmc_multiclass_t_a_M_same(params)
     data = params('data');
     num_iterations = params('num_iterations');
     label_data = params('label_data');
-    p = params('p');
-    q = params('q');
-    l = params('l');
     gamma = params('gamma');
     B = params('B');
     k = params('k');
@@ -29,6 +26,9 @@ function cont = mcmc_multiclass_t_a_M_same(params)
     if params('laplacian') == "self tuning"
         L = compute_laplacian_selftuning(data);
     elseif params('laplacian') == "un"
+        p = params('p');
+        q = params('q');
+        l = params('l');
         L = compute_laplacian_standard(data, p, q, l);
     end
     
@@ -37,6 +37,9 @@ function cont = mcmc_multiclass_t_a_M_same(params)
     lambda = eig(L);
     [phi, ~] = eig(L);
     
+    if params('remove-zero-eig')
+        lambda(1) = Inf;
+    end
     
     [num_data, ~] = size(data);
     phi = phi(:, 1:M_max);
@@ -76,7 +79,7 @@ function cont = mcmc_multiclass_t_a_M_same(params)
             
             uj_curr = (lambda + tau_curr^2).^(-alpha_curr/2) .* xi_curr / norm_const(lambda,tau_curr,alpha_curr);
             uj_avg = (uj_avg * (i-params('burn_in')) + uj_curr)/(i-params('burn_in') + 1);
-            if mod(i, 2500) == 0
+            if mod(i, params('movie_often')) == 0
                 %p = count_correct_multiclass(compute_S_multiclass(u_avg, k), params('label_data'), params('truth'));            
                 q = count_correct_multiclass(compute_S_multiclass(sign_avg, k), params('label_data'), params('truth'));
 
@@ -85,7 +88,7 @@ function cont = mcmc_multiclass_t_a_M_same(params)
         end
         
         %% Make figures
-        if params('movie') && i >= params('burn_in') && mod(i, 2500) == 0
+        if params('movie') && i >= params('burn_in') && mod(i, params('movie_often')) == 0
             fprintf('Sample number: %d, Time elapsed: %.2f\n', i, toc);
             %fprintf('Classification accuracy with S(E(u)): %.4f\n', p);
             fprintf('Classification accuracy with S(E(S(u))): %.4f\n', correct_p(i));
@@ -100,21 +103,26 @@ function cont = mcmc_multiclass_t_a_M_same(params)
             set(gcf, 'Position', [0, 500, 500, 400])
             mnist_heatmap(compute_S_multiclass(sign_avg, k), params('truth'), params('digs'), "Confusion matrix, S(E(S(u)))");
             
-            figure(3)
-            set(gcf, 'Position', [500, 500, 500, 700])
+            figure(2)
+            set(gcf, 'Position', [500, 500, 500, 300])
+            subplot(221)
+            plot(u_avg)
+            title('Average u')
             
-            subplot(311)
-            plot(u_curr)
-            title('Current u')
+            subplot(222)
+            plot(movmean(xi_accept(:,1:i)',[i 0]))
+            title('\xi acceptance probability')
             
-            subplot(312)
+            subplot(223)
             plot(uj_avg)
             title('Average u_j')
             
-            subplot(313)
-            plot(u_avg);
-            title('Average u')
+            subplot(224)
+            plot(correct_p(correct_p~=0))
+            title('Classification accuracy');
+            xlabel(sprintf('Sample number (per %d)', params('movie_often')));
             
+            %{
             figure(4)
             set(gcf, 'Position', [1000, 0, 500, 900])
             for kk = 1:k
@@ -124,9 +132,10 @@ function cont = mcmc_multiclass_t_a_M_same(params)
                     title('\xi acceptance probability')
                 end
             end
+            %}
             
-            figure(5)
-            set(gcf, 'Position', [0, 0, 500, 300])
+            figure(3)
+            set(gcf, 'Position', [500, 0, 500, 300])
             subplot(311)
             plot(tau_all(1:i))
             plot(1:i,tau_all(1:i),1:i,movmean(tau_all(1:i),[i 0]))
@@ -137,11 +146,6 @@ function cont = mcmc_multiclass_t_a_M_same(params)
             subplot(313)
             plot(1:i,M_all(1:i),1:i,movmean(M_all(1:i),[i 0]))
             xlabel('M trace')
-            
-            figure(6)
-            set(gcf, 'Position', [1000, 500, 500, 300])
-            plot(correct_p(correct_p~=0))
-            title('Classification accuracy');
             
             drawnow
         end
