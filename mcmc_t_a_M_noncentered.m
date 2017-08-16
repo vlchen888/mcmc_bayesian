@@ -2,9 +2,6 @@ function cont = mcmc_t_a_M_noncentered(params)
     data = params('data');
     num_iterations = params('num_iterations');
     label_data = params('label_data');
-    p = params('p');
-    q = params('q');
-    l = params('l');
     
     gamma = params('gamma');
     B = params('B');
@@ -23,25 +20,26 @@ function cont = mcmc_t_a_M_noncentered(params)
     alpha_epsilon = params('alpha_epsilon');
     tau_epsilon = params('tau_epsilon');
     
-    %tic;
     if params('laplacian') == "self tuning"
         L = compute_laplacian_selftuning(data);
     elseif params('laplacian') == "un"
+        p = params('p');
+        q = params('q');
+        l = params('l');
         L = compute_laplacian_standard(data, p, q, l);
     end
-    %toc
-    
-    %fprintf('Laplacian computation complete!\n');
     
     lambda = eig(L);
     [phi, ~] = eig(L);
     lambda = lambda(1:params('max_M'));
     phi = phi(:, 1:params('max_M'));
     
+    if params('remove-zero-eig')
+        lambda(1) = Inf;
+    end
+    
     [num_data, ~] = size(data);
     curr_xi = zeros(params('max_M'), 1);
-    %%%%% Initialization from Fiedler Vector?? %%%%%
-    %xi_all(2, 1) = (lambda(2)+init_tau^2)^(-init_alpha/2);
     
     tau_all = zeros(1, num_iterations);
     tau_all(1) = init_tau;
@@ -75,7 +73,10 @@ function cont = mcmc_t_a_M_noncentered(params)
         curr_M = M_all(i);
         
         xi_all(:,i) = curr_xi;
-        v_all(:,i) = (lambda + curr_tau^2).^(-curr_alpha/2)/norm_const(lambda,curr_tau,curr_alpha);
+        v_tmp = (lambda + curr_tau^2).^(-curr_alpha/2)/norm_const(lambda,curr_tau,curr_alpha);
+        v_tmp(curr_M+1:end) = 0;
+        v_all(:,i) = v_tmp;
+        
         
         curr_u = compute_T(curr_xi, curr_tau, curr_alpha, curr_M, lambda, phi);
         if i>= params('burn_in')
@@ -84,7 +85,7 @@ function cont = mcmc_t_a_M_noncentered(params)
         end
         
         %%%% Movie things %%%%
-        if params('movie') && i >= params('burn_in') && mod(i,2500)==0
+        if params('movie') && i >= params('burn_in') && mod(i,params('movie_often'))==0
             curr_avg = sign_avg;
             p = count_correct(curr_avg, params('label_data'), params('truth'));
             correct_p(i) = p;
@@ -94,8 +95,8 @@ function cont = mcmc_t_a_M_noncentered(params)
             fprintf('Acceptance rates: \n\txi:%f \n\ttau:%f \n\talpha:%f \n\tM:%f \n',...
             sum(xi_accept)/i,sum(tau_accept)/i,sum(alpha_accept)/i,sum(M_accept)/i);
             figure(2)
-            subplot(231)
-            set(gcf, 'Position', [100, 300, 1000, 500])
+            subplot(221)
+            set(gcf, 'Position', [0, 1000, 600, 500])
             if params('data_set') == "moons"
                 scatter_twomoons_classify(data, curr_avg, params('label_data'))
                 title('Average u scatter')
@@ -105,43 +106,72 @@ function cont = mcmc_t_a_M_noncentered(params)
             elseif params('data_set') == "mnist"
                 plotBar(curr_avg);
                 title('Average u')
-            end 
+            end
 
-
-            subplot(232)
+            subplot(222)
             plot(movmean(xi_accept(1:i), [i 0]));
             title('\xi acceptance probability')
             
-            subplot(233)
+            subplot(223)
             plot(uj_avg);
             title('Average u_j')
             
-            subplot(234)
-            plot(1:i,tau_all(1:i),1:i,movmean(tau_all(1:i), [i 0]));
-            title('\tau trace');
-            
-            subplot(235)
-            plot(1:i,alpha_all(1:i),1:i,movmean(alpha_all(1:i), [i 0]));
-            title('\alpha trace');
-            
-            subplot(236)
+            subplot(224)
             plot(correct_p(correct_p~=0))
             title('Classification accuracy');
+            xlabel(sprintf('Sample number (per %d)', params('movie_often')));
             
-            % M changing
-            %{
-            subplot(232)
-            plot(1:i, M_all(1:i), 1:i, movmean(M_all(1:i), [i 0]));
-            legend('M trace', 'M running average');
+            figure(3)
+            hyp_count = 0;
+            if tau_epsilon > 0
+                hyp_count = hyp_count + 1;
+            end
             
-            subplot(236)
-            histogram(M_all(1:i),'BinWidth',1);
-            title('M histogram')
+            if alpha_epsilon > 0
+                hyp_count = hyp_count + 1;
+            end
             
-            subplot(234)
-            plot(movmean(M_accept(1:i), [i 0]));
-            title('M acceptance probability')
-            %}
+            if params('max_M_jump') > 0
+                hyp_count = hyp_count + 1;
+            end
+            set(gcf, 'Position', [700, 1000, 700, 200*hyp_count])
+            fig_count = 1;
+            
+            if tau_epsilon > 0
+                subplot(hyp_count,2,fig_count)
+                plot(1:i,tau_all(1:i),1:i,movmean(tau_all(1:i), [i 0]));
+                legend('\tau trace', '\tau running average');
+
+                subplot(hyp_count,2,fig_count+1)
+                plot(movmean(tau_accept(1:i),[i 0]))
+                title('\tau acceptance probability')
+                
+                fig_count = fig_count + 2;
+            end
+            
+            if alpha_epsilon > 0
+                subplot(hyp_count,2,fig_count)
+                plot(1:i,alpha_all(1:i),1:i,movmean(alpha_all(1:i), [i 0]));
+                legend('\alpha trace', '\alpha running average');
+
+                subplot(hyp_count,2,fig_count+1)
+                plot(movmean(alpha_accept(1:i),[i 0]))
+                title('\alpha acceptance probability')
+                
+                fig_count = fig_count + 2;
+            end
+            
+            if params('max_M_jump') > 0
+                subplot(hyp_count,2,fig_count)
+                plot(1:i, M_all(1:i), 1:i, movmean(M_all(1:i), [i 0]));
+                legend('M trace', 'M running average');
+
+                subplot(hyp_count,2,fig_count+1)
+                plot(movmean(M_accept(1:i), [i 0]));
+                title('M acceptance probability')
+                
+                %fig_count = fig_count + 2;
+            end
 
             drawnow
             pause(.5)
