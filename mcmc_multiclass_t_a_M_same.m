@@ -1,11 +1,18 @@
 function cont = mcmc_multiclass_t_a_M_same(params)
+    % MCMC method, learning t, a, M
+    % There is one copy of the hyperparameters shared between k classes
+    % The pCN updates for xi are loop-based
+    
     data = params('data');
     num_iterations = params('num_iterations');
     label_data = params('label_data');
     gamma = params('gamma');
-    B = params('B');
+    
     k = params('k');
     
+    B_init = params('B_init');
+    B_all = zeros(k, num_iterations);
+    B_all(:,1) = B_init;
     
     init_tau = params('init_tau');
     init_alpha = params('init_alpha');
@@ -78,6 +85,7 @@ function cont = mcmc_multiclass_t_a_M_same(params)
             sign_avg = (sign_avg * (i-params('burn_in')) + sign_curr)/(i-params('burn_in') + 1);
             
             uj_curr = (lambda + tau_curr^2).^(-alpha_curr/2) .* xi_curr / norm_const(lambda,tau_curr,alpha_curr);
+            uj_curr(M_curr+1:end,:) = 0;
             uj_avg = (uj_avg * (i-params('burn_in')) + uj_curr)/(i-params('burn_in') + 1);
             if mod(i, params('movie_often')) == 0
                 %p = count_correct_multiclass(compute_S_multiclass(u_avg, k), params('label_data'), params('truth'));            
@@ -104,23 +112,27 @@ function cont = mcmc_multiclass_t_a_M_same(params)
             mnist_heatmap(compute_S_multiclass(sign_avg, k), params('truth'), params('digs'), "Confusion matrix, S(E(S(u)))");
             
             figure(2)
-            set(gcf, 'Position', [500, 500, 500, 300])
-            subplot(221)
+            set(gcf, 'Position', [500, 500, 600, 300])
+            subplot(231)
             plot(u_avg)
             title('Average u')
             
-            subplot(222)
+            subplot(232)
             plot(movmean(xi_accept(:,1:i)',[i 0]))
             title('\xi acceptance probability')
             
-            subplot(223)
+            subplot(233)
             plot(uj_avg)
             title('Average u_j')
             
-            subplot(224)
+            subplot(234)
             plot(correct_p(correct_p~=0))
             title('Classification accuracy');
             xlabel(sprintf('Sample number (per %d)', params('movie_often')));
+            
+            subplot(235)
+            plot(B_all(:,1:i)')
+            title('B traces')
             
             %{
             figure(4)
@@ -135,24 +147,64 @@ function cont = mcmc_multiclass_t_a_M_same(params)
             %}
             
             figure(3)
-            set(gcf, 'Position', [500, 0, 500, 300])
-            subplot(311)
-            plot(tau_all(1:i))
-            plot(1:i,tau_all(1:i),1:i,movmean(tau_all(1:i),[i 0]))
-            xlabel('\tau trace')
-            subplot(312)
-            plot(1:i,alpha_all(1:i),1:i,movmean(alpha_all(1:i),[i 0]))
-            xlabel('\alpha trace')
-            subplot(313)
-            plot(1:i,M_all(1:i),1:i,movmean(M_all(1:i),[i 0]))
-            xlabel('M trace')
+            
+            hyp_count = 0;
+            fig_count = 1;
+            if tau_epsilon > 0
+                hyp_count = hyp_count + 1;
+            end
+            
+            if alpha_epsilon > 0
+                hyp_count = hyp_count + 1;
+            end
+            
+            if params('M_max_jump') > 0
+                hyp_count = hyp_count + 1;
+            end
+            
+            set(gcf, 'Position', [500, 0, 700, 200*hyp_count])
+            
+            if tau_epsilon > 0
+                subplot(hyp_count,2,fig_count)
+                plot(1:i,tau_all(1:i),1:i,movmean(tau_all(1:i), [i 0]));
+                legend('\tau trace', '\tau running average');
+
+                subplot(hyp_count,2,fig_count+1)
+                plot(movmean(tau_accept(1:i),[i 0]))
+                title('\tau acceptance probability')
+                
+                fig_count = fig_count + 2;
+            end
+            
+            if alpha_epsilon > 0
+                subplot(hyp_count,2,fig_count)
+                plot(1:i,alpha_all(1:i),1:i,movmean(alpha_all(1:i), [i 0]));
+                legend('\alpha trace', '\alpha running average');
+
+                subplot(hyp_count,2,fig_count+1)
+                plot(movmean(alpha_accept(1:i),[i 0]))
+                title('\alpha acceptance probability')
+                
+                fig_count = fig_count + 2;
+            end
+            
+            if params('M_max_jump') > 0
+                subplot(hyp_count,2,fig_count)
+                plot(1:i, M_all(1:i), 1:i, movmean(M_all(1:i), [i 0]));
+                legend('M trace', 'M running average');
+
+                subplot(hyp_count,2,fig_count+1)
+                plot(movmean(M_accept(1:i), [i 0]));
+                title('M acceptance probability')
+                
+                %fig_count = fig_count + 2;
+            end
             
             drawnow
         end
-        
+        %% xi proposal
         for j=1:k
-            %% xi proposal
-            xi_hat = sqrt(1-B^2)*xi_curr(:,j) + B*normrnd(0,1,M_max,1);
+            xi_hat = sqrt(1-B_all(j,i)^2)*xi_curr(:,j) + B_all(j,i)*normrnd(0,1,M_max,1);
             xi_new = xi_curr;
             xi_new(:, j) = xi_hat;
             u_old = compute_T(xi_curr, tau_curr, alpha_curr, M_curr, lambda, phi);
@@ -236,6 +288,17 @@ function cont = mcmc_multiclass_t_a_M_same(params)
         else
             M_all(i+1) = M_all(i);
             M_accept(i+1) = 0;
+        end
+        
+        %% Updates to B
+        if params('adaptive') && i <= params('B_burn_in') && mod(i, params('B_update_period')) == 0
+            for j=1:k
+                accept_mov_avg = mean(xi_accept(j, i-params('B_update_period')+1:i));
+                %accept_tot_avg = mean(xi_accept(j, params('burn_in'):i));
+                B_all(j,i+1) = min(B_all(j, i)*(1 + accept_mov_avg - params('B_target_p')), 1);
+            end
+        else
+            B_all(:,i+1) = B_all(:,i);
         end
     end
     

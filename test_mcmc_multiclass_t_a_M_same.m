@@ -1,10 +1,10 @@
-function correct_p = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
+function cont = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
 
     params = containers.Map;
     params('laplacian') = "self tuning";
     
-    digs = [1,3,4,5,9];
-    saved = true;
+    digs = [4,9];
+    saved = false;
     
     params('digs') = digs;
     k = length(digs);
@@ -34,28 +34,35 @@ function correct_p = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
     params('num_iterations') = 100001;
     params('burn_in') = 2000;
     params('movie') = true;
-    params('movie_often') = 2000; 
+    params('movie_often') = 5000; 
     
     params('gamma') = 0.0001;
-    params('B') = 0.1;
     
-    params('init_tau') = 0;
-    params('tau_epsilon') = 0;
+    params('B_init') = 0.1;
+    params('B_update_period') = 500;
+    params('B_target_p') = 0.5;
+    params('B_burn_in') = 10000;
+    
+    
+    params('init_tau') = 1;
+    params('tau_epsilon') = .01;
     params('tau_min') = 0;
-    params('tau_max') = 20;
+    params('tau_max') = 8;
     
     
-    params('init_alpha') = 1;
-    params('alpha_epsilon') = 0;
+    params('init_alpha') = 30;
+    params('alpha_epsilon') = 3;
     params('alpha_min') = 0.1;
     params('alpha_max') = 90;
     
     params('init_M') = 50;
-    params('M_max_jump') = 0;
+    params('M_max_jump') = 20;
     params('M_min') = 1;
     params('M_max') = 50;
     
     params('remove-zero-eig') = true;
     
-    correct_p = mcmc_multiclass_t_a_M_same(params);    
+    params('adaptive') = true;
+    
+    cont = mcmc_multiclass_t_a_M_same(params);    
 end

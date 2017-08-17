@@ -40,12 +40,12 @@ function cont = test_mcmc_t_a_M(percent_fidelity, sigma)
     params('gamma') = sigma;
     params('B') = 0.1;
     
-    params('init_tau')      = 0;
-    params('tau_epsilon')   = 0;
+    params('init_tau')      = 1;
+    params('tau_epsilon')   = 0.3;
     params('min_tau')       = 0;
     params('max_tau')       = 8;
 
-    params('init_alpha')    = 1;
+    params('init_alpha')    = 20;
     params('alpha_epsilon') = 0;
     params('min_alpha')     = 0.1;
     params('max_alpha')     = 60;
