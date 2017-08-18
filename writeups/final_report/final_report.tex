@@ -503,7 +503,54 @@
         \end{figure}
 
 \section{Choosing hyperparameters to learn}
-    
+    Having established our beliefs in the importance of the hyperparameters $(\tau, \alpha, M)$, we turn our attention to selecting the optimal subset of these hyperparameters to learn. For these experiments, we focus on multiclass, using the MNIST dataset.
+    \subsection{Learning $(\tau, \alpha)$}
+        We had promising results learning $(\tau, \alpha)$ for the binary problems of voting records and two moons. In those experiments, we observed a consistent learning of a small $\tau$, and we wished to see if this would hold in multiclass. We find that in MNIST, we can indeed learn a small value for $\tau$, shown in \cref{ta_mnist_1}.
+
+        As the labels in MNIST should have no noise (since an image with label $4$ will always be a picture of a $4$), it is natural to consider the $\gamma \to 0$ limit. However, with $10\%$ fidelity and $\epsilon_\tau = 0.1, \epsilon_\alpha = 3,$ and $\gamma = 10^{-7}$, the mixing of $\tau$ does not appear to be great, and the acceptance probability is around $7\%$. If we lower fidelity to $1\%$, the mixing of $\tau$ appears to be better, but the classification accuracy also drops from $96\%$ to $94\%$. Compare the traces in \cref{ta_mnist_2} and \cref{ta_mnist_3}.
+
+        \begin{figure}[!htb]
+        \centering
+        \caption{\label{ta_mnist_1}Learning small $\tau$ on MNIST $[1, 4, 9]$.}
+        \includegraphics[width=0.8\linewidth]{choose_hyp/t_a/learn_tau.png}
+        \end{figure}
+
+        \begin{figure}[!htb]
+        \centering
+        \caption{\label{ta_mnist_2}Traces of $\tau, \alpha$ on MNIST $[1, 4, 9]$, $1\%$ fidelity and label noise $\gamma = 10^{-7}$.}
+        \includegraphics[width=0.8\linewidth]{choose_hyp/t_a/one_fidelity.png}
+        \end{figure}
+
+        \begin{figure}[!htb]
+        \centering
+        \caption{\label{ta_mnist_3}Traces of $\tau, \alpha$ on MNIST $[1, 4, 9]$, $10\%$ fidelity and label noise $\gamma = 10^{-7}$.}
+        \includegraphics[width=0.8\linewidth]{choose_hyp/t_a/ten_fidelity.png}
+        \end{figure}
+
+        These experiments suggest that we may need larger $\gamma$ to accommodate a higher fidelity. Taking $\gamma = 0.1$ still resulted in acceptance probabilities under $10\%$, but $\gamma = 0.9$ seems large enough to cause better mixing. $\tau$ is accepted $20\%$ of the time even with a larger jump of $\epsilon_\tau = 0.2$, while the same classification accuracy of around $97\%$ is achieved. \cref{ta_mnist_4} shows that even with initialization at $\tau=5$, a small value of $\tau$ is found with good mixing.
+
+        \begin{figure}[!htb]
+        \centering
+        \caption{\label{ta_mnist_4}Traces of $\tau, \alpha$ on MNIST $[1, 4, 9]$, $10\%$ fidelity and label noise $\gamma = 0.9$.}
+        \includegraphics[width=0.8\linewidth]{choose_hyp/t_a/good_tau.png}
+        \end{figure}
+
+    \subsection{Learning $(\tau, M)$}
+        Again with MNIST $[1, 4, 9]$, we learn $\tau$ and $M$ with fixed $\alpha$. As above, we set $\gamma = 0.9$ to allow for $10\%$ fidelity. We first fix $\alpha=30$ in the experiment shown in \cref{tM_mnist_1}. Note that when $\tau$ is large, $M$ drops to around $10$. An explanation for this relation is that large $\tau$ causes $(\lambda + \tau^2)^{-\alpha/2}$ to appear the same, so all eigenvectors are assigned equal weight in the prior. Then, $M$ must be small to truncate the unnecessary eigenvectors. Similarly, when $\tau$ is small, $M$ could be larger since the unnecessary eigenvectors already have small weight.
+
+        \begin{figure}[!htb]
+        \centering
+        \caption{\label{tM_mnist_1}Traces of $\tau, M$ on MNIST $[1, 4, 9]$, $\alpha = 30$, $10\%$ fidelity and label noise $\gamma = 0.9$.}
+        \includegraphics[width=0.8\linewidth]{choose_hyp/t_M/alpha=30.png}
+        \end{figure}
+
+        In \cref{tM_mnist_2}, with $\alpha=1$, we see that $M$ and $\tau$ are both learned with low variance. $\tau$ prefers to be close to $0$, which makes sense since $\alpha$ is so small that a very small value of $\tau$ is needed to give weight to the lowest eigenvectors. $M$ also does not fluctuate as high as it did in $\alpha=30$, since $\alpha$ being small allows the higher eigenvectors to remain in the prior, so $M$ is used to remove them.
+
+        \begin{figure}[!htb]
+        \centering
+        \caption{\label{tM_mnist_2}Traces of $\tau, M$ on MNIST $[1, 4, 9]$, $\alpha = 1$, $10\%$ fidelity and label noise $\gamma = 0.9$.}
+        \includegraphics[width=0.8\linewidth]{choose_hyp/t_M/alpha=1.png}
+        \end{figure}
 
 \section{Acknowledgments}
     This SURF is funded by The Aerospace Corporation.

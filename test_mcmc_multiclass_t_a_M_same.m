@@ -1,10 +1,11 @@
 function cont = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
+% For parameter settings and testing multiclass MCMC
 
     params = containers.Map;
     params('laplacian') = "self tuning";
     
-    digs = [4,9];
-    saved = false;
+    digs = [1,4,9];
+    saved = true;
     
     params('digs') = digs;
     k = length(digs);
@@ -31,32 +32,32 @@ function cont = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
     %}
     %
     
-    params('num_iterations') = 100001;
+    params('num_iterations') = 30001;
     params('burn_in') = 2000;
     params('movie') = true;
-    params('movie_often') = 5000; 
+    params('movie_often') = 10000; 
     
-    params('gamma') = 0.0001;
-    
+    params('gamma') = .9;
+   
     params('B_init') = 0.1;
     params('B_update_period') = 500;
     params('B_target_p') = 0.5;
     params('B_burn_in') = 10000;
     
     
-    params('init_tau') = 1;
-    params('tau_epsilon') = .01;
+    params('init_tau') = 0.7;
+    params('tau_epsilon') = 0;
     params('tau_min') = 0;
-    params('tau_max') = 8;
+    params('tau_max') = 6;
     
     
-    params('init_alpha') = 30;
+    params('init_alpha') = 20;
     params('alpha_epsilon') = 3;
     params('alpha_min') = 0.1;
     params('alpha_max') = 90;
     
     params('init_M') = 50;
-    params('M_max_jump') = 20;
+    params('M_max_jump') = 15;
     params('M_min') = 1;
     params('M_max') = 50;
     
