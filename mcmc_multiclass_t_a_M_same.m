@@ -112,42 +112,31 @@ function cont = mcmc_multiclass_t_a_M_same(params)
             mnist_heatmap(compute_S_multiclass(sign_avg, k), params('truth'), params('digs'), "Confusion matrix, S(E(S(u)))");
             
             figure(2)
-            set(gcf, 'Position', [500, 500, 600, 300])
-            subplot(231)
+            set(gcf, 'Position', [500, 500, 700, 200])
+            subplot(131)
             plot(u_avg)
             title('Average u')
             
-            subplot(232)
-            plot(movmean(xi_accept(:,1:i)',[i 0]))
-            title('\xi acceptance probability')
-            
-            subplot(233)
+            subplot(132)
             plot(uj_avg)
             title('Average u_j')
             
-            subplot(234)
+            subplot(133)
             plot(correct_p(correct_p~=0))
             title('Classification accuracy');
             xlabel(sprintf('Sample number (per %d)', params('movie_often')));
             
-            subplot(235)
-            plot(B_all(:,1:i)')
-            title('B traces')
-            
-            %{
-            figure(4)
-            set(gcf, 'Position', [1000, 0, 500, 900])
-            for kk = 1:k
-                subplot(k,1,kk)
-                plot(movmean(xi_accept(kk,1:i),[i 0]))
-                if kk == 1
-                    title('\xi acceptance probability')
-                end
-            end
-            %}
-            
             figure(3)
+            set(gcf, 'Position', [0, 0, 800, 300])
+            subplot(121)
+            plot(movmean(xi_accept(:,1:i)',[i 0]))
+            title('\xi acceptance probability')
             
+            subplot(122)
+            plot(B_all(:,1:i)')
+            title('\beta traces')
+            
+            figure(4)
             hyp_count = 0;
             fig_count = 1;
             if tau_epsilon > 0
@@ -305,8 +294,9 @@ function cont = mcmc_multiclass_t_a_M_same(params)
     correct_p = correct_p(correct_p~=0);
     cont = containers.Map;
     cont('correct_p') = correct_p;
-    cont('M_all') = M_all;
-    cont('tau_all') = tau_all;
+    %cont('M_all') = M_all;
+    %cont('tau_all') = tau_all;
+    %cont('alpha_all') = alpha_all;
 end
 %% Likelihood
 function l = compute_phi(gamma, label_data, u, k)

@@ -552,6 +552,29 @@
         \includegraphics[width=0.8\linewidth]{choose_hyp/t_M/alpha=1.png}
         \end{figure}
 
+    \subsection{Learning $(\alpha, M)$}
+        We can choose to fix $\tau$ and learn $(\alpha, M)$. With $\tau=0.7$ and $\gamma=0.9$ to allow for $10\%$ fidelity, we attempt to learn $\alpha$ from the prior $\mathsf{U}[0.1, 90]$ and $M$ from the prior $\mathsf{U}[1,70]$. The results are shown in \cref{aM_mnist_1}.
+
+        \begin{figure}[!htb]
+        \centering
+        \caption{\label{aM_mnist_1}Traces of $\alpha, M$ on MNIST $[1, 4, 9]$, $\tau = 0.7$, $10\%$ fidelity and label noise $\gamma = 0.9$.}
+        \includegraphics[width=0.8\linewidth]{choose_hyp/a_M/tau=0_7.png}
+        \end{figure}
+
+\section{Adaptive $\beta$ for Multiclass}
+    In the multiclass algorithm, when learning the $k$ independent copies of the classifying function, we observed that different choices of $\beta$ for each copy is sometimes necessary to achieve healthy acceptance probabilities in the pCN proposal. For example, take $\beta=0.1,\tau=0,\alpha=1,\gamma=1$ on the dataset MNIST $[1,3,4,9]$. We obtain the running acceptance probability for the $4$ different $\xi$ copies shown in \cref{adaptive_mnist_1}. The acceptance probabilities of $2$ of the copies approach $0.7$, while the other two linger around $0.4$. One solution for this problem is to update the values of $B$ according to the observed running acceptance probabilities for each of the $k$ copies. First, choose $p$, the target acceptance probability for each of the $k$ copies. Empirically, we can observe that $p\approx0.5$ allows for fast convergence. With $p$ fixed, we make updates to each $\beta$ every $D$ samples. During the update, for each of the $k$ copies we compute $p'$, the acceptance probability of $\xi$ over the last $D$ samples, and we set $\beta \to \min(\beta(1+p'-p),1)$. This means that if $p'>p$, we increase $\beta$ because we wish to lower the acceptance probability. Similarly, if $p'<p$, we decrease $\beta$ to increase the acceptance probability. We perform these updates $j$ times, after which the different $\beta$ values are fixed for the rest of the computation. The results of adjusting $\beta$ is shown in \cref{adaptive_mnist_2}. Notice that the acceptance probabilities for the $4$ different copies are now very similar and around $0.5$.
+
+    \begin{figure}[!htb]
+        \centering
+        \caption{\label{adaptive_mnist_1}$\xi$ acceptance probability without adaptive $\beta$ updates, MNIST $[1,3, 4, 9]$.}
+        \includegraphics[width=0.8\linewidth]{adaptive_B/without/xi_accept.png}
+    \end{figure}
+
+    \begin{figure}[!htb]
+        \centering
+        \caption{\label{adaptive_mnist_2}$\xi$ acceptance probability and $B$ traces with adaptive $\beta$ updates, MNIST $[1,3, 4, 9]$. The $\beta$ updates are turned off after $10000$ samples.}
+        \includegraphics[width=0.8\linewidth]{adaptive_B/with/xi_B.png}
+    \end{figure}
 \section{Acknowledgments}
     This SURF is funded by The Aerospace Corporation.
 
