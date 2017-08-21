@@ -72,7 +72,7 @@ function cont = mcmc_multiclass_t_a_M_same(params)
     uj_avg = zeros(M_max, k);
     
     %%%%% Store correct percent %%%%%
-    correct_p = zeros(1, num_iterations);
+    accuracy_map = containers.Map('KeyType','int32','ValueType','double');
     tic;    
     for i=1:num_iterations-1
         tau_curr = tau_all(i);
@@ -87,19 +87,20 @@ function cont = mcmc_multiclass_t_a_M_same(params)
             uj_curr = (lambda + tau_curr^2).^(-alpha_curr/2) .* xi_curr / norm_const(lambda,tau_curr,alpha_curr);
             uj_curr(M_curr+1:end,:) = 0;
             uj_avg = (uj_avg * (i-params('burn_in')) + uj_curr)/(i-params('burn_in') + 1);
-            if mod(i, params('movie_often')) == 0
+            if mod(i, params('accuracy_period')) == 0
                 %p = count_correct_multiclass(compute_S_multiclass(u_avg, k), params('label_data'), params('truth'));            
                 q = count_correct_multiclass(compute_S_multiclass(sign_avg, k), params('label_data'), params('truth'));
 
-                correct_p(i) = q;
+                accuracy_map(i) = q;
             end
         end
         
         %% Make figures
-        if params('movie') && i >= params('burn_in') && mod(i, params('movie_often')) == 0
+        if params('movie') && i >= params('burn_in') && mod(i, params('movie_period')) == 0
+            q = count_correct_multiclass(compute_S_multiclass(sign_avg, k), params('label_data'), params('truth'));
             fprintf('Sample number: %d, Time elapsed: %.2f\n', i, toc);
             %fprintf('Classification accuracy with S(E(u)): %.4f\n', p);
-            fprintf('Classification accuracy with S(E(S(u))): %.4f\n', correct_p(i));
+            fprintf('Classification accuracy with S(E(S(u))): %.4f\n', q);
             fprintf('\txi accept acceptance probability: %.4f\n', mean(xi_accept(:,1:i),2));
             fprintf('\ttau accept acceptance probability: %.4f\n', mean(tau_accept(1:i)));
             fprintf('\talpha accept acceptance probability: %.4f\n', mean(alpha_accept(1:i)));
@@ -122,9 +123,9 @@ function cont = mcmc_multiclass_t_a_M_same(params)
             title('Average u_j')
             
             subplot(133)
-            plot(correct_p(correct_p~=0))
+            plot(cell2mat(accuracy_map.keys), cell2mat(accuracy_map.values))
             title('Classification accuracy');
-            xlabel(sprintf('Sample number (per %d)', params('movie_often')));
+            xlabel('Sample number');
             
             figure(3)
             set(gcf, 'Position', [0, 0, 800, 300])
@@ -291,9 +292,8 @@ function cont = mcmc_multiclass_t_a_M_same(params)
         end
     end
     
-    correct_p = correct_p(correct_p~=0);
     cont = containers.Map;
-    cont('correct_p') = correct_p;
+    cont('accuracy_map') = accuracy_map;
     %cont('M_all') = M_all;
     %cont('tau_all') = tau_all;
     %cont('alpha_all') = alpha_all;

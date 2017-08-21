@@ -65,7 +65,7 @@ function cont = mcmc_t_a_M_noncentered(params)
     v_all = zeros(params('max_M'), num_iterations);
     
     %%%%% Store correct percent %%%%%
-    correct_p = zeros(1, num_iterations);
+    accuracy_map = containers.Map('KeyType','int32','ValueType','double')
     tic;
     for i=1:num_iterations-1
         curr_tau = tau_all(i);
@@ -84,11 +84,14 @@ function cont = mcmc_t_a_M_noncentered(params)
             uj_avg = ( v_all(:,i).*xi_all(:,i) + uj_avg*(i-params('burn_in')))/(i-params('burn_in')+1);
         end
         
+        if mod(i, params('accuracy_often')) == 0
+            accuracy_map(i) = count_correct(sign_avg, params('label_data'), params('truth'));
+        end
+        
         %%%% Movie things %%%%
         if params('movie') && i >= params('burn_in') && mod(i,params('movie_often'))==0
             curr_avg = sign_avg;
             p = count_correct(curr_avg, params('label_data'), params('truth'));
-            correct_p(i) = p;
             
             fprintf('Sample number: %d, Elapsed time: %.4f\n', i, toc);
             fprintf('Classification accuracy S(E(S(u))): %f\n', p);
@@ -117,9 +120,9 @@ function cont = mcmc_t_a_M_noncentered(params)
             title('Average u_j')
             
             subplot(224)
-            plot(correct_p(correct_p~=0))
+            plot(cell2mat(accuracy_map.keys), cell2mat(accuracy_map.values))
             title('Classification accuracy');
-            xlabel(sprintf('Sample number (per %d)', params('movie_often')));
+            xlabel('Sample number');
             
             figure(3)
             hyp_count = 0;

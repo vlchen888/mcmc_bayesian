@@ -32,10 +32,11 @@ function cont = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
     %}
     %
     
-    params('num_iterations') = 30001;
+    params('num_iterations') = 25001;
     params('burn_in') = 2000;
-    params('movie') = true;
-    params('movie_often') = 5000; 
+    params('movie') = false;
+    params('movie_period') = 5000;
+    params('accuracy_period') = 5000;
     
     params('gamma') = .0001;
    
@@ -62,7 +63,6 @@ function cont = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
     params('M_max') = 50;
     
     params('remove-zero-eig') = true;
-    
     params('adaptive') = true;
     
     cont = mcmc_multiclass_t_a_M_same(params);    

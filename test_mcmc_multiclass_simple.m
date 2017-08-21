@@ -34,9 +34,10 @@ function cont = test_mcmc_multiclass_simple(percent_fidelity)
     params('num_iterations') = 30001;
     params('burn_in') = 2000;
     params('movie') = true;
-    params('movie_often') = 5000; 
+    params('movie_period') = 5000;
+    params('accuracy_period') = 5000;
     
-    params('gamma') = .0001;
+    params('gamma') = 0.1;
    
     params('B_init') = 0.1;
     params('B_update_period') = 500;
