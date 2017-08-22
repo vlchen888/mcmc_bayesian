@@ -4,7 +4,7 @@ function multiclass_hier_nonhier_compare()
     fileID = fopen('MNIST_tests/record.csv','a');
     fprintf(fileID,"Comparing multiclass algorithms, .01 fidelity, gamma = 0.0001, MNIST3459, 30000 iterations\n");
     fprintf(fileID,"Trial #,Method,Sample,Accuracy\n");
-    for i=3:15
+    for i=8:15
         tic;
         rng(i^2);
         cont = test_mcmc_multiclass_t_a_M_same(.01);

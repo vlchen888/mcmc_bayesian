@@ -34,7 +34,7 @@ function cont = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
     
     params('num_iterations') = 25001;
     params('burn_in') = 2000;
-    params('movie') = false;
+    params('movie') = true;
     params('movie_period') = 5000;
     params('accuracy_period') = 5000;
     
@@ -46,14 +46,14 @@ function cont = test_mcmc_multiclass_t_a_M_same(percent_fidelity)
     params('B_burn_in') = 10000;
     
     
-    params('init_tau') = 0;
+    params('init_tau') = 3;
     params('tau_epsilon') = 0.2;
     params('tau_min') = -6;
     params('tau_max') = 6;
     
     
     params('init_alpha') = 1;
-    params('alpha_epsilon') = 3;
+    params('alpha_epsilon') = 5;
     params('alpha_min') = 0.1;
     params('alpha_max') = 110;
     

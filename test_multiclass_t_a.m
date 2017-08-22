@@ -1,5 +1,6 @@
-function cont = test_mcmc_multiclass_simple(percent_fidelity)
-% For parameter settings and testing multiclass MCMC, fixed tau, alpha
+function cont = test_multiclass_t_a(percent_fidelity)
+% For parameter settings and testing multiclass MCMC
+
     params = containers.Map;
     params('laplacian') = "self tuning";
     
@@ -31,14 +32,13 @@ function cont = test_mcmc_multiclass_simple(percent_fidelity)
     %}
     %
     
-    params('num_iterations') = 30001;
+    params('num_iterations') = 25001;
     params('burn_in') = 2000;
-    params('movie') = false;
-    params('movie_period') = 5000;
+    params('movie') = true;
+    params('movie_period') = 25000;
     params('accuracy_period') = 5000;
     
-    %0.0001 or 0.5
-    params('gamma') = 0.0001;
+    params('gamma') = .0001;
    
     params('B_init') = 0.1;
     params('B_update_period') = 500;
@@ -46,14 +46,14 @@ function cont = test_mcmc_multiclass_simple(percent_fidelity)
     params('B_burn_in') = 10000;
     
     
-    params('init_tau') = 0;
-    params('tau_epsilon') = 0;
+    params('init_tau') = 2;
+    params('tau_epsilon') = 0.2;
     params('tau_min') = -6;
     params('tau_max') = 6;
     
     
     params('init_alpha') = 1;
-    params('alpha_epsilon') = 0;
+    params('alpha_epsilon') = 5;
     params('alpha_min') = 0.1;
     params('alpha_max') = 110;
     
