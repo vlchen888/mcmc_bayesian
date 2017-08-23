@@ -36,8 +36,8 @@ function cont = test_choose_params(description)
 end
 
 function print_test(fileID, description, accuracy_map, i)
-fprintf(fileID,"%d,%s,\n",i,description);
+%fprintf(fileID,"%d,%s,,\n",i,description);
 for sample = cell2mat(accuracy_map.keys)
-        fprintf(fileID,",,%d,%.4f,\n",sample, accuracy_map(sample));
+        fprintf(fileID,"%d,%s,%d,%.4f\n",i,description, sample, accuracy_map(sample));
 end
 end
