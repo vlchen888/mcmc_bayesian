@@ -394,7 +394,7 @@
          \[T(\xi^{[j]}, \tau, \alpha, M) = \sum_{i=1}^M \frac{1}{(\lambda_j + \tau^2)^{\alpha/2}} \xi^{[j]}_i q_i = u^{[j]}.\]
          One choice we have to make is whether there should be one universal copy of $\tau, \alpha, M$ for all of the $k$ copies of the prior, or if each copy should have its own independently-evolving hyperparameters.
 
-\section{Experiments comparing models (C) and (E)}
+\section{Comparing Models (C) and (E)}
     Here, we compare models (C) and (E) on the binary classification problem MNIST49. We set $\gamma = 0.0001$ for the label noise, which seems to improve accuracy for both models. This is reasonable because the labeling of digits should have little error, except when some digits are poor representatives of their class.
     
     \iffalse
@@ -452,8 +452,8 @@
     \subsection{Remarks}
         These experiments suggest that model (E) is sensitive to the initial conditions of $\tau, \alpha$, while model (C) is able to effectively learn these hyperparameters. In addition, using the values of $\tau, \alpha$ suggested by model (C) to calibrate model (E) does not seem to improve either the convergence rate or the classification accuracy. These factors suggest that model (C) is a better formulation for the clustering problem.
 
-\section{Observations on $\tau, \alpha, M$}
-    As the previous section suggests, we will focus on model (C) and the hyperparameters $(\tau,\alpha, M)$. This section summarizes the observations on learning $\tau, \alpha, M$ and explains why these parameters seem to be important to learn. In these experiments, we remove the zero eigenvalue and its corresponding constant eigenvector.
+\section{Learning A Single Hyperparameter}
+    As the previous section suggests, we will focus on model (C) and the hyperparameters $(\tau,\alpha, M)$. This section summarizes the observations on learning $\tau, \alpha, M$ independently and explains why these parameters seem to be important to learn. In these experiments, we remove the zero eigenvalue and its corresponding constant eigenvector.
 
     %is this relevant
 
@@ -502,12 +502,12 @@
         \includegraphics[width=0.8\linewidth]{M_observations/all_M_sigma.png}
         \end{figure}
 
-\section{Choosing hyperparameters to learn}
+\section{Learning Pairs of Hyperparameters}
     Having established our beliefs in the importance of the hyperparameters $(\tau, \alpha, M)$, we turn our attention to selecting the optimal subset of these hyperparameters to learn. For these experiments, we focus on multiclass, using the MNIST dataset.
     \subsection{Learning $(\tau, \alpha)$}
         We had promising results learning $(\tau, \alpha)$ for the binary problems of voting records and two moons. In those experiments, we observed a consistent learning of a small $\tau$, and we wished to see if this would hold in multiclass. We find that in MNIST, we can indeed learn a small value for $\tau$, shown in \cref{ta_mnist_1}.
 
-        As the labels in MNIST should have no noise (since an image with label $4$ will always be a picture of a $4$), it is natural to consider the $\gamma \to 0$ limit. However, with $10\%$ fidelity and $\epsilon_\tau = 0.1, \epsilon_\alpha = 3,$ and $\gamma = 10^{-7}$, the mixing of $\tau$ does not appear to be great, and the acceptance probability is around $7\%$. If we lower fidelity to $1\%$, the mixing of $\tau$ appears to be better, but the classification accuracy also drops from $96\%$ to $94\%$. Compare the traces in \cref{ta_mnist_2} and \cref{ta_mnist_3}.
+        As the labels in MNIST should have no noise (since an image with label $4$ will always be a picture of a $4$), it is natural to consider the $\gamma \to 0$ limit. This limit is considered in \cref{ta_mnist_3}, with $10\%$ fidelity and $\epsilon_\tau = 0.1, \epsilon_\alpha = 3,$ and $\gamma = 10^{-7}$. However, the mixing of $\tau$ is poor with an acceptance probability of around $9\%$.
 
         \begin{figure}[!htb]
         \centering
@@ -515,11 +515,13 @@
         \includegraphics[width=0.8\linewidth]{choose_hyp/t_a/learn_tau.png}
         \end{figure}
 
-        \begin{figure}[!htb]
-        \centering
-        \caption{\label{ta_mnist_2}Traces of $\tau, \alpha$ on MNIST $[1, 4, 9]$, $1\%$ fidelity and label noise $\gamma = 10^{-7}$.}
-        \includegraphics[width=0.8\linewidth]{choose_hyp/t_a/one_fidelity.png}
-        \end{figure}
+        \iffalse
+            \begin{figure}[!htb]
+            \centering
+            \caption{\label{ta_mnist_2}Traces of $\tau, \alpha$ on MNIST $[1, 4, 9]$, $1\%$ fidelity and label noise $\gamma = 10^{-7}$.}
+            \includegraphics[width=0.8\linewidth]{choose_hyp/t_a/one_fidelity.png}
+            \end{figure}
+        \fi
 
         \begin{figure}[!htb]
         \centering
@@ -527,7 +529,9 @@
         \includegraphics[width=0.8\linewidth]{choose_hyp/t_a/ten_fidelity.png}
         \end{figure}
 
-        These experiments suggest that we may need larger $\gamma$ to accommodate a higher fidelity. Taking $\gamma = 0.1$ still resulted in acceptance probabilities under $10\%$, but $\gamma = 0.9$ seems large enough to cause better mixing. $\tau$ is accepted $20\%$ of the time even with a larger jump of $\epsilon_\tau = 0.2$, while the same classification accuracy of around $97\%$ is achieved. \cref{ta_mnist_4} shows that even with initialization at $\tau=5$, a small value of $\tau$ is found with good mixing.
+        These experiments suggest that we may need larger $\gamma$ to accommodate a higher fidelity. Taking $\gamma = 0.1$ still resulted in acceptance probabilities under $10\%$, but $\gamma = 0.9$ resulted in better mixing. This choice is shown in \cref{ta_mnist_4}. $\tau$ is accepted $20\%$ of the time even with a larger jump of $\epsilon_\tau = 0.2$, while the same classification accuracy of around $97\%$ is achieved. Even with initialization at $\tau=5$, a small value of $\tau$ is found with good mixing. 
+
+        Finally, notice the correlation between $\tau$ and $\alpha$, for example in \cref{ta_mnist_3} and \cref{ta_mnist_4}. There appears to be a direct relation between $\tau$ and $\alpha$. This behavior is in line with our beliefs about the effects of $\tau$ and $\alpha$: when $\tau$ is larger, the values of $(\lambda + \tau^2)$ are relatively closer, and so a larger $\alpha$ is needed to distinguish between these values.
 
         \begin{figure}[!htb]
         \centering
@@ -553,13 +557,21 @@
         \end{figure}
 
     \subsection{Learning $(\alpha, M)$}
-        We can choose to fix $\tau$ and learn $(\alpha, M)$. With $\tau=0.7$ and $\gamma=0.9$ to allow for $10\%$ fidelity, we attempt to learn $\alpha$ from the prior $\mathsf{U}[0.1, 90]$ and $M$ from the prior $\mathsf{U}[1,70]$. The results are shown in \cref{aM_mnist_1}.
+        The last pair is to fix $\tau$ and learn $(\alpha, M)$. With $\tau=0.7$ and $\gamma=0.9$ to allow for $10\%$ fidelity, we attempt to learn $\alpha$ from the prior $\mathsf{U}[0.1, 90]$ and $M$ from the prior $\mathsf{U}[1,70]$. The results are shown in \cref{aM_mnist_1}, and the behavior of $\alpha$ with $M$ appears to be inversely related as well. When $\alpha$ is small, $M$ needs to be smaller to truncate the unnecessary eigenvectors.
 
         \begin{figure}[!htb]
         \centering
         \caption{\label{aM_mnist_1}Traces of $\alpha, M$ on MNIST $[1, 4, 9]$, $\tau = 0.7$, $10\%$ fidelity and label noise $\gamma = 0.9$.}
         \includegraphics[width=0.8\linewidth]{choose_hyp/a_M/tau=0_7.png}
         \end{figure}
+
+    \subsection{Remarks}
+        In these experiments, we observe that $\gamma$, the label noise parameter, is very important for both classification accuracy and convergence rate. With a better choice of $\gamma$, the algorithm learning $(\tau, \alpha)$ exhibited better mixing and a better classification accuracy is attained. This choice of $\gamma$ depends on the fidelity.
+
+        In addition, reasonable solutions for hyperparameter values are learned for each of the three pairs of hyperparameters, suggesting that these algorithms may all have their own merit. 
+
+\section{Learning All Three Hyperparameters}
+    In experiments on the two moons dataset, we find that learning all the hyperparameters together, $(\tau, \alpha, M)$, gave results that were worse in both classification accuracy and convergence rate.
 
 \section{Adaptive $\beta$ for Multiclass}
     In the multiclass algorithm, when learning the $k$ independent copies of the classifying function, we observed that different choices of $\beta$ for each copy is sometimes necessary to achieve healthy acceptance probabilities in the pCN proposal. For example, take $\beta=0.1,\tau=0,\alpha=1,\gamma=1$ on the dataset MNIST $[1,3,4,9]$. We obtain the running acceptance probability for the $4$ different $\xi$ copies shown in \cref{adaptive_mnist_1}. The acceptance probabilities of $2$ of the copies approach $0.7$, while the other two linger around $0.4$. One solution for this problem is to update the values of $B$ according to the observed running acceptance probabilities for each of the $k$ copies. First, choose $p$, the target acceptance probability for each of the $k$ copies. Empirically, we can observe that $p\approx0.5$ allows for fast convergence. With $p$ fixed, we make updates to each $\beta$ every $D$ samples. During the update, for each of the $k$ copies we compute $p'$, the acceptance probability of $\xi$ over the last $D$ samples, and we set $\beta \to \min(\beta(1+p'-p),1)$. This means that if $p'>p$, we increase $\beta$ because we wish to lower the acceptance probability. Similarly, if $p'<p$, we decrease $\beta$ to increase the acceptance probability. We perform these updates $j$ times, after which the different $\beta$ values are fixed for the rest of the computation. The results of adjusting $\beta$ is shown in \cref{adaptive_mnist_2}. Notice that the acceptance probabilities for the $4$ different copies are now very similar and around $0.5$.
@@ -575,6 +587,22 @@
         \caption{\label{adaptive_mnist_2}$\xi$ acceptance probability and $B$ traces with adaptive $\beta$ updates, MNIST $[1,3, 4, 9]$. The $\beta$ updates are turned off after $10000$ samples.}
         \includegraphics[width=0.8\linewidth]{adaptive_B/with/xi_B.png}
     \end{figure}
+
+\section{Comparing Hyperparameter Choices}    
+    Having established that learning pairs or even all three hyperparameters could all be reasonable approaches, we compared the classification accuracy and convergence rate of these methods in experiments. We needed to benchmark these algorithms against a nonhierarchical algorithm to see if there are merits to a hierarchical approach. We used the MNIST dataset with digits $[3,4,5,9]$ and $N=4854$ digits total. We fixed the fidelity to be $1\%$ and $\gamma = 0.0001$, since the fidelity is low. We ran a number of trials, randomly selecting a subset of digits to label for each trial and testing each algorithm with that labeled subset. We incorporated the tuning of $\beta$ into each algorithm since we believe that it should help with convergence rate. For each algorithm, we will additionally throw away the zero eigenvalue and its corresponding eigenvector. We took $25000$ samples with a burn-in period of $2000$, and calculated the classification accuracy from the running average of $S(u)$ every $5000$ samples. The priors for $\tau, \alpha, M$ were $\mathsf{U}[-6, 6], \mathsf{U}[1, 110],$ and $\mathsf{U}[1, 80]$, respectively. The details of the different parameter choices for the different algorithms follow:
+    
+    The nonhierarchical algorithm will fix $\tau=0, \alpha=1, M=50$.
+
+    Learning $(\tau, \alpha)$, we fix $M=50$. We set $\epsilon=0.2$ for $\tau$ and $\epsilon = 5$ for $\alpha$.
+
+    Learning $(\tau, M)$, we fix $\alpha=60$. We set $\epsilon=0.2$ for $\tau$ and $|Q| \le 15$ for $M$.
+
+    Learning $(\alpha, M)$, we fix $\tau=1$. We set $\epsilon=5$ for $\alpha$ and $|Q| \le 15$ for $M$.
+
+    Learning $(\tau, \alpha, M)$, we set $\epsilon=0.2$ for $\tau$, $\epsilon=5$ for $\alpha$ and $|Q| \le 15$ for $M$.
+
+    The results are shown ???. Plotted is the median of the classification accuracies of the algorithm against the sample number.
+
 \section{Acknowledgments}
     This SURF is funded by The Aerospace Corporation.
 
