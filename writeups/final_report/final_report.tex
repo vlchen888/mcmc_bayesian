@@ -225,34 +225,19 @@
             \includegraphics[width=0.5\linewidth]{laplacians/mnist_laplacian.png}
             \end{figure}
 
-    \subsection{Findings}
-        Our first finding is that some hierarchical models are preferable to others with respect to metrics such as convergence rate and classification accuracy. In particular, our experiments indicate that the hyperparameters $(\tau, \alpha, M)$ in model (C) appear to be better than the formulation with $(v, \xi, M)$ in model (E).
+\section{Findings}
+    Our first finding is that some hierarchical models are preferable to others with respect to metrics such as convergence rate and classification accuracy. In particular, our experiments indicate that the hyperparameters $(\tau, \alpha, M)$ in model (C) appear to be better than the formulation with $(v, \xi, M)$ in model (E).
 
-        We can observe through experiments that $\tau, \alpha, M$ are important for selecting the weight and number of eigenvectors used to formulate a classifying function. These hyperparameters show promising behavior when applied to the model problems.
+    We can observe through experiments that $\tau, \alpha, M$ are important for selecting the weight and number of eigenvectors used to formulate a classifying function. These hyperparameters show promising behavior when applied to the model problems.
 
-        We finally find that it is preferable to learn certain combinations of the hyperparameters of $(\tau, \alpha, M)$, and not necessarily learn all three at once. Some combinations perform better than others with respect to convergence rate, classification accuracy, and behavior of the hyperparameters.
+    We finally find that it is preferable to learn certain combinations of the hyperparameters of $(\tau, \alpha, M)$, and not necessarily learn all three at once. Some combinations perform better than others with respect to convergence rate, classification accuracy, and behavior of the hyperparameters.
 
-        The remaining sections describe these findings and the experiments that support our claims.
+    The remaining sections describe these findings and the experiments that support our claims.
 
 \section{Algorithms}
-    This section discusses the algorithms that we have implemented for the hierarchical models. Note that model (B) can be thought of as a special case of model (C), and model (D) as a special case of model (E). Therefore, we provide the algorithms for model (A), (C), (E), and (F) only. These algorithms are implemented in MATLAB and tested on the listed model problems.
+    This section discusses the algorithms that we have implemented for the hierarchical models. Note that model (B) can be thought of as a special case of model (C), and model (D) as a special case of model (E). Therefore, we provide the algorithms for model (A), (C), (E), and (F) only. These algorithms are implemented in MATLAB and tested on the listed model problems. Pseudocode for these algorithms are given in \cref{appendix:algorithms}.
     \subsection{Model (A)}
         For the nonhierarchical model (A), we implemented a pCN algorithm first introduced in \cite{BeRoStVo08} and described in \cref{alg:generalpCN}.
-
-        \begin{algorithm}
-        \caption{General pCN adapted from \cite{CoRoStWh13}}
-        \label{alg:generalpCN}
-        \begin{algorithmic}[1]
-        \State{Select $u^{(0)}$. Select $\tau, \alpha$. Select $\beta \in [0, 1]$}
-        \For{$k = 0$ to $S$}
-        \State{Sample $v$ from the prior distribution given in \cref{eqn:prior}}
-        \State{Set $\hat u^{(k)} = (1- \beta^2)^{1/2}u^{(k)} + \beta v$}
-        \State{Set $\alpha(u^{(k)} \to \hat u^{(k)}) = \min (1, \exp(\Phi(u^{(k)}) - \Phi(\hat u^{(k)})) )$}
-        \State{Set $u^{(k+1)} = \hat u^{(k)}$ with probability $\alpha(u^{(k)} \to \hat u^{(k)})$, and set $u^{(k+1)} = u^{(k)}$ otherwise}
-        \EndFor
-        \State \Return $\{u^{(k)}\}$
-        \end{algorithmic}
-        \end{algorithm}
 
     \subsection{Hierarchical algorithms}
         To implement hierarchical algorithms, we need to sample conditional distributions that govern $u$ and $\theta$, where $\theta$ is the set of hyperparameters. $\theta$ could be $(\tau, \alpha, M)$ or $(v, M)$ depending on if we choose model (C) or model (E). When we attempt to sample the posterior distribution in the hierarchical methods, we could use the Gibbs sampler. The basic form of Gibbs sampling has two repeated steps:
@@ -279,35 +264,6 @@
 
         This algorithm is given in \cref{alg:hier_t_a_M}.
 
-        \begin{algorithm}
-            \caption{Non-centered parameterization, hierarchical with $\tau, \alpha, M$}
-            \label{alg:hier_t_a_M}
-            \begin{algorithmic}[1]
-            \State Choose $\xi^{(0)} \in \mathbb{R}^N, \tau^{(0)}, \alpha^{(0)}, M^{(0)} > 0, \beta \in (0, 1]$ and $\epsilon_1, \epsilon_2 > 0$.
-            \For{$k=0$ to $S$}
-            \State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim \mathsf{N}(0, I)$
-            \State Make transition $\xi^{(k)} \to \hat\xi^{(k)}$ with probability
-            \[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)})) - \Phi(T(\hat\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)}))\right) \right\}\] \Comment{$T$ defined in \cref{eqn:noncentered_T_M}}
-
-            \State Propose $\hat\tau^{(k)} = \tau^{(k)} + \epsilon_1 \rho^{(k)}, \rho^{(k)} \sim \mathsf{N}(0,1)$
-            \State Make transition $\tau^{(k)} \to \hat\tau^{(k)}$ with probability
-            \[ A(\tau^{(k)} \to \hat\tau^{(k)}) 
-            = \min\left\{1, \frac{g(\xi^{(k+1)},\hat\tau^{(k)},\alpha^{(k)},M^{(k)})}{g(\xi^{(k+1)},\tau^{(k)},\alpha^{(k)},M^{(k)})} \right\}\] \Comment{$g$ defined in \cref{eqn:noncentered_post_M}}
-
-            \State Propose $\hat\alpha^{(k)} = \alpha^{(k)} + \epsilon_2 \sigma^{(k)}, \sigma^{(k)} \sim \mathsf{N}(0,1)$
-            \State Make transition $\alpha^{(k)} \to \hat\alpha^{(k)}$ with probability
-            \[ A(\alpha^{(k)} \to \hat\alpha^{(k)}) 
-            = \min\left\{1, \frac{g(\xi^{(k+1)},\tau^{(k+1)},\hat \alpha^{(k)},M^{(k)})}{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k)},M^{(k)})} \right\}\]
-            \State Propose $\hat M^{(k)} = M^{(k)} + Q$, with jump $Q$ distributed as $\mathbb{P}(Q=k) \propto \frac{1}{1+|k|}$, $|Q|$ bounded.
-            \State Make transition $M^{(k)} \to \hat M^{(k)}$ with probability
-            \[ A(M^{(k)} \to \hat M^{(k)}) = 
-            \min\left\{1, \frac{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k+1)},\hat M^{(k)})}{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k+1)},M^{(k)})} \right\}
-            \]
-            \EndFor
-            \State \Return $\{ T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)}), \tau^{(k)}, \alpha^{k} \}$
-            \end{algorithmic}
-        \end{algorithm}
-
     \subsection{Model (E)} \label{sec:algorithms_model_e}
         This algorithm reparameterizes the problem in terms of the random vectors $v$ and $\xi$. $v_j$ modifies the scale of influence of $q_j$, the $j$th eigenvector of the graph Laplacian, on the classifying function $u$. This model aims to learn $M$ as well. Define:
         \begin{equation}
@@ -320,41 +276,8 @@
         \label{eqn:learn_v_M_posterior}
         h(v, \xi, M) \propto \exp \left(-\Phi(T(v,\xi, M)) + \log (\pi_0(v, M)) - \frac{1}{2}\langle \xi, \xi \rangle  \right).
         \end{equation}
-        This approach is described in \cref{alg:hier_v_M}.
-        \begin{algorithm}
-        \caption{Non-centered parameterization, hierarchical with $v, M$}
-        \label{alg:hier_v_M}
-        \begin{algorithmic}[1]
-        \State Choose $v^{(0)}, \xi^{(0)} \in \mathbb{R}^N, M^{(0)}, \beta \in (0, 1], \epsilon > 0$.
-        \For{$k=0$ to $S$}
-        \State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim \mathsf{N}(0, I)$
-        \State Make transition $\xi^{(k)} \to \hat\xi^{(k)}$ with probability
-        \[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k)}, M^{(k)})) - \Phi(T(v^{(k)}, \hat \xi^{(k)}, M^{(k)}))\right) \right\}\]
-
-        \State Propose $\hat v^{(k)} = v^{(k)} + \epsilon \rho^{(k)}, \rho^{(k)} \sim \mathsf{N}(0,I)$
-        \If {$\hat v^{(k)} _j$ is outside of its prior interval for any $j$} 
-            \State Reject and set $v^{(k+1)} = v^{(k)}$.
-        \Else
-        \State Make transition $v^{(k)} \to \hat v^{(k)}$ with probability
-        \begin{align*}
-         A(v^{(k)} \to \hat v^{(k)}) &= \min\left\{1, \frac{h(\hat v^{(k)}, \xi^{(k+1)}, M^{(k)})}{h(v^{(k)}, \xi^{(k+1)}, M^{(k)})}\right\} \\
-         &= \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k+1)},M^{(k)}))-\Phi(T(\hat v^{(k)}, \xi^{(k+1)}, M^{(k)})) \right) \right\}
-         \end{align*}
-        \EndIf
-
-        \State Propose $\hat M^{(k)} = M^{(k)} + Q$, with jump $Q$ distributed as $\mathbb{P}(Q=k) \propto \frac{1}{1+|k|}$, $|Q|$ bounded.
-        \State Make transition $M^{(k)} \to \hat M^{(k)}$ with probability
-
-        \begin{align*}
-        A(M^{(k)} \to \hat M^{(k)}) &= \min\left\{1, \frac{h( v^{(k+1)}, \xi^{(k+1)}, \hat M^{(k)}  )}{h( v^{(k+1)}, \xi^{(k+1)}, M^{(k)} )} \right\}\\
-        &=\min\left\{1, \exp\left(\Phi(v^{(k+1)}, \xi^{(k+1)}, M^{(k)} ) - \Phi(v^{(k+1)}, \xi^{(k+1)}, \hat M^{(k)} )\right)\right\}
-        \end{align*}
-
-        \EndFor
-        \State \Return $\{ T(v^{(k)},\xi^{(k)}), v^{(k)}, \xi^{(k)} \}$
-        \end{algorithmic}
-        \end{algorithm}
-
+        This gives \cref{alg:hier_v_M}.
+        
     \subsection{Model (F)} \label{sec:algorithms_multiclass}
         We describe the algorithm to solve the multiclass clustering problem. Recall that for $v \in \mathbb{R}^k$, we define $S(v) = e_p, \quad p = \text{argmax} (v_r)$ where $\{e_1, \ldots e_k\}$ is the standard basis of $\mathbb{R}^k$. Now, the classifying function is of the form $u: Z \to \mathbb{R}^k$, or $u = (u^{[1]}, u^{[2]}, \ldots u^{[k]})$ with functions $u^{[j]}: Z \to \mathbb{R}$. Each of the $u^{[j]}$ has prior distribution given by $\mathsf{N}(0, C)$ with $C = (L + \tau^2 I)^{-\alpha}$. We retain
         \[ \Phi(u) = \frac{1}{2\gamma^2}\sum_{l \in Z'} \text{norm}(y(l) - S(u(l)))^2. \]
@@ -367,32 +290,11 @@
         T(\xi) = (T(\xi^{[1]}), \ldots T(\xi^{[k]}) ) = u.
         \end{equation}
 
-        Refer to \cref{alg:multiclass_nonhier}.
-        
-        \begin{algorithm}
-
-        \caption{Multiclass, Metropolis-within-Gibbs updates}
-        \label{alg:multiclass_nonhier}
-        \begin{algorithmic}[1]
-        \State Choose $\xi^{(0)} = (\xi^{[1],(0)}, \ldots \xi^{[k],(0)}), \xi^{[j],(0)} \in \mathbb{R}^M$. Choose $\tau, \alpha, \beta \in (0, 1]$. \Comment{We refer to $\xi^{[j],(i)}$ as the $i$th observation of $\xi^{[j]}$.}
-        \For{$i=0$ to $S$}
-            \For{$j=1$ to $k$}
-                \State Propose $\hat\xi^{[j],(i)} = (1-\beta^2)^{\frac{1}{2}}\xi^{[j],(i)} + \beta \zeta^{(i)}$, $\zeta^{(i)} \sim \mathsf{N}(0, I)$
-                \State Define $\hat \xi = (\xi^{[1],(i+1)}, \ldots \xi^{[j-1],(i+1)}, \hat\xi^{[j],(i)}, \xi^{[j+1],(i)}, \ldots)$
-                \State Make transition $\xi^{(i)} \to \hat\xi$ with probability
-                \[ A(\xi^{(i)} \to \hat\xi) = \min\left\{1, \exp\left(\Phi(T(\xi^{(i)})) - \Phi(T(\hat \xi))\right) \right\}\]
-
-            \EndFor
-        \EndFor
-
-        \State \Return $\{T(\xi^{(i)})\}$
-        
-        \end{algorithmic}
-        \end{algorithm}
+        This gives \cref{alg:multiclass_nonhier}.
 
         We can extend this algorithm to be hierarchical with $\tau, \alpha, M$ as in the binary case. Define $T$ as
          \[T(\xi^{[j]}, \tau, \alpha, M) = \sum_{i=1}^M \frac{1}{(\lambda_j + \tau^2)^{\alpha/2}} \xi^{[j]}_i q_i = u^{[j]}.\]
-         One choice we have to make is whether there should be one universal copy of $\tau, \alpha, M$ for all of the $k$ copies of the prior, or if each copy should have its own independently-evolving hyperparameters.
+         One choice we have to make is whether there should be one universal copy of $\tau, \alpha, M$ for all of the $k$ copies of the prior, or if each copy should have its own independently-evolving hyperparameters. We chose to have one universal copy.
 
 \section{Comparing Models (C) and (E)}
     Here, we compare models (C) and (E) on the binary classification problem MNIST49. We set $\gamma = 0.0001$ for the label noise, which seems to improve accuracy for both models. This is reasonable because the labeling of digits should have little error, except when some digits are poor representatives of their class.
@@ -409,21 +311,20 @@
             \end{figure}
 
         \subsubsection{Model (E)}
-            If we choose the parameters of the prior on $v_j$ to be $\tau = 3, \alpha = 35, a=0.8$ and fix $M=50$ for model (E), we can obtain levels of accuracy and convergence rates similar to model (C). Note that this is ``cheating" in the sense that it uses the convergence of $\tau$ in model (C). The results are shown in \cref{fig:model_e_two_moons_t=3}.
-
+            If we choose the parameters of the prior on $v_j$ to be $\tau = 3, \alpha = 35, a=0.8$ and fix $M=50$ for model (E), we can obtain levels of accuracy and convergence rates similar to model (C). Note that this is ``cheating" in the sense that it uses the convergence of $\tau$ in model (C). The results are shown in \cref{fig:model_e_two_moons_t=3}. The same accuracy is not achieved when $\tau=5$ is chosen, shown in \cref{fig:model_e_two_moons_t=5}. Note that convergence of the classification accuracy appears much slower and the final accuracy is still lower than the previous two examples.
             \begin{figure}[!htb]
+                \begin{minipage}{0.48\linewidth}
                 \centering
                 \caption{\label{fig:model_e_two_moons_t=3}Model (E) on two moons with $\tau=3,\alpha=35,a=0.8$. Figures from left to right, top to bottom: Final classification obtained, $\xi$ running acceptance probability, $v$ acceptance probability, final $v_j$ observation, final average of $u_j$, running classification accuracy (updated every 2500 trials).}
                 \includegraphics[width=0.8\linewidth]{model_c_vs_model_e/moons/learn_v/t=3.png}
-            \end{figure}
-
-            The same accuracy is not achieved when $\tau=5$ is chosen. See \cref{fig:model_e_two_moons_t=5}. Note that convergence of the classification accuracy appears much slower and the final accuracy is still lower than the previous two examples.
-
-            \begin{figure}[!htb]
+                \end{minipage}\hfill
+                \begin{minipage}{0.48\linewidth}
                 \centering
                 \caption{\label{fig:model_e_two_moons_t=5}Model (E) on two moons with $\tau=5,\alpha=35,a=0.8$.}
                 \includegraphics[width=0.8\linewidth]{model_c_vs_model_e/moons/learn_v/t=5.png}
+                \end{minipage}
             \end{figure}
+
 
             It seems that model (E) is very sensitive to the value of $\tau$ chosen for its prior. Initializing $\tau$ to be at the value suggested by model (C) achieves similar results in both classification accuracy and convergence rate, but choosing a somewhat poor value of $\tau$ leads to a noticeable drop in accuracy and convergence rate.
     \fi
@@ -432,23 +333,27 @@
         \begin{figure}[!htb]
             \centering
             \caption{\label{fig:model_c_mnist}Model (C) on MNIST49. Figures from top to bottom, left to right: Final classification obtained, $\xi$ running acceptance probability, final average of $u_j$, $\tau$ trace, $\alpha$ trace, running classification accuracy (updated every 2500 trials).}
-            \includegraphics[width=0.8\linewidth]{model_c_vs_model_e/mnist/learn_t_a/all.png}
+            \includegraphics[width=0.48\linewidth]{model_c_vs_model_e/mnist/learn_t_a/all.png}
         \end{figure}
     \subsection{Model (E)}
         Fix $M=50$ again. 
-        With $\tau = 0.7$, which is ``cheating" by using the $\tau$ learnt from model (C), we obtain \cref{fig:model_e_mnist_t=0.7}. Note the similar final accuracy of around $96\%$, with faster convergence to that accuracy since we cheated with the initialization.
-        \begin{figure}[!htb]
-            \centering
-            \caption{\label{fig:model_e_mnist_t=0.7}Model (E) on MNIST49 with $\tau=0.7,\alpha=35,a=0.8$. Figures from left to right, top to bottom: Final classification obtained, $\xi$ running acceptance probability, $v$ acceptance probability, final $v_j$ observation, final average of $u_j$, running classification accuracy (updated every 2500 trials).}
-            \includegraphics[width=0.8\linewidth]{model_c_vs_model_e/mnist/learn_v/t=0_7.png}
-        \end{figure}
+        With $\tau = 0.7$, which is ``cheating" by using the $\tau$ learnt from model (C), we obtain \cref{fig:model_e_mnist_t=0.7}. The figures from left to right, top to bottom are: Final classification obtained, $\xi$ running acceptance probability, $v$ acceptance probability, final $v_j$ observation, final average of $u_j$, running classification accuracy (updated every 2500 trials). Note the similar final accuracy of around $96\%$, with faster convergence to that accuracy since we cheated with the initialization. With $\tau = 0.3$, we obtain \cref{fig:model_e_mnist_t=0.3}. Note the slow convergence compared to $\tau=0.7$. In fact, it appears that the accuracy is still climbing even at 100000 iterations.
 
-        With $\tau = 0.3$, we obtain \cref{fig:model_e_mnist_t=0.3}. Note the slow convergence compared to $\tau=0.7$. In fact, it appears that the accuracy is still climbing even at 100000 iterations.
         \begin{figure}[!htb]
+            \begin{minipage}{0.48\textwidth}
+                \centering
+                \caption{\label{fig:model_e_mnist_t=0.7}Model (E) on MNIST49 with $\tau=0.7,\alpha=35,a=0.8$.}
+                \includegraphics[width=\linewidth]{model_c_vs_model_e/mnist/learn_v/t=0_7.png}
+            \end{minipage} \hfill
+            \begin{minipage}{0.48\textwidth}
             \centering
             \caption{\label{fig:model_e_mnist_t=0.3}Model (E) on MNIST49 with $\tau=0.3,\alpha=35,a=0.8$.}
-            \includegraphics[width=0.8\linewidth]{model_c_vs_model_e/mnist/learn_v/t=0_3.png}
+            \includegraphics[width=\linewidth]{model_c_vs_model_e/mnist/learn_v/t=0_3.png}
+            \end{minipage}
         \end{figure}
+
+        
+
     \subsection{Remarks}
         These experiments suggest that model (E) is sensitive to the initial conditions of $\tau, \alpha$, while model (C) is able to effectively learn these hyperparameters. In addition, using the values of $\tau, \alpha$ suggested by model (C) to calibrate model (E) does not seem to improve either the convergence rate or the classification accuracy. These factors suggest that model (C) is a better formulation for the clustering problem.
 
@@ -483,15 +388,15 @@
         $M$ controls the number of eigenvectors used. In a way, small $M$ plays a similar role as large $\alpha$ in truncating the eigenvectors, but $M$ and $\alpha$ could be used together to control which eigenvectors to include and the relative scale of these selected eigenvectors. We observed an interesting relation between $M$ and the noise in the data. When the data is noisier, we find that $M$ tends to converge to a larger value as well, since more eigenvectors are needed to explain the clustering. We demonstrate this relation in an experiment using the two moons dataset, since we can directly control the noise of the synthetic data. We fix $\tau=0, \alpha = 1$ and learn $M$ on the interval $\mathsf{U}[1,70]$. Compare \cref{taM_M_moons_1} with \cref{taM_M_moons_2} and note the higher average value of $M$ when $\sigma=0.20$. A pronounced minimum value of $M$ is shown in \cref{taM_M_moons_1}, suggesting that an eigenvector around that index is important for classification.
 
         \begin{figure}[!htb]
-        \centering
-        \caption{\label{taM_M_moons_1}Trace of $M$ on two moons $N=2000, \sigma = 0.15$, $1\%$ fidelity and $\gamma = 0.15$.}
-        \includegraphics[width=0.8\linewidth]{M_observations/sigma_15.png}
+            \centering
+            \caption{\label{taM_M_moons_1}Trace of $M$ on two moons $N=2000, \sigma = 0.15$, $1\%$ fidelity and $\gamma = 0.15$.}
+            \includegraphics[width=0.8\linewidth]{M_observations/sigma_15.png}
         \end{figure}
 
         \begin{figure}[!htb]
-        \centering
-        \caption{\label{taM_M_moons_2}Trace of $M$ on two moons $N=2000, \sigma = 0.20$, $1\%$ fidelity and $\gamma = 0.20$.}
-        \includegraphics[width=0.8\linewidth]{M_observations/sigma_20.png}
+            \centering
+            \caption{\label{taM_M_moons_2}Trace of $M$ on two moons $N=2000, \sigma = 0.20$, $1\%$ fidelity and $\gamma = 0.20$.}
+            \includegraphics[width=0.8\linewidth]{M_observations/sigma_20.png}
         \end{figure}
 
         Performing the same experiment over a larger number of trials and noise levels, we obtain the graph shown in \cref{taM_M_moons_3}. Again, the same direct relation between $M$ and $\sigma$ is observed.
@@ -505,17 +410,16 @@
 \section{Learning Pairs of Hyperparameters}
     Having established our beliefs in the importance of the hyperparameters $(\tau, \alpha, M)$, we turn our attention to selecting the optimal subset of these hyperparameters to learn. For these experiments, we focus on multiclass, using the MNIST dataset.
     \subsection{Learning $(\tau, \alpha)$}
-        We had promising results learning $(\tau, \alpha)$ for the binary problems of voting records and two moons. In those experiments, we observed a consistent learning of a small $\tau$, and we wished to see if this would hold in multiclass. We find that in MNIST, we can indeed learn a small value for $\tau$, shown in \cref{ta_mnist_1}.
+        We had promising results learning $(\tau, \alpha)$ for the binary problems of voting records and two moons. In those experiments, we observed a consistent learning of a small $\tau$, and we wished to see if this would hold in multiclass.
 
         As the labels in MNIST should have no noise (since an image with label $4$ will always be a picture of a $4$), it is natural to consider the $\gamma \to 0$ limit. This limit is considered in \cref{ta_mnist_3}, with $10\%$ fidelity and $\epsilon_\tau = 0.1, \epsilon_\alpha = 3,$ and $\gamma = 10^{-7}$. However, the mixing of $\tau$ is poor with an acceptance probability of around $9\%$.
-
-        \begin{figure}[!htb]
-        \centering
-        \caption{\label{ta_mnist_1}Learning small $\tau$ on MNIST $[1, 4, 9]$.}
-        \includegraphics[width=0.8\linewidth]{choose_hyp/t_a/learn_tau.png}
-        \end{figure}
-
         \iffalse
+            \begin{figure}[!htb]
+            \centering
+            \caption{\label{ta_mnist_1}Learning small $\tau$ on MNIST $[1, 4, 9]$.}
+            \includegraphics[width=0.8\linewidth]{choose_hyp/t_a/learn_tau.png}
+            \end{figure}
+
             \begin{figure}[!htb]
             \centering
             \caption{\label{ta_mnist_2}Traces of $\tau, \alpha$ on MNIST $[1, 4, 9]$, $1\%$ fidelity and label noise $\gamma = 10^{-7}$.}
@@ -529,7 +433,7 @@
         \includegraphics[width=0.8\linewidth]{choose_hyp/t_a/ten_fidelity.png}
         \end{figure}
 
-        These experiments suggest that we may need larger $\gamma$ to accommodate a higher fidelity. Taking $\gamma = 0.1$ still resulted in acceptance probabilities under $10\%$, but $\gamma = 0.9$ resulted in better mixing. This choice is shown in \cref{ta_mnist_4}. $\tau$ is accepted $20\%$ of the time even with a larger jump of $\epsilon_\tau = 0.2$, while the same classification accuracy of around $97\%$ is achieved. Even with initialization at $\tau=5$, a small value of $\tau$ is found with good mixing. 
+        These experiments suggest that we may need larger $\gamma$ to accommodate a higher fidelity. Taking $\gamma = 0.1$ still resulted in acceptance probabilities under $10\%$, but $\gamma = 0.9$ resulted in better mixing. This choice is shown in \cref{ta_mnist_4}. $\tau$ is accepted $20\%$ of the time even with a larger jump of $\epsilon_\tau = 0.2$, while the same classification accuracy of around $97\%$ is achieved. Even with initialization at $\tau=5$, we can indeed learn a small value of $\tau$ with good mixing. 
 
         Finally, notice the correlation between $\tau$ and $\alpha$, for example in \cref{ta_mnist_3} and \cref{ta_mnist_4}. There appears to be a direct relation between $\tau$ and $\alpha$. This behavior is in line with our beliefs about the effects of $\tau$ and $\alpha$: when $\tau$ is larger, the values of $(\lambda + \tau^2)$ are relatively closer, and so a larger $\alpha$ is needed to distinguish between these values.
 
@@ -568,10 +472,13 @@
     \subsection{Remarks}
         In these experiments, we observe that $\gamma$, the label noise parameter, is very important for both classification accuracy and convergence rate. With a better choice of $\gamma$, the algorithm learning $(\tau, \alpha)$ exhibited better mixing and a better classification accuracy is attained. This choice of $\gamma$ depends on the fidelity.
 
-        In addition, reasonable solutions for hyperparameter values are learned for each of the three pairs of hyperparameters, suggesting that these algorithms may all have their own merit. 
+        In addition, reasonable solutions for hyperparameter values are learned for each of the three pairs of hyperparameters, suggesting that these algorithms may all have their own merits. 
 
 \section{Learning All Three Hyperparameters}
     In experiments on the two moons dataset, we find that learning all the hyperparameters together, $(\tau, \alpha, M)$, gave results that were worse in both classification accuracy and convergence rate.
+    % Show a figure
+
+    % Show that some success with MNIST3459 is seen
 
 \section{Adaptive $\beta$ for Multiclass}
     In the multiclass algorithm, when learning the $k$ independent copies of the classifying function, we observed that different choices of $\beta$ for each copy is sometimes necessary to achieve healthy acceptance probabilities in the pCN proposal. For example, take $\beta=0.1,\tau=0,\alpha=1,\gamma=1$ on the dataset MNIST $[1,3,4,9]$. We obtain the running acceptance probability for the $4$ different $\xi$ copies shown in \cref{adaptive_mnist_1}. The acceptance probabilities of $2$ of the copies approach $0.7$, while the other two linger around $0.4$. One solution for this problem is to update the values of $B$ according to the observed running acceptance probabilities for each of the $k$ copies. First, choose $p$, the target acceptance probability for each of the $k$ copies. Empirically, we can observe that $p\approx0.5$ allows for fast convergence. With $p$ fixed, we make updates to each $\beta$ every $D$ samples. During the update, for each of the $k$ copies we compute $p'$, the acceptance probability of $\xi$ over the last $D$ samples, and we set $\beta \to \min(\beta(1+p'-p),1)$. This means that if $p'>p$, we increase $\beta$ because we wish to lower the acceptance probability. Similarly, if $p'<p$, we decrease $\beta$ to increase the acceptance probability. We perform these updates $j$ times, after which the different $\beta$ values are fixed for the rest of the computation. The results of adjusting $\beta$ is shown in \cref{adaptive_mnist_2}. Notice that the acceptance probabilities for the $4$ different copies are now very similar and around $0.5$.
@@ -588,7 +495,7 @@
         \includegraphics[width=0.8\linewidth]{adaptive_B/with/xi_B.png}
     \end{figure}
 
-\section{Comparing Hyperparameter Choices}    
+\section{Comparing Hyperparameter Choices}
     Having established that learning pairs or even all three hyperparameters could all be reasonable approaches, we compared the classification accuracy and convergence rate of these methods in experiments. We needed to benchmark these algorithms against a nonhierarchical algorithm to see if there are merits to a hierarchical approach. We used the MNIST dataset with digits $[3,4,5,9]$ and $N=4854$ digits total. We fixed the fidelity to be $1\%$ and $\gamma = 0.0001$, since the fidelity is low. We ran a number of trials, randomly selecting a subset of digits to label for each trial and testing each algorithm with that labeled subset. We incorporated the tuning of $\beta$ into each algorithm since we believe that it should help with convergence rate. For each algorithm, we will additionally throw away the zero eigenvalue and its corresponding eigenvector. We took $25000$ samples with a burn-in period of $2000$, and calculated the classification accuracy from the running average of $S(u)$ every $5000$ samples. The priors for $\tau, \alpha, M$ were $\mathsf{U}[-6, 6], \mathsf{U}[1, 110],$ and $\mathsf{U}[1, 80]$, respectively. The details of the different parameter choices for the different algorithms follow:
     
     The nonhierarchical algorithm will fix $\tau=0, \alpha=1, M=50$.
@@ -601,11 +508,114 @@
 
     Learning $(\tau, \alpha, M)$, we set $\epsilon=0.2$ for $\tau$, $\epsilon=5$ for $\alpha$ and $|Q| \le 15$ for $M$.
 
-    The results are shown ???. Plotted is the median of the classification accuracies of the algorithm against the sample number.
+    \cref{fig:compare_all_1_20} plots the results of this experiment, showing the median of the classification accuracies of the algorithm against the sample number.
 
-\section{Acknowledgments}
+    \begin{figure}[!htb]
+        \centering
+        \caption{\label{fig:compare_all_1_20} Median classification accuracy of $20$ trials against sample number. MNIST $[3, 4, 5, 9]$.}
+        \includegraphics[width=0.8\linewidth]{compare_all/1-20.png}
+    \end{figure}
+
+\section*{Acknowledgments}
     This SURF is funded by The Aerospace Corporation.
 
+\appendix
+    \section{Algorithms} \label{appendix:algorithms}
+        \begin{algorithm}
+            \caption{Model (A), general pCN proposal adapted from \cite{CoRoStWh13}}
+            \label{alg:generalpCN}
+            \begin{algorithmic}[1]
+            \State{Select $u^{(0)}$. Select $\tau, \alpha$. Select $\beta \in [0, 1]$}
+            \For{$k = 0$ to $S$}
+            \State{Sample $v$ from the prior distribution given in \cref{eqn:prior}}
+            \State{Set $\hat u^{(k)} = (1- \beta^2)^{1/2}u^{(k)} + \beta v$}
+            \State{Set $\alpha(u^{(k)} \to \hat u^{(k)}) = \min (1, \exp(\Phi(u^{(k)}) - \Phi(\hat u^{(k)})) )$}
+            \State{Set $u^{(k+1)} = \hat u^{(k)}$ with probability $\alpha(u^{(k)} \to \hat u^{(k)})$, and set $u^{(k+1)} = u^{(k)}$ otherwise}
+            \EndFor
+            \State \Return $\{u^{(k)}\}$
+            \end{algorithmic}
+        \end{algorithm}
+
+        \begin{algorithm}
+            \caption{Model (C), non-centered parameterization, hierarchical with $\tau, \alpha, M$}
+            \label{alg:hier_t_a_M}
+            \begin{algorithmic}[1]
+            \State Choose $\xi^{(0)} \in \mathbb{R}^N, \tau^{(0)}, \alpha^{(0)}, M^{(0)} > 0, \beta \in (0, 1]$ and $\epsilon_1, \epsilon_2 > 0$.
+            \For{$k=0$ to $S$}
+            \State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim \mathsf{N}(0, I)$
+            \State Make transition $\xi^{(k)} \to \hat\xi^{(k)}$ with probability
+            \[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)})) - \Phi(T(\hat\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)}))\right) \right\}\] \Comment{$T$ defined in \cref{eqn:noncentered_T_M}}
+
+            \State Propose $\hat\tau^{(k)} = \tau^{(k)} + \epsilon_1 \rho^{(k)}, \rho^{(k)} \sim \mathsf{N}(0,1)$
+            \State Make transition $\tau^{(k)} \to \hat\tau^{(k)}$ with probability
+            \[ A(\tau^{(k)} \to \hat\tau^{(k)}) 
+            = \min\left\{1, \frac{g(\xi^{(k+1)},\hat\tau^{(k)},\alpha^{(k)},M^{(k)})}{g(\xi^{(k+1)},\tau^{(k)},\alpha^{(k)},M^{(k)})} \right\}\] \Comment{$g$ defined in \cref{eqn:noncentered_post_M}}
+
+            \State Propose $\hat\alpha^{(k)} = \alpha^{(k)} + \epsilon_2 \sigma^{(k)}, \sigma^{(k)} \sim \mathsf{N}(0,1)$
+            \State Make transition $\alpha^{(k)} \to \hat\alpha^{(k)}$ with probability
+            \[ A(\alpha^{(k)} \to \hat\alpha^{(k)}) 
+            = \min\left\{1, \frac{g(\xi^{(k+1)},\tau^{(k+1)},\hat \alpha^{(k)},M^{(k)})}{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k)},M^{(k)})} \right\}\]
+            \State Propose $\hat M^{(k)} = M^{(k)} + Q$, with jump $Q$ distributed as $\mathbb{P}(Q=k) \propto \frac{1}{1+|k|}$, $|Q|$ bounded.
+            \State Make transition $M^{(k)} \to \hat M^{(k)}$ with probability
+            \[ A(M^{(k)} \to \hat M^{(k)}) = 
+            \min\left\{1, \frac{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k+1)},\hat M^{(k)})}{g(\xi^{(k+1)},\tau^{(k+1)},\alpha^{(k+1)},M^{(k)})} \right\}
+            \]
+            \EndFor
+            \State \Return $\{ T(\xi^{(k)},\tau^{(k)},\alpha^{(k)}, M^{(k)}), \tau^{(k)}, \alpha^{k} \}$
+            \end{algorithmic}
+        \end{algorithm}
+
+        \begin{algorithm}
+            \caption{Model (E), non-centered parameterization, hierarchical with $v, M$}
+            \label{alg:hier_v_M}
+            \begin{algorithmic}[1]
+            \State Choose $v^{(0)}, \xi^{(0)} \in \mathbb{R}^N, M^{(0)}, \beta \in (0, 1], \epsilon > 0$.
+            \For{$k=0$ to $S$}
+            \State Propose $\hat\xi^{(k)} = (1-\beta^2)^{\frac{1}{2}}\xi^{(k)} + \beta \zeta^{(k)}$, $\zeta^{(k)} \sim \mathsf{N}(0, I)$
+            \State Make transition $\xi^{(k)} \to \hat\xi^{(k)}$ with probability
+            \[ A(\xi^{(k)} \to \hat\xi^{(k)}) = \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k)}, M^{(k)})) - \Phi(T(v^{(k)}, \hat \xi^{(k)}, M^{(k)}))\right) \right\}\]
+
+            \State Propose $\hat v^{(k)} = v^{(k)} + \epsilon \rho^{(k)}, \rho^{(k)} \sim \mathsf{N}(0,I)$
+            \If {$\hat v^{(k)} _j$ is outside of its prior interval for any $j$} 
+                \State Reject and set $v^{(k+1)} = v^{(k)}$.
+            \Else
+            \State Make transition $v^{(k)} \to \hat v^{(k)}$ with probability
+            \begin{align*}
+             A(v^{(k)} \to \hat v^{(k)}) &= \min\left\{1, \frac{h(\hat v^{(k)}, \xi^{(k+1)}, M^{(k)})}{h(v^{(k)}, \xi^{(k+1)}, M^{(k)})}\right\} \\
+             &= \min\left\{1, \exp\left(\Phi(T(v^{(k)}, \xi^{(k+1)},M^{(k)}))-\Phi(T(\hat v^{(k)}, \xi^{(k+1)}, M^{(k)})) \right) \right\}
+             \end{align*}
+            \EndIf
+
+            \State Propose $\hat M^{(k)} = M^{(k)} + Q$, with jump $Q$ distributed as $\mathbb{P}(Q=k) \propto \frac{1}{1+|k|}$, $|Q|$ bounded.
+            \State Make transition $M^{(k)} \to \hat M^{(k)}$ with probability
+
+            \begin{align*}
+            A(M^{(k)} \to \hat M^{(k)}) &= \min\left\{1, \frac{h( v^{(k+1)}, \xi^{(k+1)}, \hat M^{(k)}  )}{h( v^{(k+1)}, \xi^{(k+1)}, M^{(k)} )} \right\}\\
+            &=\min\left\{1, \exp\left(\Phi(v^{(k+1)}, \xi^{(k+1)}, M^{(k)} ) - \Phi(v^{(k+1)}, \xi^{(k+1)}, \hat M^{(k)} )\right)\right\}
+            \end{align*}
+
+            \EndFor
+            \State \Return $\{ T(v^{(k)},\xi^{(k)}), v^{(k)}, \xi^{(k)} \}$
+            \end{algorithmic}
+        \end{algorithm}
+
+        \begin{algorithm}
+            \caption{Model (F), multiclass, Metropolis-within-Gibbs updates}
+            \label{alg:multiclass_nonhier}
+            \begin{algorithmic}[1]
+            \State Choose $\xi^{(0)} = (\xi^{[1],(0)}, \ldots \xi^{[k],(0)}), \xi^{[j],(0)} \in \mathbb{R}^M$. Choose $\tau, \alpha, \beta \in (0, 1]$. \Comment{We refer to $\xi^{[j],(i)}$ as the $i$th observation of $\xi^{[j]}$.}
+            \For{$i=0$ to $S$}
+                \For{$j=1$ to $k$}
+                    \State Propose $\hat\xi^{[j],(i)} = (1-\beta^2)^{\frac{1}{2}}\xi^{[j],(i)} + \beta \zeta^{(i)}$, $\zeta^{(i)} \sim \mathsf{N}(0, I)$
+                    \State Define $\hat \xi = (\xi^{[1],(i+1)}, \ldots \xi^{[j-1],(i+1)}, \hat\xi^{[j],(i)}, \xi^{[j+1],(i)}, \ldots)$
+                    \State Make transition $\xi^{(i)} \to \hat\xi$ with probability
+                    \[ A(\xi^{(i)} \to \hat\xi) = \min\left\{1, \exp\left(\Phi(T(\xi^{(i)})) - \Phi(T(\hat \xi))\right) \right\}\]
+
+                \EndFor
+            \EndFor
+            \State \Return $\{T(\xi^{(i)})\}$
+            \end{algorithmic}
+        \end{algorithm}
 \bibliographystyle{siamplain}
 \bibliography{references}
 \end{document}

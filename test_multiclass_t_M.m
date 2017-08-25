@@ -34,7 +34,7 @@ function cont = test_multiclass_t_M(percent_fidelity)
     
     params('num_iterations') = 25001;
     params('burn_in') = 2000;
-    params('movie') = true;
+    params('movie') = false;
     params('movie_period') = 25000;
     params('accuracy_period') = 5000;
     
@@ -54,8 +54,8 @@ function cont = test_multiclass_t_M(percent_fidelity)
     
     params('init_alpha') = 60;
     params('alpha_epsilon') = 0;
-    params('alpha_min') = 30;
-    params('alpha_max') = 30;
+    params('alpha_min') = 0.1;
+    params('alpha_max') = 110;
     
     params('init_M') = 50;
     params('M_max_jump') = 15;

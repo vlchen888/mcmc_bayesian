@@ -34,7 +34,7 @@ function cont = test_multiclass_a_M(percent_fidelity)
     
     params('num_iterations') = 25001;
     params('burn_in') = 2000;
-    params('movie') = true;
+    params('movie') = false;
     params('movie_period') = 25000;
     params('accuracy_period') = 5000;
     
