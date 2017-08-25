@@ -1,11 +1,11 @@
 function test_hyperparameter_choice()
 %Testing nonhierarchical, hierarchical, and different parameter sets
 
-fileID = fopen('hyperparameter_tests/all21-30.csv','a');
+fileID = fopen('hyperparameter_tests/all31-40.csv','a');
 fprintf(fileID,"Hyperparameter choice, .01 fidelity, gamma = 0.0001, MNIST3459\n");
 fprintf(fileID,"Trial #,Method,Sample,Accuracy\n");
 descriptions = ["simple", "tau_alpha", "tau_M", "alpha_M", "tau_alpha_M"];
-for i = 21:30
+for i = 31:40
     for descrip_id = 1:length(descriptions)
         tic;
         rng(i^2);

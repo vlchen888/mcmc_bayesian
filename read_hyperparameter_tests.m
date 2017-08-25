@@ -1,7 +1,7 @@
 function read_hyperparameter_tests()
 %Reading hyperparameter test results
 methods = {'simple';'tau_alpha'; 'tau_M'; 'alpha_M'; 'tau_alpha_M'}; % types 0,1,2,3,4
-record = csvread('hyperparameter_tests/all1-20.csv', 2);
+record = csvread('hyperparameter_tests/all1-30.csv', 2);
 samples = [5000 10000 15000 20000 25000];
 
 for i = 1:length(methods)
@@ -19,12 +19,12 @@ for i = 1:length(methods)
         
         R_arr(sample/5000) = prctile(these_records, 75) - plot_arr(sample/5000);
     end
-    %plot(samples,plot_arr,'LineWidth',2);
-    errorbar(samples,plot_arr,L_arr,R_arr,'LineWidth',2);
+    plot(samples,plot_arr,'LineWidth',2);
+    %errorbar(samples,plot_arr,L_arr,R_arr,'LineWidth',2);
     hold on;
 end
 
-title("Comparing different hyperparameter choices, 20 trials");
+title("Comparing different hyperparameter choices, 30 trials");
 legend("Nonhierarchical","(\tau, \alpha)", "(\tau, M)", "(\alpha, M)", "(\tau, \alpha, M)");
 xlabel('Sample number')
 ylabel('Median accuracy')
